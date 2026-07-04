@@ -1,35 +1,53 @@
-<%-- 
-    Document   : menu
-    Created on : Jun 20, 2026, 10:46:02 AM
-    Author     : Admin
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+
 <style>
-    .sidebar {
-    width: 250px;
-    height: fit-content;
-    position: sticky;
-    top: 0;
-    background: #2c3e50;
-}
-        .h4{
-            color: white
-        }
-        .logo{
-    text-align:center;
-    padding:40px 0 25px 0;
-    border-bottom:1px solid #334155;
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-.logo h3{
-    color:#fff;
-    font-size:22px;
-    font-weight:700;
-    letter-spacing:1px;
-    margin:0;
+.sidebar{
+    width:260px;
+    min-height:100vh;
+    background:#2c3e50;
+    flex-shrink:0;
 }
-    </style>
+
+.logo{
+    text-align: center;
+    padding: 40px 0 25px;
+    border-bottom: 1px solid #45576d;
+}
+
+.logo h4{
+    color: #fff;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.sidebar a{
+    display:block;
+    color:white;
+    text-decoration:none;
+    padding:18px 28px;
+    font-size:18px;
+    transition:.3s;
+}
+
+.sidebar a:hover{
+    background:#34495e;
+    color:white;
+}
+
+.sidebar .active{
+    background:#0d6efd;
+}
+
+</style>
 <div class="sidebar">
     
     <div class="logo">
