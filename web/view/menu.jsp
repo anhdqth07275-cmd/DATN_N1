@@ -51,7 +51,7 @@
 <div class="sidebar">
     
     <div class="logo">
-        <h4>-QUẢN LÍ TÀI CHÍNH-</h4>
+        <h4>QUẢN LÍ TÀI CHÍNH</h4>
     </div>
     
 
