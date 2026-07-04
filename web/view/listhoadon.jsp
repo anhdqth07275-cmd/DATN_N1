@@ -1,229 +1,213 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="jakarta.tags.core"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="model.HoaDon"%>
 
 <!DOCTYPE html>
+
 <html>
+
 <head>
-    <meta charset="UTF-8">
-    <title>Danh sách hóa đơn</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+<meta charset="UTF-8">
 
-    <style>
-.sidebar{
-    width:240px;
-    background:#0f172a;
-    min-height:100vh;
-}
+<title>Danh sách hóa đơn</title>
 
-.logo{
-    text-align:center;
-    padding-top:40px;
-    padding-bottom:25px;
-    border-bottom:1px solid #334155;
-}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-.logo h4{
-    color:#ffffff;       /* Chữ QUẢN LÍ TÀI CHÍNH màu trắng */
+<style>
+
+body{
     margin:0;
-    font-size:22px;
+    background:#eef2f7;
+    font-family:Arial;
+}
+
+.wrapper{
+    display:flex;
+    width:100%;
+}
+
+.content{
+    flex:1;
+    padding:35px;
+}
+
+.box{
+    background:white;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+.title{
+    text-align:center;
+    font-size:34px;
     font-weight:bold;
+    margin-bottom:35px;
 }
 
-.sidebar a{
-    display:block;
-    color:#ffffff;       /* Các mục menu màu trắng */
-    text-decoration:none;
-    padding:15px 20px;
-    font-size:16px;
+.top{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:25px;
 }
 
-.sidebar a:hover{
-    background:#1e293b;
-    color:#ffffff;       /* Hover vẫn giữ màu trắng */
+.search{
+    width:420px;
 }
-            body{
-                margin:0;
-                background:#f4f6f9;
-            }
 
-            .wrapper{
-                display:flex;
-            }
+table th{
+    background:#212529;
+    color:white;
+    text-align:center;
+}
 
-            .content{
-                flex:1;
-                padding:30px;
-            }
+table td{
+    text-align:center;
+    vertical-align:middle;
+}
 
-            .box{
-                background:white;
-                padding:20px;
-                border-radius:12px;
-                box-shadow:0 0 5px #ddd;
-            }
+.pagination{
+    justify-content:center;
+    margin-top:20px;
+}
 
-            .top{
-                display:flex;
-                justify-content:space-between;
-                margin-bottom:20px;
-            }
-
-            .green{
-                color:green;
-            }
-
-            .orange{
-                color:orange;
-            }
-
-            .pagination{
-                justify-content:center;
-            }
-
-        </style>
+</style>
 
 </head>
 
 <body>
 
-<div class="container">
+<div class="wrapper">
 
-    <div class="card">
+<jsp:include page="menu.jsp"/>
 
-        <div class="card-header bg-primary text-white">
+<div class="content">
 
-            <h3 class="text-center">
-                DANH SÁCH HÓA ĐƠN
-            </h3>
+<div class="box">
 
-        </div>
+<h1 class="title">
+DANH SÁCH HÓA ĐƠN
+</h1>
 
-        <div class="card-body">
+<div class="top">
 
-            <!-- Thông báo -->
-            <c:if test="${not empty sessionScope.message}">
-                <div class="alert alert-success">
-                    ${sessionScope.message}
-                </div>
+<a class="btn btn-primary btn-lg"
+href="${pageContext.request.contextPath}/hoadon?action=add">
 
-                <c:remove var="message" scope="session"/>
-            </c:if>
++ Thêm hóa đơn
 
-            <!-- Thanh chức năng -->
-            <div class="row mb-3">
+</a>
 
-                <div class="col-md-6">
+<form action="${pageContext.request.contextPath}/hoadon">
 
-                    <a href="${pageContext.request.contextPath}/hoadon?action=add"
-                       class="btn btn-success">
+<div class="input-group search">
 
-                        + Thêm hóa đơn
+<input
+class="form-control"
+name="id"
+placeholder="Nhập mã hóa đơn...">
 
-                    </a>
+<button class="btn btn-primary">
 
-                </div>
+Tìm kiếm
 
-                <div class="col-md-6">
+</button>
 
-                    <form action="${pageContext.request.contextPath}/hoadon"
-                          method="get">
+</div>
 
-                        <input type="hidden"
-                               name="action"
-                               value="search">
+</form>
 
-                        <div class="input-group">
+</div>
 
-                            <input
-                                type="text"
-                                name="keyword"
-                                class="form-control"
-                                placeholder="Nhập mã hóa đơn...">
+<table class="table table-bordered table-hover">
 
-                            <button class="btn btn-primary">
+<tr>
 
-                                Tìm kiếm
+<th>Mã HĐ</th>
+<th>Mã KH</th>
+<th>Mã User</th>
+<th>Ngày lập</th>
+<th>Tổng tiền</th>
+<th>Trạng thái</th>
+<th>Chi tiết</th>
 
-                            </button>
+</tr>
 
-                        </div>
+<%
 
-                    </form>
+ArrayList<HoaDon> list=(ArrayList<HoaDon>)request.getAttribute("list");
 
-                </div>
+if(list!=null){
 
-            </div>
+for(HoaDon hd:list){
 
-            <!-- Bảng dữ liệu -->
+%>
 
-            <table class="table table-bordered table-hover">
+<tr>
 
-                <thead class="table-dark">
+<td>HD<%=hd.getInvoiceId()%></td>
 
-                <tr>
+<td>KH<%=hd.getCustomerId()%></td>
 
-                    <th>Mã HĐ</th>
+<td>NV<%=hd.getUserId()%></td>
 
-                    <th>Mã KH</th>
+<td><%=hd.getInvoiceDate()%></td>
 
-                    <th>Mã User</th>
+<td><%=hd.getTotalAmount()%></td>
 
-                    <th>Ngày lập</th>
+<td><%=hd.getStatus()%></td>
 
-                    <th>Tổng tiền</th>
+<td>
 
-                    <th>Trạng thái</th>
+<a class="btn btn-success btn-sm"
 
-                    <th>Chi tiết</th>
+href="${pageContext.request.contextPath}/hoadon?action=detail&id=<%=hd.getInvoiceId()%>">
 
-                </tr>
+Xem
 
-                </thead>
+</a>
 
-                <tbody>
+</td>
 
-                <c:forEach items="${list}" var="hd">
+</tr>
 
-                    <tr>
+<%
 
-                        <td>${hd.invoiceId}</td>
+}
 
-                        <td>${hd.customerId}</td>
+}
 
-                        <td>${hd.userId}</td>
+%>
 
-                        <td>${hd.invoiceDate}</td>
+</table>
 
-                        <td>${hd.totalAmount}</td>
+<nav>
 
-                        <td>${hd.status}</td>
+<ul class="pagination">
 
-                        <td>
+<li class="page-item active">
+<a class="page-link">1</a>
+</li>
 
-                            <a href="${pageContext.request.contextPath}/chitiethoadon?id=${hd.invoiceId}"
-                               class="btn btn-info btn-sm">
+<li class="page-item">
+<a class="page-link">2</a>
+</li>
 
-                                Xem
+<li class="page-item">
+<a class="page-link">3</a>
+</li>
 
-                            </a>
+</ul>
 
-                        </td>
+</nav>
 
-                    </tr>
+</div>
 
-                </c:forEach>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
+</div>
 
 </div>
 
 </body>
+
 </html>
