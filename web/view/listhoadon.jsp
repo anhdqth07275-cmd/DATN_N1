@@ -10,7 +10,7 @@
 
 <meta charset="UTF-8">
 
-<title>Danh sách hóa đơn</title>
+<title>-Danh sách hóa đơn-</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
