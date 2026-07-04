@@ -1,17 +1,16 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="jakarta.tags.core"%>
 
 <!DOCTYPE html>
 <html>
-    <head>
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách hóa đơn</title>
 
-        <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 
-        <title>Danh sách hóa đơn</title>
-
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-              rel="stylesheet">
-
-        <style>
+    <style>
 .sidebar{
     width:240px;
     background:#0f172a;
@@ -85,176 +84,146 @@
 
         </style>
 
-    </head>
+</head>
 
-    <body>
+<body>
 
-        <div class="wrapper">
+<div class="container">
 
-            <jsp:include page="menu.jsp"/>
+    <div class="card">
 
-            <div class="content">
+        <div class="card-header bg-primary text-white">
 
-                <div class="box">
+            <h3 class="text-center">
+                DANH SÁCH HÓA ĐƠN
+            </h3>
 
-                    <h4 class="text-center">
-                        DANH SÁCH HÓA ĐƠN
-                    </h4>
+        </div>
 
-                    <div class="top">
+        <div class="card-body">
 
-                        <button class="btn btn-primary">
-                            + Thêm hóa đơn
-                        </button>
+            <!-- Thông báo -->
+            <c:if test="${not empty sessionScope.message}">
+                <div class="alert alert-success">
+                    ${sessionScope.message}
+                </div>
 
-                        <input
-                            type="text"
-                            class="form-control"
-                            style="width:250px"
-                            placeholder="Tìm kiếm...">
+                <c:remove var="message" scope="session"/>
+            </c:if>
 
-                    </div>
+            <!-- Thanh chức năng -->
+            <div class="row mb-3">
 
-                    <table class="table table-bordered table-hover">
+                <div class="col-md-6">
 
-                        <tr>
+                    <a href="${pageContext.request.contextPath}/hoadon?action=add"
+                       class="btn btn-success">
 
-                            <th>Mã HĐ</th>
-                            <th>Khách hàng</th>
-                            <th>Ngày lập</th>
-                            <th>Tổng tiền</th>
-                            <th>Trạng thái</th>
-                            <th>Chi tiết</th>
+                        + Thêm hóa đơn
 
-                        </tr>
+                    </a>
 
-                        <tr>
+                </div>
 
-                            <td>HD0001</td>
-                            <td>Công ty A</td>
-                            <td>20/05/2024</td>
-                            <td>15,000,000</td>
+                <div class="col-md-6">
 
-                            <td class="green">
-                                Đã thanh toán
-                            </td>
+                    <form action="${pageContext.request.contextPath}/hoadon"
+                          method="get">
 
-                            <td>
+                        <input type="hidden"
+                               name="action"
+                               value="search">
 
-                                <a
-                                    href="chitiethoadon.jsp"
-                                    class="btn btn-success btn-sm">
+                        <div class="input-group">
 
-                                    Xem
+                            <input
+                                type="text"
+                                name="keyword"
+                                class="form-control"
+                                placeholder="Nhập mã hóa đơn...">
 
-                                </a>
+                            <button class="btn btn-primary">
 
-                            </td>
+                                Tìm kiếm
 
-                        </tr>
+                            </button>
 
-                        <tr>
+                        </div>
 
-                            <td>HD0002</td>
-                            <td>Công ty B</td>
-                            <td>19/05/2024</td>
-                            <td>8,500,000</td>
-
-                            <td class="orange">
-                                Chưa thanh toán
-                            </td>
-
-                            <td>
-
-                                <a
-                                    href="chitiethoadon.jsp"
-                                    class="btn btn-success btn-sm">
-
-                                    Xem
-
-                                </a>
-
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <td>HD0003</td>
-                            <td>Công ty C</td>
-                            <td>18/05/2024</td>
-                            <td>12,000,000</td>
-
-                            <td>
-                                Một phần
-                            </td>
-
-                            <td>
-
-                                <a
-                                    href="chitiethoadon.jsp"
-                                    class="btn btn-success btn-sm">
-
-                                    Xem
-
-                                </a>
-
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <td>HD0004</td>
-                            <td>Khách lẻ</td>
-                            <td>17/05/2024</td>
-                            <td>2,300,000</td>
-
-                            <td class="green">
-                                Đã thanh toán
-                            </td>
-
-                            <td>
-
-                                <a
-                                    href="chitiethoadon.jsp"
-                                    class="btn btn-success btn-sm">
-
-                                    Xem
-
-                                </a>
-
-                            </td>
-
-                        </tr>
-
-                    </table>
-
-                    <nav>
-
-                        <ul class="pagination">
-
-                            <li class="page-item active">
-                                <a class="page-link">1</a>
-                            </li>
-
-                            <li class="page-item">
-                                <a class="page-link">2</a>
-                            </li>
-
-                            <li class="page-item">
-                                <a class="page-link">3</a>
-                            </li>
-
-                        </ul>
-
-                    </nav>
+                    </form>
 
                 </div>
 
             </div>
 
+            <!-- Bảng dữ liệu -->
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-dark">
+
+                <tr>
+
+                    <th>Mã HĐ</th>
+
+                    <th>Mã KH</th>
+
+                    <th>Mã User</th>
+
+                    <th>Ngày lập</th>
+
+                    <th>Tổng tiền</th>
+
+                    <th>Trạng thái</th>
+
+                    <th>Chi tiết</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <c:forEach items="${list}" var="hd">
+
+                    <tr>
+
+                        <td>${hd.invoiceId}</td>
+
+                        <td>${hd.customerId}</td>
+
+                        <td>${hd.userId}</td>
+
+                        <td>${hd.invoiceDate}</td>
+
+                        <td>${hd.totalAmount}</td>
+
+                        <td>${hd.status}</td>
+
+                        <td>
+
+                            <a href="${pageContext.request.contextPath}/chitiethoadon?id=${hd.invoiceId}"
+                               class="btn btn-info btn-sm">
+
+                                Xem
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                </c:forEach>
+
+                </tbody>
+
+            </table>
+
         </div>
 
-    </body>
+    </div>
+
+</div>
+
+</body>
 </html>

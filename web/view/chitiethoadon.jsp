@@ -1,19 +1,16 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="jakarta.tags.core"%>
 
 <!DOCTYPE html>
 <html>
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết hóa đơn</title>
 
-    <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 
-        <meta charset="UTF-8">
-
-        <title>Chi tiết hóa đơn</title>
-
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-            rel="stylesheet">
-
-        <style>
+    <style>
 .sidebar{
     width:240px;
     background:#0f172a;
@@ -78,128 +75,117 @@
 
         </style>
 
-    </head>
+</head>
 
-    <body>
+<body>
 
-        <div class="wrapper">
+<div class="container">
 
-            <jsp:include page="menu.jsp"/>
+    <div class="card">
 
-            <div class="content">
+        <div class="card-header bg-primary text-white">
 
-                <div class="box">
+            <h3 class="text-center">
 
-                    <div class="top">
+                CHI TIẾT HÓA ĐƠN
 
-                        <h5>
-                            Hóa đơn:
-                            HD0002 - Công ty B
-                        </h5>
+            </h3>
 
-                        <a
-                            href="listhoadon.jsp"
-                            class="btn btn-secondary">
+        </div>
 
-                            Quay lại
+        <div class="card-body">
 
-                        </a>
+            <table class="table table-bordered">
 
-                    </div>
+                <tr>
+                    <th width="200">Mã hóa đơn</th>
+                    <td>${invoice.invoiceId}</td>
+                </tr>
 
-                    <hr>
+                <tr>
+                    <th>Mã khách hàng</th>
+                    <td>${invoice.customerId}</td>
+                </tr>
 
-                    <div class="row mb-4">
+                <tr>
+                    <th>Mã nhân viên</th>
+                    <td>${invoice.userId}</td>
+                </tr>
 
-                        <div class="col-md-3">
-                            Ngày lập:
-                            20/05/2024
-                        </div>
+                <tr>
+                    <th>Ngày lập</th>
+                    <td>${invoice.invoiceDate}</td>
+                </tr>
 
-                        <div class="col-md-3">
-                            Nhân viên:
-                            Admin
-                        </div>
+                <tr>
+                    <th>Tổng tiền</th>
+                    <td>${invoice.totalAmount}</td>
+                </tr>
 
-                        <div class="col-md-3">
-                            Trạng thái:
-                            Chưa thanh toán
-                        </div>
+                <tr>
+                    <th>Trạng thái</th>
+                    <td>${invoice.status}</td>
+                </tr>
 
-                        <div class="col-md-3">
+            </table>
 
-                            <b class="red">
+            <h4 class="mt-4 mb-3">
+                Danh sách sản phẩm
+            </h4>
 
-                                Tổng tiền:
-                                8,500,000
+            <table class="table table-bordered table-hover">
 
-                            </b>
+                <thead class="table-dark">
 
-                        </div>
+                    <tr>
 
-                    </div>
+                        <th>Mã SP</th>
+                        <th>Số lượng</th>
+                        <th>Đơn giá</th>
+                        <th>Thành tiền</th>
 
-                    <table class="table table-bordered">
+                    </tr>
 
-                        <tr>
+                </thead>
 
-                            <th>STT</th>
-                            <th>Sản phẩm/Dịch vụ</th>
-                            <th>ĐVT</th>
-                            <th>Số lượng</th>
-                            <th>Đơn giá</th>
-                            <th>Thành tiền</th>
+                <tbody>
 
-                        </tr>
-
-                        <tr>
-
-                            <td>1</td>
-                            <td>Sản phẩm A</td>
-                            <td>Cái</td>
-                            <td>2</td>
-                            <td>2,000,000</td>
-                            <td>4,000,000</td>
-
-                        </tr>
+                    <c:forEach items="${listDetail}" var="d">
 
                         <tr>
 
-                            <td>2</td>
-                            <td>Dịch vụ B</td>
-                            <td>Gói</td>
-                            <td>1</td>
-                            <td>4,500,000</td>
-                            <td>4,500,000</td>
+                            <td>${d.productId}</td>
+
+                            <td>${d.quantity}</td>
+
+                            <td>${d.unitPrice}</td>
+
+                            <td>${d.subtotal}</td>
 
                         </tr>
 
-                        <tr>
+                    </c:forEach>
 
-                            <td colspan="5" align="right">
+                </tbody>
 
-                                <b>Tổng cộng:</b>
+            </table>
 
-                            </td>
+            <div class="text-center">
 
-                            <td>
+                <a href="${pageContext.request.contextPath}/hoadon"
+                   class="btn btn-secondary">
 
-                                <b>
-                                    8,500,000
-                                </b>
+                    Quay lại
 
-                            </td>
-
-                        </tr>
-
-                    </table>
-
-                </div>
+                </a>
 
             </div>
 
         </div>
 
-    </body>
+    </div>
 
+</div>
+
+</body>
 </html>
