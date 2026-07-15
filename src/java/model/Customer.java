@@ -1,23 +1,22 @@
 package model;
 
-import java.sql.Timestamp;
+
+import java.util.Date;
 
 public class Customer {
 
-    private int customerId;
-    private String customerName;
-    private String phone;
-    private String address;
-    private String email;
-    private Timestamp createdDate;
-    private boolean status;
+   private int customerId;
+private String customerName;
+private String phone;
+private String address;
+private String email;
+private Date createdDate;
+private boolean status;
 
     public Customer() {
     }
 
-    public Customer(int customerId, String customerName, String phone,
-            String address, String email,
-            Timestamp createdDate, boolean status) {
+    public Customer(int customerId, String customerName, String phone, String address, String email, Date createdDate, boolean status) {
         this.customerId = customerId;
         this.customerName = customerName;
         this.phone = phone;
@@ -67,11 +66,11 @@ public class Customer {
         this.email = email;
     }
 
-    public Timestamp getCreatedDate() {
+    public Date getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Timestamp createdDate) {
+    public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
 
@@ -82,5 +81,7 @@ public class Customer {
     public void setStatus(boolean status) {
         this.status = status;
     }
+
+    
 
 }

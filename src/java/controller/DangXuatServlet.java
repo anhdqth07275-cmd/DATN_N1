@@ -4,7 +4,6 @@
  */
 package controller;
 
-import dao.DangNhapDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -13,15 +12,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import model.DangKy;
-import model.DangNhap;
 
 /**
  *
  * @author Admin
  */
-@WebServlet(name = "DangNhapServlet", urlPatterns = {"/dangnhap"})
-public class DangNhapServlet extends HttpServlet {
+@WebServlet(name = "DangXuatServlet", urlPatterns = {"/dangxuat"})
+public class DangXuatServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -40,10 +37,10 @@ public class DangNhapServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet DangNhapServlet</title>");
+            out.println("<title>Servlet DangXuatServlet</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet DangNhapServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet DangXuatServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -61,9 +58,14 @@ public class DangNhapServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // processRequest(request, response);
-        request.getRequestDispatcher("/view/dangnhap.jsp")
-                .forward(request, response);
+        //processRequest(request, response);
+        HttpSession session = request.getSession(false);
+
+        if (session != null) {
+            session.invalidate();
+        }
+
+        response.sendRedirect(request.getContextPath() + "/dangnhap");
     }
 
     /**
@@ -77,35 +79,7 @@ public class DangNhapServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //processRequest(request, response);
-        request.setCharacterEncoding("UTF-8");
-
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-
-        DangNhapDAO dao = new DangNhapDAO();
-
-        DangKy user = dao.login(username, password);
-
-        if (user != null) {
-
-            HttpSession session = request.getSession();
-
-            session.setAttribute("user", user);
-
-            session.setMaxInactiveInterval(30 * 60);
-
-            response.sendRedirect(request.getContextPath() + "/trangchu");
-
-        } else {
-
-            request.setAttribute("error", "Không thể đăng nhập!");
-
-            request.getRequestDispatcher("/view/dangnhap.jsp")
-                    .forward(request, response);
-
-        }
-
+        processRequest(request, response);
     }
 
     /**

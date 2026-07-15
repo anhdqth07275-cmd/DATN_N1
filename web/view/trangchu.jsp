@@ -1,5 +1,15 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
+<%@page import="model.DangKy"%>
+
+<%
+DangKy user = (DangKy) session.getAttribute("user");
+
+if(user == null){
+    response.sendRedirect(request.getContextPath() + "/dangnhap");
+    return;
+}
+%>
 <!DOCTYPE html>
 <html>
 
@@ -108,7 +118,15 @@
             .red{
                 color:red;
             }
+            .user-box{
+                font-size:15px;
+                font-weight:600;
+                color:#333;
+            }
 
+            .user-box strong{
+                color:#0d6efd;
+            }
         </style>
 
     </head>
@@ -123,8 +141,21 @@
 
                 <div class="topbar">
 
-                    🔔 &nbsp;&nbsp;
-                    👤 Admin
+                    <div>
+                        🔔
+                    </div>
+
+                    <div class="user-box">
+
+                        👤 <strong><%= user.getFullName() %></strong>
+
+                        <br>
+
+                        <small>
+                            <%= user.getRoleName() %>
+                        </small>
+
+                    </div>
 
                 </div>
 

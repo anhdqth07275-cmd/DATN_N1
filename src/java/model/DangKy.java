@@ -8,6 +8,24 @@ public class DangKy {
     private String email;
     private String phone;
     private int roleId;
+    private int userId;
+    private String roleName;
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 
     public DangKy() {
     }
