@@ -63,7 +63,10 @@
     <a href="${pageContext.request.contextPath}/khachhang">
         👤 Khách hàng
     </a>
-    <a href="listhoadon.jsp">📄 Hóa đơn</a>
+        <a href="${pageContext.request.contextPath}/hoadon">
+        📄 Hóa đơn
+    </a>
+    
 
     <a href="congno.jsp">💰 Công nợ</a>
 

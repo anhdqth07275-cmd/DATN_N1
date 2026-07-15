@@ -1,6 +1,7 @@
 package model;
 
-import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class HoaDon {
@@ -8,31 +9,30 @@ public class HoaDon {
     private int invoiceId;
     private int customerId;
     private int userId;
+
+    private String customerName;
+    private String userName;
+
     private Date invoiceDate;
-    private BigDecimal totalAmount;
+
+    private double totalAmount;
+
     private String status;
 
     public HoaDon() {
     }
 
-    // Constructor dùng khi lấy dữ liệu từ database
     public HoaDon(int invoiceId, int customerId, int userId,
-            Date invoiceDate, BigDecimal totalAmount, String status) {
+                  String customerName, String userName,
+                  Date invoiceDate,
+                  double totalAmount,
+                  String status) {
 
         this.invoiceId = invoiceId;
         this.customerId = customerId;
         this.userId = userId;
-        this.invoiceDate = invoiceDate;
-        this.totalAmount = totalAmount;
-        this.status = status;
-    }
-
-    // Constructor dùng khi thêm hóa đơn
-    public HoaDon(int customerId, int userId,
-            Date invoiceDate, BigDecimal totalAmount, String status) {
-
-        this.customerId = customerId;
-        this.userId = userId;
+        this.customerName = customerName;
+        this.userName = userName;
         this.invoiceDate = invoiceDate;
         this.totalAmount = totalAmount;
         this.status = status;
@@ -62,6 +62,22 @@ public class HoaDon {
         this.userId = userId;
     }
 
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public Date getInvoiceDate() {
         return invoiceDate;
     }
@@ -70,11 +86,11 @@ public class HoaDon {
         this.invoiceDate = invoiceDate;
     }
 
-    public BigDecimal getTotalAmount() {
+    public double getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount) {
+    public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
     }
 
@@ -86,15 +102,17 @@ public class HoaDon {
         this.status = status;
     }
 
-    @Override
-    public String toString() {
-        return "HoaDon{" +
-                "invoiceId=" + invoiceId +
-                ", customerId=" + customerId +
-                ", userId=" + userId +
-                ", invoiceDate=" + invoiceDate +
-                ", totalAmount=" + totalAmount +
-                ", status=" + status +
-                '}';
+    public String getInvoiceCode() {
+        return String.format("HD%04d", invoiceId);
+    }
+
+    public String getMoney() {
+        DecimalFormat df = new DecimalFormat("#,###");
+        return df.format(totalAmount);
+    }
+
+    public String getDateVN() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(invoiceDate);
     }
 }

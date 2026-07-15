@@ -1,28 +1,36 @@
 package model;
 
-import java.math.BigDecimal;
-
 public class InvoiceDetail {
 
     private int detailId;
     private int invoiceId;
-    private int productId;
+
+    private String itemName;
+    private String unit;
+
     private int quantity;
-    private BigDecimal unitPrice;
-    private BigDecimal subtotal;
+    private double unitPrice;
+    private double subtotal;
 
     public InvoiceDetail() {
     }
 
-    public InvoiceDetail(int detailId, int invoiceId, int productId,
-            int quantity, BigDecimal unitPrice, BigDecimal subtotal) {
+    public InvoiceDetail(int detailId,
+            int invoiceId,
+            String itemName,
+            String unit,
+            int quantity,
+            double unitPrice,
+            double subtotal) {
 
         this.detailId = detailId;
         this.invoiceId = invoiceId;
-        this.productId = productId;
+        this.itemName = itemName;
+        this.unit = unit;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
         this.subtotal = subtotal;
+
     }
 
     public int getDetailId() {
@@ -41,12 +49,20 @@ public class InvoiceDetail {
         this.invoiceId = invoiceId;
     }
 
-    public int getProductId() {
-        return productId;
+    public String getItemName() {
+        return itemName;
     }
 
-    public void setProductId(int productId) {
-        this.productId = productId;
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
     public int getQuantity() {
@@ -55,22 +71,37 @@ public class InvoiceDetail {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+        tinhThanhTien();
     }
 
-    public BigDecimal getUnitPrice() {
+    public double getUnitPrice() {
         return unitPrice;
     }
 
-    public void setUnitPrice(BigDecimal unitPrice) {
+    public void setUnitPrice(double unitPrice) {
         this.unitPrice = unitPrice;
+        tinhThanhTien();
     }
 
-    public BigDecimal getSubtotal() {
+    public double getSubtotal() {
         return subtotal;
     }
 
-    public void setSubtotal(BigDecimal subtotal) {
+    public void setSubtotal(double subtotal) {
         this.subtotal = subtotal;
+    }
+
+    private void tinhThanhTien() {
+        this.subtotal = quantity * unitPrice;
+    }
+
+    public String getMoney() {
+
+        java.text.DecimalFormat df =
+                new java.text.DecimalFormat("#,###");
+
+        return df.format(subtotal);
+
     }
 
 }
