@@ -160,8 +160,8 @@
             <div class="toolbar">
 
                 <form action="<%=request.getContextPath()%>/congno"
-                      method="post"
-                      class="d-flex">
+      method="get"
+      class="d-flex">
 
                     <input
                             type="hidden"
@@ -190,30 +190,33 @@
 
                 <thead>
 
-                <tr>
+<tr>
 
-                    <th width="90">Mã CN</th>
+    <th width="90">Mã CN</th>
 
-                    <th>Khách hàng</th>
+    <th>Khách hàng</th>
 
-                    <th width="120">Mã HĐ</th>
+    <th width="120">Mã HĐ</th>
 
-                    <th width="180">Còn nợ</th>
+    <th width="180">Còn nợ</th>
 
-                    <th width="150">Hạn thanh toán</th>
+    <th width="150">Hạn thanh toán</th>
 
-                    <th width="150">Trạng thái</th>
+    <th width="150">Trạng thái</th>
 
-                </tr>
+    <th width="150">Thao tác</th>
 
-                </thead>
+</tr>
+
+</thead>
 
                 <tbody>
-                    <%
 
-    if(list != null && !list.isEmpty()){
+<%
 
-        for(Debt d : list){
+if(list != null && !list.isEmpty()){
+
+    for(Debt d : list){
 
 %>
 
@@ -221,7 +224,7 @@
 
     <td align="center">
 
-        CN<%=String.format("%04d", d.getInvoiceId())%>
+        <%=d.getDebtCode()%>
 
     </td>
 
@@ -255,55 +258,68 @@
 
     <td align="center">
 
-        <%
+<%
 
-            String status = d.getStatus();
+String status=d.getStatus();
 
-            if(status == null){
+if(status==null){
 
-                status = "";
+    status="";
 
-            }
+}
 
-            if(status.equalsIgnoreCase("Đã thanh toán")){
+if(status.equalsIgnoreCase("Đã thanh toán")){
 
-        %>
+%>
 
-        <span class="badge bg-success">
+<span class="badge bg-success">
 
-            Đã thanh toán
+    Đã thanh toán
 
-        </span>
+</span>
 
-        <%
+<%
 
-            }else if(status.equalsIgnoreCase("Quá hạn")){
+}else if(status.equalsIgnoreCase("Quá hạn")){
 
-        %>
+%>
 
-        <span class="badge bg-danger">
+<span class="badge bg-danger">
 
-            Quá hạn
+    Quá hạn
 
-        </span>
+</span>
 
-        <%
+<%
 
-            }else{
+}else{
 
-        %>
+%>
 
-        <span class="badge bg-warning text-dark">
+<span class="badge bg-warning text-dark">
 
-            Còn nợ
+    Còn nợ
 
-        </span>
+</span>
 
-        <%
+<%
 
-            }
+}
 
-        %>
+%>
+
+    </td>
+
+    <td align="center">
+
+        <a href="<%=request.getContextPath()%>/congno?action=extend&id=<%=d.getDebtId()%>"
+           class="btn btn-warning btn-sm">
+
+            <i class="bi bi-calendar-event"></i>
+
+            Gia hạn
+
+        </a>
 
     </td>
 
@@ -311,15 +327,15 @@
 
 <%
 
-        }
+    }
 
-    }else{
+}else{
 
 %>
 
 <tr>
 
-    <td colspan="6" class="empty-row">
+    <td colspan="7" class="empty-row">
 
         <i class="bi bi-database-exclamation"></i>
 
@@ -331,10 +347,11 @@
 
 <%
 
-    }
+}
 
 %>
-                </tbody>
+
+</tbody>
 
             </table>
 
