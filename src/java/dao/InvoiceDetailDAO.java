@@ -8,101 +8,133 @@ import model.InvoiceDetail;
 import util.DBConnect;
 
 public class InvoiceDetailDAO {
-    public ArrayList<InvoiceDetail> getByInvoiceId(int invoiceId){
 
-    ArrayList<InvoiceDetail> list = new ArrayList<>();
+    // ==========================
+    // Lấy tất cả chi tiết theo hóa đơn
+    // ==========================
+    public ArrayList<InvoiceDetail> getByInvoiceId(int invoiceId) {
 
-    String sql =
-            "SELECT * FROM Invoice_Detail WHERE invoice_id=?";
+        ArrayList<InvoiceDetail> list = new ArrayList<>();
 
-    try{
+        String sql =
+                "SELECT * FROM Invoice_Detail "
+                + "WHERE invoice_id=? "
+                + "ORDER BY detail_id";
 
-        Connection con = DBConnect.getConnection();
+        try {
 
-        PreparedStatement ps = con.prepareStatement(sql);
+            Connection con = DBConnect.getConnection();
 
-        ps.setInt(1, invoiceId);
+            PreparedStatement ps = con.prepareStatement(sql);
 
-        ResultSet rs = ps.executeQuery();
+            ps.setInt(1, invoiceId);
 
-        while(rs.next()){
+            ResultSet rs = ps.executeQuery();
 
-            InvoiceDetail d = new InvoiceDetail();
+            while (rs.next()) {
 
-            d.setDetailId(rs.getInt("detail_id"));
-            d.setInvoiceId(rs.getInt("invoice_id"));
-            d.setItemName(rs.getString("item_name"));
-            d.setUnit(rs.getString("unit"));
-            d.setQuantity(rs.getInt("quantity"));
-            d.setUnitPrice(rs.getDouble("unit_price"));
-            d.setSubtotal(rs.getDouble("subtotal"));
+                InvoiceDetail d = new InvoiceDetail();
 
-            list.add(d);
+                d.setDetailId(rs.getInt("detail_id"));
+
+                d.setInvoiceId(rs.getInt("invoice_id"));
+
+                d.setItemName(rs.getString("item_name"));
+
+                d.setUnit(rs.getString("unit"));
+
+                d.setQuantity(rs.getInt("quantity"));
+
+                d.setUnitPrice(rs.getDouble("unit_price"));
+
+                d.setSubtotal(rs.getDouble("subtotal"));
+
+                list.add(d);
+
+            }
+
+            con.close();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
 
         }
 
-        con.close();
-
-    }catch(Exception e){
-
-        e.printStackTrace();
+        return list;
 
     }
 
-    return list;
+    // ==========================
+    // Lấy 1 dòng theo ID
+    // ==========================
+    public InvoiceDetail getById(int detailId) {
 
-}
-    public boolean insert(InvoiceDetail d){
+        String sql =
+                "SELECT * FROM Invoice_Detail "
+                + "WHERE detail_id=?";
 
-    String sql =
-    "INSERT INTO Invoice_Detail(invoice_id,item_name,unit,quantity,unit_price,subtotal) "
-    + "VALUES(?,?,?,?,?,?)";
+        try {
 
-    try{
+            Connection con = DBConnect.getConnection();
 
-        Connection con = DBConnect.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql);
 
-        PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, detailId);
 
-        ps.setInt(1,d.getInvoiceId());
+            ResultSet rs = ps.executeQuery();
 
-        ps.setString(2,d.getItemName());
+            if (rs.next()) {
 
-        ps.setString(3,d.getUnit());
+                InvoiceDetail d = new InvoiceDetail();
 
-        ps.setInt(4,d.getQuantity());
+                d.setDetailId(rs.getInt("detail_id"));
 
-        ps.setDouble(5,d.getUnitPrice());
+                d.setInvoiceId(rs.getInt("invoice_id"));
 
-        ps.setDouble(6,d.getQuantity()*d.getUnitPrice());
+                d.setItemName(rs.getString("item_name"));
 
-        int row = ps.executeUpdate();
+                d.setUnit(rs.getString("unit"));
 
-        con.close();
+                d.setQuantity(rs.getInt("quantity"));
 
-        return row>0;
+                d.setUnitPrice(rs.getDouble("unit_price"));
 
-    }catch(Exception e){
+                d.setSubtotal(rs.getDouble("subtotal"));
 
-        e.printStackTrace();
+                con.close();
+
+                return d;
+
+            }
+
+            con.close();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+
+        return null;
 
     }
-
-    return false;
-
-}
-    private void updateInvoiceTotal(int invoiceId){
+    
+    // ==========================
+// Cập nhật tổng tiền hóa đơn
+// ==========================
+private void updateInvoiceTotal(int invoiceId) {
 
     String sql =
-    "UPDATE Invoice "
-    + "SET total_amount=("
-    + "SELECT ISNULL(SUM(subtotal),0) "
-    + "FROM Invoice_Detail "
-    + "WHERE invoice_id=?"
-    + ") "
-    + "WHERE invoice_id=?";
+            "UPDATE Invoice "
+            + "SET total_amount = ("
+            + "SELECT ISNULL(SUM(subtotal),0) "
+            + "FROM Invoice_Detail "
+            + "WHERE invoice_id=?"
+            + ") "
+            + "WHERE invoice_id=?";
 
-    try{
+    try {
 
         Connection con = DBConnect.getConnection();
 
@@ -116,58 +148,63 @@ public class InvoiceDetailDAO {
 
         con.close();
 
-    }catch(Exception e){
+    } catch (Exception e) {
 
         e.printStackTrace();
 
     }
 
 }
-    public boolean update(InvoiceDetail d){
+
+// ==========================
+// Thêm chi tiết hóa đơn
+// ==========================
+public boolean insert(InvoiceDetail d) {
 
     String sql =
-    "UPDATE Invoice_Detail SET "
-    + "item_name=?,"
-    + "unit=?,"
-    + "quantity=?,"
-    + "unit_price=?,"
-    + "subtotal=? "
-    + "WHERE detail_id=?";
+            "INSERT INTO Invoice_Detail("
+            + "invoice_id,"
+            + "item_name,"
+            + "unit,"
+            + "quantity,"
+            + "unit_price,"
+            + "subtotal"
+            + ") VALUES(?,?,?,?,?,?)";
 
-    try{
+    try {
 
         Connection con = DBConnect.getConnection();
 
         PreparedStatement ps = con.prepareStatement(sql);
 
-        ps.setString(1,d.getItemName());
+        ps.setInt(1, d.getInvoiceId());
 
-        ps.setString(2,d.getUnit());
+        ps.setString(2, d.getItemName());
 
-        ps.setInt(3,d.getQuantity());
+        ps.setString(3, d.getUnit());
 
-        ps.setDouble(4,d.getUnitPrice());
+        ps.setInt(4, d.getQuantity());
+
+        ps.setDouble(5, d.getUnitPrice());
 
         double subtotal =
-                d.getQuantity()*d.getUnitPrice();
+                d.getQuantity() * d.getUnitPrice();
 
-        ps.setDouble(5,subtotal);
+        ps.setDouble(6, subtotal);
 
-        ps.setInt(6,d.getDetailId());
-
-        int row=ps.executeUpdate();
+        int row = ps.executeUpdate();
 
         con.close();
 
-        if(row>0){
+        if (row > 0) {
 
             updateInvoiceTotal(d.getInvoiceId());
 
         }
 
-        return row>0;
+        return row > 0;
 
-    }catch(Exception e){
+    } catch (Exception e) {
 
         e.printStackTrace();
 
@@ -176,32 +213,94 @@ public class InvoiceDetailDAO {
     return false;
 
 }
-    public boolean delete(int detailId,int invoiceId){
 
-    String sql=
-    "DELETE FROM Invoice_Detail WHERE detail_id=?";
+// ==========================
+// Cập nhật chi tiết hóa đơn
+// ==========================
+public boolean update(InvoiceDetail d) {
 
-    try{
+    String sql =
+            "UPDATE Invoice_Detail SET "
+            + "item_name=?,"
+            + "unit=?,"
+            + "quantity=?,"
+            + "unit_price=?,"
+            + "subtotal=? "
+            + "WHERE detail_id=?";
 
-        Connection con=DBConnect.getConnection();
+    try {
 
-        PreparedStatement ps=con.prepareStatement(sql);
+        Connection con = DBConnect.getConnection();
 
-        ps.setInt(1,detailId);
+        PreparedStatement ps = con.prepareStatement(sql);
 
-        int row=ps.executeUpdate();
+        ps.setString(1, d.getItemName());
+
+        ps.setString(2, d.getUnit());
+
+        ps.setInt(3, d.getQuantity());
+
+        ps.setDouble(4, d.getUnitPrice());
+
+        double subtotal =
+                d.getQuantity() * d.getUnitPrice();
+
+        ps.setDouble(5, subtotal);
+
+        ps.setInt(6, d.getDetailId());
+
+        int row = ps.executeUpdate();
 
         con.close();
 
-        if(row>0){
+        if (row > 0) {
+
+            updateInvoiceTotal(d.getInvoiceId());
+
+        }
+
+        return row > 0;
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+    }
+
+    return false;
+
+}
+
+// ==========================
+// Xóa 1 dòng chi tiết
+// ==========================
+public boolean delete(int detailId, int invoiceId) {
+
+    String sql =
+            "DELETE FROM Invoice_Detail "
+            + "WHERE detail_id=?";
+
+    try {
+
+        Connection con = DBConnect.getConnection();
+
+        PreparedStatement ps = con.prepareStatement(sql);
+
+        ps.setInt(1, detailId);
+
+        int row = ps.executeUpdate();
+
+        con.close();
+
+        if (row > 0) {
 
             updateInvoiceTotal(invoiceId);
 
         }
 
-        return row>0;
+        return row > 0;
 
-    }catch(Exception e){
+    } catch (Exception e) {
 
         e.printStackTrace();
 
@@ -210,28 +309,33 @@ public class InvoiceDetailDAO {
     return false;
 
 }
-    public boolean deleteByInvoice(int invoiceId){
 
-    String sql=
-    "DELETE FROM Invoice_Detail WHERE invoice_id=?";
+// ==========================
+// Xóa toàn bộ chi tiết theo hóa đơn
+// ==========================
+public boolean deleteByInvoice(int invoiceId) {
 
-    try{
+    String sql =
+            "DELETE FROM Invoice_Detail "
+            + "WHERE invoice_id=?";
 
-        Connection con=DBConnect.getConnection();
+    try {
 
-        PreparedStatement ps=con.prepareStatement(sql);
+        Connection con = DBConnect.getConnection();
 
-        ps.setInt(1,invoiceId);
+        PreparedStatement ps = con.prepareStatement(sql);
 
-        int row=ps.executeUpdate();
+        ps.setInt(1, invoiceId);
+
+        int row = ps.executeUpdate();
 
         con.close();
 
         updateInvoiceTotal(invoiceId);
 
-        return row>0;
+        return row > 0;
 
-    }catch(Exception e){
+    } catch (Exception e) {
 
         e.printStackTrace();
 
@@ -240,5 +344,4 @@ public class InvoiceDetailDAO {
     return false;
 
 }
-    
 }

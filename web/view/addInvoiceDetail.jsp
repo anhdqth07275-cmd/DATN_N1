@@ -3,366 +3,479 @@
 <%@page import="model.InvoiceDetail"%>
 
 <%
-int invoiceId=(Integer)request.getAttribute("invoiceId");
+    int invoiceId = (Integer) request.getAttribute("invoiceId");
 
-ArrayList<InvoiceDetail> list=
-(ArrayList<InvoiceDetail>)request.getAttribute("listDetail");
+    ArrayList<InvoiceDetail> list =
+            (ArrayList<InvoiceDetail>) request.getAttribute("listDetail");
 %>
 
 <!DOCTYPE html>
-
 <html>
 
-<head>
+    <head>
 
-<meta charset="UTF-8">
+        <meta charset="UTF-8">
 
-<title>Chi tiết hóa đơn</title>
+        <title>Chi tiết hóa đơn</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-rel="stylesheet">
+        <!-- Bootstrap -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+              rel="stylesheet">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-rel="stylesheet">
+        <!-- Bootstrap Icons -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+              rel="stylesheet">
 
-<style>
+        <style>
 
-body{
+            *{
+                margin:0;
+                padding:0;
+                box-sizing:border-box;
+            }
 
-    background:#eef2f7;
-    font-family:Segoe UI;
+            body{
 
-}
+                background:#edf2f7;
+                font-family:"Segoe UI",sans-serif;
 
-.container-box{
+            }
 
-    width:1100px;
+            .container-box{
 
-    margin:30px auto;
+                width:1150px;
 
-    background:white;
+                margin:35px auto;
 
-    border-radius:15px;
+                background:#fff;
 
-    padding:30px;
+                border-radius:15px;
 
-    box-shadow:0 5px 15px rgba(0,0,0,.08);
+                padding:30px;
 
-}
+                box-shadow:0 5px 18px rgba(0,0,0,.08);
 
-h2{
+            }
 
-    text-align:center;
+            h2{
 
-    margin-bottom:30px;
+                font-weight:700;
 
-    font-weight:bold;
+                color:#0f172a;
 
-}
+                margin-bottom:30px;
 
-.table td{
+            }
 
-    vertical-align:middle;
+            .form-title{
 
-}
+                font-size:20px;
 
-.table th{
+                font-weight:600;
 
-    text-align:center;
+                margin-bottom:20px;
 
-}
+                color:#0d6efd;
 
-.total{
+            }
 
-    font-size:24px;
+            .table{
 
-    color:red;
+                margin-top:30px;
 
-    font-weight:bold;
+            }
 
-}
+            thead{
 
-</style>
+                background:#0d6efd;
 
-</head>
+                color:white;
 
-<body>
+            }
 
-<div class="container-box">
+            thead th{
 
-<h2>
+                text-align:center;
 
-<i class="bi bi-receipt"></i>
+                vertical-align:middle;
 
-CHI TIẾT HÓA ĐƠN
+            }
 
-</h2>
+            tbody td{
 
-<form
+                vertical-align:middle;
 
-action="<%=request.getContextPath()%>/invoice-detail"
+            }
 
-method="post">
+            tbody tr:hover{
 
-<input
-type="hidden"
-name="action"
-value="insert">
+                background:#f5f9ff;
 
-<input
-type="hidden"
-name="invoiceId"
-value="<%=invoiceId%>">
+            }
 
-<div class="row">
+            .btn{
 
-<div class="col-md-4">
+                border-radius:8px;
 
-<label>
+            }
 
-Tên hàng
+            .card-box{
 
-</label>
+                border:1px solid #dee2e6;
 
-<input
-name="itemName"
-class="form-control"
-required>
+                border-radius:12px;
 
-</div>
+                padding:20px;
 
-<div class="col-md-2">
+                background:#fafafa;
 
-<label>
+            }
 
-ĐVT
+        </style>
 
-</label>
+    </head>
 
-<input
-name="unit"
-class="form-control"
-required>
+    <body>
 
-</div>
+        <div class="container-box">
 
-<div class="col-md-2">
+            <h2>
 
-<label>
+                <i class="bi bi-receipt-cutoff"></i>
 
-Số lượng
+                Chi tiết hóa đơn
 
-</label>
+            </h2>
 
-<input
-type="number"
-min="1"
-name="quantity"
-class="form-control"
-required>
+            <div class="card-box">
 
-</div>
+                <div class="form-title">
 
-<div class="col-md-2">
+                    <i class="bi bi-plus-circle-fill"></i>
 
-<label>
+                    Thêm mặt hàng
 
-Đơn giá
+                </div>
 
-</label>
+                <form action="<%=request.getContextPath()%>/invoice-detail"
+                      method="post">
 
-<input
-type="number"
-min="0"
-step="0.01"
-name="unitPrice"
-class="form-control"
-required>
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="insert">
 
-</div>
+                    <input
+                        type="hidden"
+                        name="invoiceId"
+                        value="<%=invoiceId%>">
 
-<div class="col-md-2 d-flex align-items-end">
+                    <div class="row">
 
-<button
+                        <div class="col-md-4">
 
-class="btn btn-primary w-100">
+                            <label class="form-label">
 
-<i class="bi bi-plus-circle"></i>
+                                Tên hàng
 
-Thêm
+                            </label>
 
-</button>
+                            <input
+                                class="form-control"
+                                name="itemName"
+                                required>
 
-</div>
+                        </div>
 
-</div>
+                        <div class="col-md-2">
 
-</form>
+                            <label class="form-label">
 
-<hr>
+                                Đơn vị tính
 
-<table
+                            </label>
 
-class="table table-bordered table-hover">
+                            <input
+                                class="form-control"
+                                name="unit"
+                                required>
 
-<thead class="table-primary">
+                        </div>
 
-<tr>
+                        <div class="col-md-2">
 
-<th>STT</th>
+                            <label class="form-label">
 
-<th>Tên hàng</th>
+                                Số lượng
 
-<th>ĐVT</th>
+                            </label>
 
-<th>SL</th>
+                            <input
+                                type="number"
+                                min="1"
+                                class="form-control"
+                                name="quantity"
+                                required>
 
-<th>Đơn giá</th>
+                        </div>
 
-<th>Thành tiền</th>
+                        <div class="col-md-2">
 
-<th width="130">
+                            <label class="form-label">
 
-Thao tác
+                                Đơn giá
 
-</th>
+                            </label>
 
-</tr>
+                            <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                class="form-control"
+                                name="unitPrice"
+                                required>
 
-</thead>
+                        </div>
 
-<tbody>
+                        <div class="col-md-2 d-grid">
 
-<%
+                            <label class="form-label">
 
-double tong=0;
+                                &nbsp;
 
-int stt=1;
+                            </label>
 
-if(list!=null){
+                            <button
+                                class="btn btn-primary">
 
-for(InvoiceDetail d:list){
+                                <i class="bi bi-plus-circle"></i>
 
-tong+=d.getSubtotal();
+                                Thêm
 
-%>
+                            </button>
 
-<tr>
+                        </div>
 
-<td align="center">
+                    </div>
 
-<%=stt++%>
+                </form>
 
-</td>
+            </div>
+            <!-- =========================
+                DANH SÁCH CHI TIẾT
+        ========================== -->
 
-<td>
+            <table class="table table-bordered table-hover">
 
-<%=d.getItemName()%>
+                <thead>
 
-</td>
+                    <tr>
 
-<td>
+                        <th width="70">STT</th>
 
-<%=d.getUnit()%>
+                        <th>Tên hàng</th>
 
-</td>
+                        <th width="130">ĐVT</th>
 
-<td align="center">
+                        <th width="100">SL</th>
 
-<%=d.getQuantity()%>
+                        <th width="170">Đơn giá</th>
 
-</td>
+                        <th width="180">Thành tiền</th>
 
-<td align="right">
+                        <th width="150">Thao tác</th>
 
-<%=String.format("%,.0f",d.getUnitPrice())%>
+                    </tr>
 
-</td>
+                </thead>
 
-<td align="right">
+                <tbody>
 
-<%=String.format("%,.0f",d.getSubtotal())%>
+                    <%
 
-</td>
+                        double tong = 0;
 
-<td align="center">
+                        int stt = 1;
 
-<a
+                        if(list != null && !list.isEmpty()){
 
-href="<%=request.getContextPath()%>/invoice-detail?action=edit&detailId=<%=d.getDetailId()%>"
+                            for(InvoiceDetail d : list){
 
-class="btn btn-warning btn-sm">
+                                tong += d.getSubtotal();
 
-<i class="bi bi-pencil-square"></i>
+                    %>
 
-</a>
+                    <tr>
 
-<a
+                        <td align="center">
 
-href="<%=request.getContextPath()%>/invoice-detail?action=delete&detailId=<%=d.getDetailId()%>&invoiceId=<%=invoiceId%>"
+                            <%=stt++%>
 
-class="btn btn-danger btn-sm"
+                        </td>
 
-onclick="return confirm('Xóa dòng này?')">
+                        <td>
 
-<i class="bi bi-trash"></i>
+                            <%=d.getItemName()%>
 
-</a>
+                        </td>
 
-</td>
+                        <td align="center">
 
-</tr>
+                            <%=d.getUnit()%>
 
-<%
+                        </td>
 
-}
+                        <td align="center">
 
-}
+                            <%=d.getQuantity()%>
 
-%>
+                        </td>
 
-</tbody>
+                        <td align="right">
 
-</table>
+                            <%=String.format("%,.0f",d.getUnitPrice())%>
 
-<div class="row mt-4">
+                        </td>
 
-<div class="col-md-8">
+                        <td align="right">
 
-</div>
+                            <strong>
 
-<div class="col-md-4 text-end">
+                                <%=String.format("%,.0f",d.getSubtotal())%>
 
-<div class="total">
+                            </strong>
 
-Tổng:
+                        </td>
 
-<%=String.format("%,.0f",tong)%> VNĐ
+                        <td align="center">
 
-</div>
+                            <a
 
-</div>
+                                href="<%=request.getContextPath()%>/invoice-detail?action=edit&detailId=<%=d.getDetailId()%>"
 
-</div>
+                                class="btn btn-warning btn-sm">
 
-<div class="text-center mt-4">
+                                <i class="bi bi-pencil-square"></i>
 
-<a
+                            </a>
 
-href="<%=request.getContextPath()%>/hoadon"
+                            <a
 
-class="btn btn-success">
+                                href="<%=request.getContextPath()%>/invoice-detail?action=delete&detailId=<%=d.getDetailId()%>&invoiceId=<%=invoiceId%>"
 
-<i class="bi bi-check-circle-fill"></i>
+                                class="btn btn-danger btn-sm"
 
-Hoàn tất hóa đơn
+                                onclick="return confirm('Bạn chắc chắn muốn xóa dòng hàng này?')">
 
-</a>
+                                <i class="bi bi-trash3-fill"></i>
 
-</div>
+                            </a>
 
-</div>
+                        </td>
 
-</body>
+                    </tr>
+
+                    <%
+
+                            }
+
+                        }else{
+
+                    %>
+
+                    <tr>
+
+                        <td colspan="7"
+
+                            class="text-center text-secondary"
+
+                            style="height:80px;">
+
+                            <i class="bi bi-database-exclamation"></i>
+
+                            Chưa có mặt hàng nào.
+
+                        </td>
+
+                    </tr>
+
+                    <%
+
+                        }
+
+                    %>
+
+                </tbody>
+
+            </table>
+            <!-- =========================
+            TỔNG TIỀN
+    ========================== -->
+
+            <div class="row mt-4">
+
+                <div class="col-md-8">
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="card border-primary">
+
+                        <div class="card-body text-end">
+
+                            <div class="text-secondary">
+
+                                Tổng tiền hóa đơn
+
+                            </div>
+
+                            <h3 class="text-danger fw-bold mt-2">
+
+                                <%=String.format("%,.0f", tong)%> VNĐ
+
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- =========================
+                    BUTTON
+            ========================== -->
+
+            <div class="d-flex justify-content-between mt-4">
+
+                <a
+                    href="<%=request.getContextPath()%>/hoadon"
+                    class="btn btn-secondary">
+
+                    <i class="bi bi-arrow-left-circle"></i>
+
+                    Quay lại danh sách
+
+                </a>
+
+                <a
+                    href="<%=request.getContextPath()%>/hoadon"
+                    class="btn btn-success">
+
+                    <i class="bi bi-check-circle-fill"></i>
+
+                    Hoàn tất hóa đơn
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    </body>
 
 </html>

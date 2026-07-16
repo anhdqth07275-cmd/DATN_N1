@@ -67,8 +67,11 @@
         📄 Hóa đơn
     </a>
     
-
-    <a href="congno.jsp">💰 Công nợ</a>
+        </a>
+        <a href="${pageContext.request.contextPath}/congno">
+        💰 Công nợ
+    </a>
+    
 
     <a href="phieuthu_chi.jsp">💵 Thu chi</a>
 

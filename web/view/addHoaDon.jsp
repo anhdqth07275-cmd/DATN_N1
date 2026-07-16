@@ -137,7 +137,7 @@ ArrayList<Customer> list =
 
                     </div>
 
-                            <%--xoa tong tien -->
+                            
 
                     <div class="mb-3">
 

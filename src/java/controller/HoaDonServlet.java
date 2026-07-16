@@ -2,6 +2,7 @@ package controller;
 
 import dao.CustomerDAO;
 import dao.HoaDonDAO;
+import dao.InvoiceDetailDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -152,19 +153,25 @@ public class HoaDonServlet extends HttpServlet {
     // Chi tiết
     // ==========================
     private void viewHoaDon(HttpServletRequest request,
-            HttpServletResponse response)
-            throws ServletException, IOException {
+        HttpServletResponse response)
+        throws ServletException, IOException {
 
-        int id = Integer.parseInt(request.getParameter("id"));
+    int id = Integer.parseInt(request.getParameter("id"));
 
-        HoaDon hd = dao.getById(id);
+    HoaDon hd = dao.getById(id);
 
-        request.setAttribute("hoaDon", hd);
+    InvoiceDetailDAO detailDAO = new InvoiceDetailDAO();
 
-        request.getRequestDispatcher("/view/viewHoaDon.jsp")
-                .forward(request, response);
+    request.setAttribute("hoaDon", hd);
 
-    }
+    request.setAttribute(
+            "listDetail",
+            detailDAO.getByInvoiceId(id));
+
+    request.getRequestDispatcher("/view/viewHoaDon.jsp")
+            .forward(request, response);
+
+}
 
     // ==========================
     // Thêm
@@ -189,7 +196,7 @@ public class HoaDonServlet extends HttpServlet {
 
         hd.setStatus(request.getParameter("status"));
 
-        dao.insert(hd);
+        
 
         int invoiceId = dao.insert(hd);
 

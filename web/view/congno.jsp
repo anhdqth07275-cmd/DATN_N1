@@ -1,91 +1,123 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="model.Debt"%>
+
+<%
+    ArrayList<Debt> list =
+            (ArrayList<Debt>) request.getAttribute("listDebt");
+%>
 
 <!DOCTYPE html>
 <html>
+
 <head>
 
-<meta charset="UTF-8">
-<title>Công nợ</title>
+    <meta charset="UTF-8">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet">
+    <title>Quản lý công nợ</title>
 
-<style>
-.sidebar{
-    width:240px;
-    background:#0f172a;
-    min-height:100vh;
-}
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 
-.logo{
-    text-align:center;
-    padding-top:40px;
-    padding-bottom:25px;
-    border-bottom:1px solid #334155;
-}
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+          rel="stylesheet">
 
-.logo h4{
-    color:#ffffff;       /* Chữ QUẢN LÍ TÀI CHÍNH màu trắng */
-    margin:0;
-    font-size:22px;
-    font-weight:bold;
-}
+    <style>
 
-.sidebar a{
-    display:block;
-    color:#ffffff;       /* Các mục menu màu trắng */
-    text-decoration:none;
-    padding:15px 20px;
-    font-size:16px;
-}
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
 
-.sidebar a:hover{
-    background:#1e293b;
-    color:#ffffff;       /* Hover vẫn giữ màu trắng */
-}
-body{
-    margin:0;
-    background:#f4f6f9;
-    font-family:Segoe UI;
-}
+        body{
+            background:#edf2f7;
+            font-family:"Segoe UI",sans-serif;
+        }
 
-.wrapper{
-    display:flex;
-}
+        .wrapper{
+            display:flex;
+            min-height:100vh;
+        }
 
-.content{
-    flex:1;
-    padding:30px;
-}
+        .content{
+            flex:1;
+            padding:30px;
+        }
 
-.card-box{
-    background:white;
-    border-radius:12px;
-    padding:20px;
-    box-shadow:0 0 5px #ddd;
-}
+        .box{
+            background:#fff;
+            border-radius:15px;
+            padding:30px;
+            box-shadow:0 5px 15px rgba(0,0,0,.08);
+        }
 
-.box{
-    background:white;
-    border-radius:12px;
-    padding:20px;
-    box-shadow:0 0 5px #ddd;
-    margin-top:25px;
-}
+        .page-title{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:25px;
+        }
 
-.green{
-    color:green;
-}
+        .page-title h2{
+            color:#0f172a;
+            font-weight:700;
+            margin-bottom:5px;
+        }
 
-.orange{
-    color:orange;
-}
+        .page-title p{
+            color:#64748b;
+            margin:0;
+        }
 
-.red{
-    color:red;
-}
+        .toolbar{
+            display:flex;
+            justify-content:flex-end;
+            align-items:center;
+            margin-bottom:20px;
+        }
 
-</style>
+        .toolbar input{
+            width:280px;
+        }
+
+        table{
+            vertical-align:middle!important;
+        }
+
+        thead{
+            background:#0d6efd;
+            color:#fff;
+        }
+
+        thead th{
+            text-align:center;
+        }
+
+        tbody tr:hover{
+            background:#f8fbff;
+            transition:.2s;
+        }
+
+        .badge{
+            padding:8px 12px;
+            font-size:13px;
+        }
+
+        .pagination{
+            justify-content:center;
+            margin-top:25px;
+        }
+
+        .empty-row{
+            height:80px;
+            text-align:center;
+            color:#6c757d;
+        }
+
+    </style>
 
 </head>
 
@@ -93,140 +125,238 @@ body{
 
 <div class="wrapper">
 
+    <!-- Sidebar -->
     <jsp:include page="menu.jsp"/>
 
     <div class="content">
 
-        <h4 class="mb-4">
-            CÔNG NỢ KHÁCH HÀNG
-        </h4>
-
-        <div class="row">
-
-            <div class="col-md-3">
-
-                <div class="card-box">
-
-                    <h6>Tổng phải thu</h6>
-
-                    <h4>230,000,000</h4>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-3">
-
-                <div class="card-box">
-
-                    <h6 class="green">
-                        Chưa đến hạn
-                    </h6>
-
-                    <h4>120,000,000</h4>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-3">
-
-                <div class="card-box">
-
-                    <h6 class="orange">
-                        Đến hạn
-                    </h6>
-
-                    <h4>60,000,000</h4>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-3">
-
-                <div class="card-box">
-
-                    <h6 class="red">
-                        Quá hạn
-                    </h6>
-
-                    <h4>50,000,000</h4>
-
-                </div>
-
-            </div>
-
-        </div>
-
         <div class="box">
 
-            <table class="table table-bordered table-hover">
+            <!-- Header -->
+            <div class="page-title">
+
+                <div>
+
+                    <h2>
+
+                        <i class="bi bi-cash-coin"></i>
+
+                        Quản lý công nợ
+
+                    </h2>
+
+                    <p>
+
+                        Theo dõi công nợ của khách hàng
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- Search -->
+
+            <div class="toolbar">
+
+                <form action="<%=request.getContextPath()%>/congno"
+                      method="post"
+                      class="d-flex">
+
+                    <input
+                            type="hidden"
+                            name="action"
+                            value="search">
+
+                    <input
+                            type="text"
+                            name="keyword"
+                            class="form-control me-2"
+                            placeholder="Nhập tên khách hàng hoặc mã hóa đơn">
+
+                    <button class="btn btn-success">
+
+                        <i class="bi bi-search"></i>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+            <!-- Table -->
+
+            <table class="table table-bordered table-hover align-middle">
+
+                <thead>
 
                 <tr>
+
+                    <th width="90">Mã CN</th>
 
                     <th>Khách hàng</th>
-                    <th>Tổng nợ</th>
-                    <th>Đã thanh toán</th>
-                    <th>Còn lại</th>
-                    <th>Hạn thanh toán</th>
-                    <th>Trạng thái</th>
+
+                    <th width="120">Mã HĐ</th>
+
+                    <th width="180">Còn nợ</th>
+
+                    <th width="150">Hạn thanh toán</th>
+
+                    <th width="150">Trạng thái</th>
 
                 </tr>
 
-                <tr>
+                </thead>
 
-                    <td>Công ty A</td>
-                    <td>25,000,000</td>
-                    <td>0</td>
-                    <td>25,000,000</td>
-                    <td>10/06/2024</td>
-                    <td class="green">
-                        Chưa đến hạn
-                    </td>
+                <tbody>
+                    <%
 
-                </tr>
+    if(list != null && !list.isEmpty()){
 
-                <tr>
+        for(Debt d : list){
 
-                    <td>Công ty B</td>
-                    <td>30,000,000</td>
-                    <td>5,000,000</td>
-                    <td>25,000,000</td>
-                    <td>10/05/2024</td>
-                    <td class="red">
-                        Quá hạn
-                    </td>
+%>
 
-                </tr>
+<tr>
 
-                <tr>
+    <td align="center">
 
-                    <td>Công ty C</td>
-                    <td>15,000,000</td>
-                    <td>0</td>
-                    <td>15,000,000</td>
-                    <td>05/05/2024</td>
-                    <td class="red">
-                        Quá hạn
-                    </td>
+        CN<%=String.format("%04d", d.getInvoiceId())%>
 
-                </tr>
+    </td>
 
-                <tr>
+    <td>
 
-                    <td>Công ty D</td>
-                    <td>10,000,000</td>
-                    <td>2,000,000</td>
-                    <td>8,000,000</td>
-                    <td>20/05/2024</td>
-                    <td class="orange">
-                        Đến hạn
-                    </td>
+        <%=d.getCustomerName()%>
 
-                </tr>
+    </td>
+
+    <td align="center">
+
+        <%=d.getInvoiceCode()%>
+
+    </td>
+
+    <td align="right">
+
+        <strong class="text-danger">
+
+            <%=d.getMoney()%> VNĐ
+
+        </strong>
+
+    </td>
+
+    <td align="center">
+
+        <%=d.getDateVN()%>
+
+    </td>
+
+    <td align="center">
+
+        <%
+
+            String status = d.getStatus();
+
+            if(status == null){
+
+                status = "";
+
+            }
+
+            if(status.equalsIgnoreCase("Đã thanh toán")){
+
+        %>
+
+        <span class="badge bg-success">
+
+            Đã thanh toán
+
+        </span>
+
+        <%
+
+            }else if(status.equalsIgnoreCase("Quá hạn")){
+
+        %>
+
+        <span class="badge bg-danger">
+
+            Quá hạn
+
+        </span>
+
+        <%
+
+            }else{
+
+        %>
+
+        <span class="badge bg-warning text-dark">
+
+            Còn nợ
+
+        </span>
+
+        <%
+
+            }
+
+        %>
+
+    </td>
+
+</tr>
+
+<%
+
+        }
+
+    }else{
+
+%>
+
+<tr>
+
+    <td colspan="6" class="empty-row">
+
+        <i class="bi bi-database-exclamation"></i>
+
+        Chưa có dữ liệu công nợ.
+
+    </td>
+
+</tr>
+
+<%
+
+    }
+
+%>
+                </tbody>
 
             </table>
+
+            <!-- Pagination -->
+
+            <nav>
+
+                <ul class="pagination">
+
+                    <li class="page-item active">
+
+                        <a class="page-link">
+
+                            1
+
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </nav>
 
         </div>
 
@@ -234,5 +364,8 @@ body{
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
+
 </html>

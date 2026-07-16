@@ -118,55 +118,60 @@ public class HoaDonDAO {
     // ==========================
     // Thêm hóa đơn
     // ==========================
-    public int insert(HoaDon hd){
+    public int insert(HoaDon hd) {
 
     String sql =
             "INSERT INTO Invoice(customer_id,user_id,total_amount,status) "
             + "VALUES(?,?,?,?)";
 
-    try{
+    try {
 
         Connection con = DBConnect.getConnection();
 
         PreparedStatement ps = con.prepareStatement(
                 sql,
-                PreparedStatement.RETURN_GENERATED_KEYS);
+                java.sql.Statement.RETURN_GENERATED_KEYS);
 
         ps.setInt(1, hd.getCustomerId());
 
         ps.setInt(2, hd.getUserId());
 
+        // Khi mới tạo hóa đơn thì tổng tiền = 0
         ps.setDouble(3, 0);
 
         ps.setString(4, hd.getStatus());
 
         int row = ps.executeUpdate();
 
-        if(row>0){
+        if (row > 0) {
 
             ResultSet rs = ps.getGeneratedKeys();
 
-            if(rs.next()){
+            if (rs.next()) {
 
-                int id = rs.getInt(1);
+                int invoiceId = rs.getInt(1);
 
+                rs.close();
+                ps.close();
                 con.close();
 
-                return id;
+                return invoiceId;
 
             }
 
+            rs.close();
         }
 
+        ps.close();
         con.close();
 
-    }catch(Exception e){
+    } catch (Exception e) {
 
         e.printStackTrace();
 
     }
 
-    return -1;
+    return 0;
 
 }
 
