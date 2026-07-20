@@ -63,28 +63,31 @@
     <a href="${pageContext.request.contextPath}/khachhang">
         👤 Khách hàng
     </a>
-        <a href="${pageContext.request.contextPath}/hoadon">
+    <a href="${pageContext.request.contextPath}/hoadon">
         📄 Hóa đơn
     </a>
-    
-        </a>
-        <a href="${pageContext.request.contextPath}/congno">
-        💰 Công nợ
-    </a>
-    
-        <a href="${pageContext.request.contextPath}/phieuthu">
-        💵 Thu chi
-    </a>
-    
 
-    <a href="baocao.jsp">📊 Báo cáo</a>
+</a>
+<a href="${pageContext.request.contextPath}/congno">
+    💰 Công nợ
+</a>
 
-    <a href="hethong.jsp">⚙ Hệ thống</a>
+<a href="${pageContext.request.contextPath}/phieuthu">
+    💵 Thu tiền
+</a>
+<a href="${pageContext.request.contextPath}/phieuchi">
 
-    <hr>
+    💸 chi tiền
+</a>
 
-    <a href="${pageContext.request.contextPath}/dangxuat">
-        🚪 Đăng xuất
-    </a>
+<a href="baocao.jsp">📊 Báo cáo</a>
+
+<a href="hethong.jsp">⚙ Hệ thống</a>
+
+<hr>
+
+<a href="${pageContext.request.contextPath}/dangxuat">
+    🚪 Đăng xuất
+</a>
 
 </div>
