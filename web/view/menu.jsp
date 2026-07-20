@@ -72,8 +72,10 @@
         💰 Công nợ
     </a>
     
-
-    <a href="phieuthu_chi.jsp">💵 Thu chi</a>
+        <a href="${pageContext.request.contextPath}/phieuthu">
+        💵 Thu chi
+    </a>
+    
 
     <a href="baocao.jsp">📊 Báo cáo</a>
 
