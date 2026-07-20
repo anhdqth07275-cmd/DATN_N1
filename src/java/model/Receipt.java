@@ -8,45 +8,22 @@ import java.util.Locale;
 public class Receipt {
 
     private int receiptId;
-
-    private int customerId;
-
     private int invoiceId;
-
     private int userId;
 
-    private Date receiptDate;
+    private Date paymentDate;
 
     private double amount;
+
+    private String paymentMethod;
 
     private String note;
 
     // Hiển thị
     private String customerName;
-
-    private String invoiceCode;
-
     private String userName;
 
     public Receipt() {
-    }
-
-    public Receipt(int receiptId,
-            int customerId,
-            int invoiceId,
-            int userId,
-            Date receiptDate,
-            double amount,
-            String note) {
-
-        this.receiptId = receiptId;
-        this.customerId = customerId;
-        this.invoiceId = invoiceId;
-        this.userId = userId;
-        this.receiptDate = receiptDate;
-        this.amount = amount;
-        this.note = note;
-
     }
 
     public int getReceiptId() {
@@ -55,14 +32,6 @@ public class Receipt {
 
     public void setReceiptId(int receiptId) {
         this.receiptId = receiptId;
-    }
-
-    public int getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(int customerId) {
-        this.customerId = customerId;
     }
 
     public int getInvoiceId() {
@@ -81,12 +50,12 @@ public class Receipt {
         this.userId = userId;
     }
 
-    public Date getReceiptDate() {
-        return receiptDate;
+    public Date getPaymentDate() {
+        return paymentDate;
     }
 
-    public void setReceiptDate(Date receiptDate) {
-        this.receiptDate = receiptDate;
+    public void setPaymentDate(Date paymentDate) {
+        this.paymentDate = paymentDate;
     }
 
     public double getAmount() {
@@ -95,6 +64,14 @@ public class Receipt {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public String getNote() {
@@ -113,10 +90,6 @@ public class Receipt {
         this.customerName = customerName;
     }
 
-    public String getInvoiceCode() {
-        return "HD" + String.format("%04d", invoiceId);
-    }
-
     public String getUserName() {
         return userName;
     }
@@ -126,13 +99,23 @@ public class Receipt {
     }
 
     public String getReceiptCode() {
-        return "PT" + String.format("%04d", receiptId);
+
+        return "PT"
+                + String.format("%04d", receiptId);
+
+    }
+
+    public String getInvoiceCode() {
+
+        return "HD"
+                + String.format("%04d", invoiceId);
+
     }
 
     public String getMoney() {
 
-        NumberFormat nf =
-                NumberFormat.getNumberInstance(
+        NumberFormat nf
+                = NumberFormat.getNumberInstance(
                         new Locale("vi", "VN"));
 
         return nf.format(amount);
@@ -141,14 +124,14 @@ public class Receipt {
 
     public String getDateVN() {
 
-        if (receiptDate == null) {
+        if (paymentDate == null) {
 
             return "";
 
         }
 
         return new SimpleDateFormat("dd/MM/yyyy")
-                .format(receiptDate);
+                .format(paymentDate);
 
     }
 

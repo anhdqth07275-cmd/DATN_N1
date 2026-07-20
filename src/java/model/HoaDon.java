@@ -1,8 +1,10 @@
 package model;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class HoaDon {
 
@@ -18,15 +20,34 @@ public class HoaDon {
     private double totalAmount;
 
     private String status;
+    private double remainingAmount;
+
+    public double getRemainingAmount() {
+        return remainingAmount;
+    }
+
+    public void setRemainingAmount(double remainingAmount) {
+        this.remainingAmount = remainingAmount;
+    }
+
+    public String getRemainingMoney() {
+
+        NumberFormat nf
+                = NumberFormat.getNumberInstance(
+                        new Locale("vi", "VN"));
+
+        return nf.format(remainingAmount);
+
+    }
 
     public HoaDon() {
     }
 
     public HoaDon(int invoiceId, int customerId, int userId,
-                  String customerName, String userName,
-                  Date invoiceDate,
-                  double totalAmount,
-                  String status) {
+            String customerName, String userName,
+            Date invoiceDate,
+            double totalAmount,
+            String status) {
 
         this.invoiceId = invoiceId;
         this.customerId = customerId;

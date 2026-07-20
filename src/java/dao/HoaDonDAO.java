@@ -16,8 +16,8 @@ public class HoaDonDAO {
 
         ArrayList<HoaDon> list = new ArrayList<>();
 
-        String sql =
-                "SELECT i.*, c.customer_name, u.full_name "
+        String sql
+                = "SELECT i.*, c.customer_name, u.full_name "
                 + "FROM Invoice i "
                 + "JOIN Customer c ON i.customer_id = c.customer_id "
                 + "JOIN [User] u ON i.user_id = u.user_id "
@@ -66,8 +66,8 @@ public class HoaDonDAO {
     // ==========================
     public HoaDon getById(int id) {
 
-        String sql =
-                "SELECT i.*, c.customer_name, u.full_name "
+        String sql
+                = "SELECT i.*, c.customer_name, u.full_name "
                 + "FROM Invoice i "
                 + "JOIN Customer c ON i.customer_id = c.customer_id "
                 + "JOIN [User] u ON i.user_id = u.user_id "
@@ -120,68 +120,68 @@ public class HoaDonDAO {
     // ==========================
     public int insert(HoaDon hd) {
 
-    String sql =
-            "INSERT INTO Invoice(customer_id,user_id,total_amount,status) "
-            + "VALUES(?,?,?,?)";
+        String sql
+                = "INSERT INTO Invoice(customer_id,user_id,total_amount,status) "
+                + "VALUES(?,?,?,?)";
 
-    try {
+        try {
 
-        Connection con = DBConnect.getConnection();
+            Connection con = DBConnect.getConnection();
 
-        PreparedStatement ps = con.prepareStatement(
-                sql,
-                java.sql.Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = con.prepareStatement(
+                    sql,
+                    java.sql.Statement.RETURN_GENERATED_KEYS);
 
-        ps.setInt(1, hd.getCustomerId());
+            ps.setInt(1, hd.getCustomerId());
 
-        ps.setInt(2, hd.getUserId());
+            ps.setInt(2, hd.getUserId());
 
-        // Khi mới tạo hóa đơn thì tổng tiền = 0
-        ps.setDouble(3, 0);
+            // Khi mới tạo hóa đơn thì tổng tiền = 0
+            ps.setDouble(3, 0);
 
-        ps.setString(4, hd.getStatus());
+            ps.setString(4, hd.getStatus());
 
-        int row = ps.executeUpdate();
+            int row = ps.executeUpdate();
 
-        if (row > 0) {
+            if (row > 0) {
 
-            ResultSet rs = ps.getGeneratedKeys();
+                ResultSet rs = ps.getGeneratedKeys();
 
-            if (rs.next()) {
+                if (rs.next()) {
 
-                int invoiceId = rs.getInt(1);
+                    int invoiceId = rs.getInt(1);
+
+                    rs.close();
+                    ps.close();
+                    con.close();
+
+                    return invoiceId;
+
+                }
 
                 rs.close();
-                ps.close();
-                con.close();
-
-                return invoiceId;
-
             }
 
-            rs.close();
+            ps.close();
+            con.close();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
         }
 
-        ps.close();
-        con.close();
-
-    } catch (Exception e) {
-
-        e.printStackTrace();
+        return 0;
 
     }
-
-    return 0;
-
-}
 
     // ==========================
     // Cập nhật hóa đơn
     // ==========================
     public boolean update(HoaDon hd) {
 
-        String sql =
-                "UPDATE Invoice "
+        String sql
+                = "UPDATE Invoice "
                 + "SET customer_id=?, total_amount=?, status=? "
                 + "WHERE invoice_id=?";
 
@@ -217,8 +217,8 @@ public class HoaDonDAO {
     // ==========================
     public boolean delete(int id) {
 
-        String sql =
-                "DELETE FROM Invoice WHERE invoice_id=?";
+        String sql
+                = "DELETE FROM Invoice WHERE invoice_id=?";
 
         try {
 
@@ -251,8 +251,8 @@ public class HoaDonDAO {
 
         ArrayList<HoaDon> list = new ArrayList<>();
 
-        String sql =
-                "SELECT i.*, c.customer_name, u.full_name "
+        String sql
+                = "SELECT i.*, c.customer_name, u.full_name "
                 + "FROM Invoice i "
                 + "JOIN Customer c ON i.customer_id=c.customer_id "
                 + "JOIN [User] u ON i.user_id=u.user_id "
@@ -284,6 +284,85 @@ public class HoaDonDAO {
                 hd.setInvoiceDate(rs.getDate("invoice_date"));
                 hd.setTotalAmount(rs.getDouble("total_amount"));
                 hd.setStatus(rs.getString("status"));
+
+                list.add(hd);
+
+            }
+
+            con.close();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+
+        return list;
+
+    }
+
+    // ==========================
+// Lấy hóa đơn chưa thanh toán
+// ==========================
+    public ArrayList<HoaDon> getUnpaidInvoice() {
+
+        ArrayList<HoaDon> list = new ArrayList<>();
+
+        String sql
+                = "SELECT "
+                + "i.*, "
+                + "c.customer_name, "
+                + "u.full_name, "
+                + "ISNULL(d.remaining_amount,0) remaining_amount "
+                + "FROM Invoice i "
+                + "JOIN Customer c "
+                + "ON i.customer_id=c.customer_id "
+                + "JOIN [User] u "
+                + "ON i.user_id=u.user_id "
+                + "LEFT JOIN Debt d "
+                + "ON i.invoice_id=d.invoice_id "
+                + "WHERE i.status<>N'Đã thanh toán' "
+                + "ORDER BY i.invoice_id DESC";
+
+        try {
+
+            Connection con = DBConnect.getConnection();
+
+            PreparedStatement ps
+                    = con.prepareStatement(sql);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                HoaDon hd = new HoaDon();
+
+                hd.setInvoiceId(
+                        rs.getInt("invoice_id"));
+
+                hd.setCustomerId(
+                        rs.getInt("customer_id"));
+
+                hd.setUserId(
+                        rs.getInt("user_id"));
+
+                hd.setInvoiceDate(
+                        rs.getDate("invoice_date"));
+
+                hd.setTotalAmount(
+                        rs.getDouble("total_amount"));
+
+                hd.setStatus(
+                        rs.getString("status"));
+
+                hd.setCustomerName(
+                        rs.getString("customer_name"));
+
+                hd.setUserName(
+                        rs.getString("full_name"));
+
+                hd.setRemainingAmount(
+                        rs.getDouble("remaining_amount"));
 
                 list.add(hd);
 
