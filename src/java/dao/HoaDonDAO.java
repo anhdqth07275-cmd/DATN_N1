@@ -379,5 +379,69 @@ public class HoaDonDAO {
         return list;
 
     }
+    
+    // ==========================
+// 5 hóa đơn mới nhất
+// ==========================
+public ArrayList<HoaDon> getTop5Newest() {
+
+    ArrayList<HoaDon> list = new ArrayList<>();
+
+    String sql =
+        "SELECT TOP 5 "
+        + "i.invoice_id, "
+        + "c.customer_name, "
+        + "i.invoice_date, "
+        + "i.total_amount, "
+        + "i.status "
+        + "FROM Invoice i "
+        + "INNER JOIN Customer c "
+        + "ON i.customer_id = c.customer_id "
+        + "ORDER BY i.invoice_date DESC";
+
+    try {
+
+        Connection con = DBConnect.getConnection();
+
+        PreparedStatement ps =
+                con.prepareStatement(sql);
+
+        ResultSet rs =
+                ps.executeQuery();
+
+        while (rs.next()) {
+
+            HoaDon hd = new HoaDon();
+
+            hd.setInvoiceId(
+                    rs.getInt("invoice_id"));
+
+            hd.setCustomerName(
+                    rs.getString("customer_name"));
+
+            hd.setInvoiceDate(
+                    rs.getTimestamp("invoice_date"));
+
+            hd.setTotalAmount(
+                    rs.getDouble("total_amount"));
+
+            hd.setStatus(
+                    rs.getString("status"));
+
+            list.add(hd);
+
+        }
+
+        con.close();
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+    }
+
+    return list;
+
+}
 
 }

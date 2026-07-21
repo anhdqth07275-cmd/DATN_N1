@@ -1,10 +1,21 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 <%@page import="model.DangKy"%>
+<%@page import="model.Dashboard"%>
+<%@page import="model.HoaDon"%>
+<%@page import="model.Debt"%>
+<%@page import="java.util.ArrayList"%>
 
 <%
 DangKy user = (DangKy) session.getAttribute("user");
+Dashboard dashboard =
+        (Dashboard) request.getAttribute("dashboard");
 
+ArrayList<HoaDon> listInvoice =
+        (ArrayList<HoaDon>) request.getAttribute("listInvoice");
+
+ArrayList<Debt> listDebt =
+        (ArrayList<Debt>) request.getAttribute("listDebt");
 if(user == null){
     response.sendRedirect(request.getContextPath() + "/dangnhap");
     return;
@@ -167,21 +178,16 @@ if(user == null){
 
                             <div class="card-stat">
 
-                                <h6>Tổng doanh thu</h6>
+                                <h6>💰 Tổng doanh thu</h6>
 
-                                <h3>550,000,000</h3>
+                                <h3 class="text-primary">
 
-                            </div>
+                                    <%=String.format("%,.0f",
+                            dashboard.getTotalRevenue())%>
 
-                        </div>
+                                    VNĐ
 
-                        <div class="col-md-3">
-
-                            <div class="card-stat">
-
-                                <h6>Tổng thu</h6>
-
-                                <h3>420,000,000</h3>
+                                </h3>
 
                             </div>
 
@@ -191,9 +197,16 @@ if(user == null){
 
                             <div class="card-stat">
 
-                                <h6>Tổng chi</h6>
+                                <h6>💵 Tổng thu</h6>
 
-                                <h3>130,000,000</h3>
+                                <h3 class="text-success">
+
+                                    <%=String.format("%,.0f",
+                            dashboard.getTotalReceiptAmount())%>
+
+                                    VNĐ
+
+                                </h3>
 
                             </div>
 
@@ -203,11 +216,33 @@ if(user == null){
 
                             <div class="card-stat">
 
-                                <h6>Công nợ phải thu</h6>
+                                <h6>💸 Tổng chi</h6>
 
                                 <h3 class="text-danger">
 
-                                    230,000,000
+                                    <%=String.format("%,.0f",
+                            dashboard.getTotalExpenseAmount())%>
+
+                                    VNĐ
+
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <div class="card-stat">
+
+                                <h6>📋 Công nợ</h6>
+
+                                <h3 class="text-warning">
+
+                                    <%=String.format("%,.0f",
+                            dashboard.getTotalDebt())%>
+
+                                    VNĐ
 
                                 </h3>
 
@@ -223,7 +258,7 @@ if(user == null){
 
                             <div class="box">
 
-                                <h5>DOANH THU THEO THÁNG</h5>
+                                <h5>📈 DOANH THU THEO THÁNG</h5>
 
                                 <canvas id="chart1"></canvas>
 
@@ -235,7 +270,7 @@ if(user == null){
 
                             <div class="box">
 
-                                <h5>CÔNG NỢ THEO TRẠNG THÁI</h5>
+                                <h5>📊 CÔNG NỢ THEO TRẠNG THÁI</h5>
 
                                 <canvas id="chart2"></canvas>
 
@@ -251,55 +286,93 @@ if(user == null){
 
                             <div class="box">
 
-                                <h5>HÓA ĐƠN MỚI NHẤT</h5>
+                                <h5>🧾 HÓA ĐƠN MỚI NHẤT</h5>
 
-                                <table class="table">
+                                <table class="table table-hover">
 
-                                    <tr>
+                                    <thead>
 
-                                        <th>Mã HĐ</th>
-                                        <th>Khách hàng</th>
-                                        <th>Ngày lập</th>
-                                        <th>Tổng tiền</th>
-                                        <th>Trạng thái</th>
+                                        <tr>
 
-                                    </tr>
+                                            <th>Mã HĐ</th>
 
-                                    <tr>
+                                            <th>Khách hàng</th>
 
-                                        <td>HD0001</td>
-                                        <td>Công ty A</td>
-                                        <td>20/05/2024</td>
-                                        <td>15,000,000</td>
-                                        <td class="green">
-                                            Đã thanh toán
-                                        </td>
+                                            <th>Ngày lập</th>
 
-                                    </tr>
+                                            <th>Tổng tiền</th>
 
-                                    <tr>
+                                            <th>Trạng thái</th>
 
-                                        <td>HD0002</td>
-                                        <td>Công ty B</td>
-                                        <td>19/05/2024</td>
-                                        <td>8,500,000</td>
-                                        <td class="orange">
-                                            Chưa thanh toán
-                                        </td>
+                                        </tr>
 
-                                    </tr>
+                                    </thead>
 
-                                    <tr>
+                                    <tbody>
 
-                                        <td>HD0003</td>
-                                        <td>Khách lẻ</td>
-                                        <td>18/05/2024</td>
-                                        <td>2,300,000</td>
-                                        <td class="green">
-                                            Đã thanh toán
-                                        </td>
+                                        <%
 
-                                    </tr>
+                                        if(listInvoice!=null){
+
+                                            for(HoaDon hd:listInvoice){
+
+                                        %>
+
+                                        <tr>
+
+                                            <td><%=hd.getInvoiceCode()%></td>
+
+                                            <td><%=hd.getCustomerName()%></td>
+
+                                            <td><%=hd.getDateVN()%></td>
+
+                                            <td><%=hd.getMoney()%> VNĐ</td>
+
+                                            <td>
+
+                                                <%
+
+                                                if("Đã thanh toán".equalsIgnoreCase(hd.getStatus())){
+
+                                                %>
+
+                                                <span class="badge bg-success">
+
+                                                    Đã thanh toán
+
+                                                </span>
+
+                                                <%
+
+                                                }else{
+
+                                                %>
+
+                                                <span class="badge bg-warning text-dark">
+
+                                                    Còn nợ
+
+                                                </span>
+
+                                                <%
+
+                                                }
+
+                                                %>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <%
+
+                                            }
+
+                                        }
+
+                                        %>
+
+                                    </tbody>
 
                                 </table>
 
@@ -311,41 +384,65 @@ if(user == null){
 
                             <div class="box">
 
-                                <h5>CÔNG NỢ QUÁ HẠN</h5>
+                                <h5>📋 CÔNG NỢ GẦN NHẤT</h5>
 
-                                <table class="table">
+                                <table class="table table-hover">
 
-                                    <tr>
+                                    <thead>
 
-                                        <th>Khách hàng</th>
-                                        <th>Số tiền</th>
-                                        <th>Ngày quá hạn</th>
+                                        <tr>
 
-                                    </tr>
+                                            <th>Mã CN</th>
 
-                                    <tr>
+                                            <th>Khách hàng</th>
 
-                                        <td>Công ty B</td>
-                                        <td>25,000,000</td>
-                                        <td>10/05/2024</td>
+                                            <th>Số tiền</th>
 
-                                    </tr>
+                                            <th>Hạn TT</th>
 
-                                    <tr>
+                                        </tr>
 
-                                        <td>Công ty C</td>
-                                        <td>15,000,000</td>
-                                        <td>05/05/2024</td>
+                                    </thead>
 
-                                    </tr>
+                                    <tbody>
 
-                                    <tr>
+                                        <%
 
-                                        <td>Công ty D</td>
-                                        <td>10,000,000</td>
-                                        <td>01/05/2024</td>
+                                        if(listDebt!=null){
 
-                                    </tr>
+                                            for(Debt d:listDebt){
+
+                                        %>
+
+                                        <tr>
+
+                                            <td><%=d.getDebtCode()%></td>
+
+                                            <td><%=d.getCustomerName()%></td>
+
+                                            <td class="text-danger">
+
+                                                <%=d.getMoney()%> VNĐ
+
+                                            </td>
+
+                                            <td>
+
+                                                <%=d.getDateVN()%>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <%
+
+                                            }
+
+                                        }
+
+                                        %>
+
+                                    </tbody>
 
                                 </table>
 
@@ -361,51 +458,65 @@ if(user == null){
 
         </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
         <script>
 
-            new Chart(
-                    document.getElementById('chart1'),
-                    {
-                        type: 'line',
+                        new Chart(document.getElementById("chart1"), {
 
-                        data: {
-                            labels: [
-                                'T1', 'T2', 'T3', 'T4',
-                                'T5', 'T6', 'T7', 'T8',
-                                'T9', 'T10', 'T11', 'T12'
-                            ],
+                            type: "line",
 
-                            datasets: [{
-                                    data: [
-                                        50, 100, 140, 130,
-                                        90, 120, 100, 150,
-                                        150, 150, 100, 150
-                                    ]
-                                }]
-                        }
-                    });
+                            data: {
 
-            new Chart(
-                    document.getElementById('chart2'),
-                    {
-                        type: 'doughnut',
+                                labels: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"],
 
-                        data: {
-                            labels: [
-                                'Chưa đến hạn',
-                                'Đến hạn',
-                                'Quá hạn'
-                            ],
+                                datasets: [{
 
-                            datasets: [{
-                                    data: [
-                                        120,
-                                        60,
-                                        50
-                                    ]
-                                }]
-                        }
-                    });
+                                        label: "Doanh thu",
+
+                                        data: [15, 20, 25, 18, 40, 35, 42, 50, 46, 58, 65, 70],
+
+                                        borderWidth: 3,
+
+                                        fill: false,
+
+                                        tension: .35
+
+                                    }]
+
+                            },
+
+                            options: {
+
+                                responsive: true
+
+                            }
+
+                        });
+
+                        new Chart(document.getElementById("chart2"), {
+
+                            type: "doughnut",
+
+                            data: {
+
+                                labels: ["Đã thanh toán", "Còn nợ"],
+
+                                datasets: [{
+
+                                        data: [75, 25]
+
+                                    }]
+
+                            },
+
+                            options: {
+
+                                responsive: true
+
+                            }
+
+                        });
 
         </script>
 

@@ -382,5 +382,75 @@ public void updateFromInvoice(int invoiceId){
         return list;
 
     }
+    
+    // ==========================
+// 5 công nợ quá hạn
+// ==========================
+public ArrayList<Debt> getTop5Overdue() {
+
+    ArrayList<Debt> list = new ArrayList<>();
+
+    String sql =
+            "SELECT TOP 5 "
+            + "d.debt_id, "
+            + "d.invoice_id, "
+            + "d.remaining_amount, "
+            + "d.due_date, "
+            + "d.status, "
+            + "c.customer_name "
+            + "FROM Debt d "
+            + "INNER JOIN Customer c "
+            + "ON d.customer_id = c.customer_id "
+            + "WHERE d.remaining_amount > 0 "
+            + "AND d.due_date < GETDATE() "
+            + "ORDER BY d.due_date ASC";
+
+    try {
+
+        Connection con = DBConnect.getConnection();
+
+        PreparedStatement ps =
+                con.prepareStatement(sql);
+
+        ResultSet rs =
+                ps.executeQuery();
+
+        while (rs.next()) {
+
+            Debt d = new Debt();
+
+            d.setDebtId(
+                    rs.getInt("debt_id"));
+
+            d.setInvoiceId(
+                    rs.getInt("invoice_id"));
+
+            d.setCustomerName(
+                    rs.getString("customer_name"));
+
+            d.setRemainingAmount(
+                    rs.getDouble("remaining_amount"));
+
+            d.setDueDate(
+                    rs.getTimestamp("due_date"));
+
+            d.setStatus(
+                    rs.getString("status"));
+
+            list.add(d);
+
+        }
+
+        con.close();
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+    }
+
+    return list;
+
+}
 
 }
