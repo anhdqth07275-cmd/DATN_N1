@@ -224,6 +224,22 @@ ArrayList<HoaDon> list =
 
                     </div>
 
+                    <%
+                        String errorMsg = request.getParameter("error");
+                        if (errorMsg != null && !errorMsg.isEmpty()) {
+                    %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <%=errorMsg%>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+
+                    </div>
+                    <%
+                        }
+                    %>
+
                     <div class="toolbar">
 
                         <div class="left">

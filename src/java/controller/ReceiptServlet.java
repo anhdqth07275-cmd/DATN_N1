@@ -1,5 +1,6 @@
 package controller;
 
+import dao.DebtDAO;
 import dao.HoaDonDAO;
 import dao.ReceiptDAO;
 import jakarta.servlet.ServletException;
@@ -20,6 +21,8 @@ public class ReceiptServlet extends HttpServlet {
     ReceiptDAO dao = new ReceiptDAO();
 
     HoaDonDAO hoaDonDAO = new HoaDonDAO();
+
+    DebtDAO debtDAO = new DebtDAO();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -159,16 +162,34 @@ public class ReceiptServlet extends HttpServlet {
         Receipt receipt
                 = dao.getById(id);
 
-        ArrayList<HoaDon> listHoaDon
-                = hoaDonDAO.getUnpaidInvoice();
+        HoaDon invoice
+                = hoaDonDAO.getById(receipt.getInvoiceId());
+
+        // Số tiền đã thu của TẤT CẢ các phiếu thu khác (không tính
+        // phiếu đang sửa), để tính đúng hạn mức tối đa có thể sửa
+        // thành, thay vì lấy nhầm "còn nợ hiện tại" (vốn đã trừ đi
+        // chính phiếu thu này rồi).
+        double paidByOthers
+                = debtDAO.getTotalPaid(receipt.getInvoiceId(), id);
+
+        double maxAmount
+                = invoice.getTotalAmount() - paidByOthers;
+
+        if (maxAmount < 0) {
+            maxAmount = 0;
+        }
 
         request.setAttribute(
                 "receipt",
                 receipt);
 
         request.setAttribute(
-                "listHoaDon",
-                listHoaDon);
+                "invoice",
+                invoice);
+
+        request.setAttribute(
+                "maxAmount",
+                maxAmount);
 
         request.getRequestDispatcher(
                 "/view/editReceipt.jsp")
@@ -188,18 +209,42 @@ public class ReceiptServlet extends HttpServlet {
         DangKy user
                 = (DangKy) session.getAttribute("user");
 
+        int invoiceId
+                = Integer.parseInt(
+                        request.getParameter("invoiceId"));
+
+        double amount
+                = Double.parseDouble(
+                        request.getParameter("amount"));
+
+        // Kiểm tra lại ở server, không chỉ dựa vào JS phía client
+        // (JS có thể bị vô hiệu hóa hoặc bị lách qua).
+        double remaining = debtDAO.getRemainingAmount(invoiceId);
+
+        if (amount <= 0 || amount > remaining) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/phieuthu?action=add&error="
+                    + java.net.URLEncoder.encode(
+                            "Số tiền thu phải lớn hơn 0 và không "
+                            + "được vượt quá số tiền còn nợ ("
+                            + String.format("%,.0f", remaining)
+                            + " đ).",
+                            "UTF-8"));
+
+            return;
+
+        }
+
         Receipt r = new Receipt();
 
-        r.setInvoiceId(
-                Integer.parseInt(
-                        request.getParameter("invoiceId")));
+        r.setInvoiceId(invoiceId);
 
         r.setUserId(
                 user.getUserId());
 
-        r.setAmount(
-                Double.parseDouble(
-                        request.getParameter("amount")));
+        r.setAmount(amount);
 
         r.setPaymentMethod(
                 request.getParameter("paymentMethod"));
@@ -208,6 +253,11 @@ public class ReceiptServlet extends HttpServlet {
                 request.getParameter("note"));
 
         dao.insert(r);
+
+        // Đồng bộ lại công nợ + trạng thái hóa đơn ngay sau khi
+        // ghi nhận phiếu thu, để tránh mâu thuẫn giữa 3 màn hình
+        // hóa đơn / công nợ / thu tiền.
+        debtDAO.updateFromInvoice(invoiceId);
 
         response.sendRedirect(
                 request.getContextPath()
@@ -222,19 +272,49 @@ public class ReceiptServlet extends HttpServlet {
             HttpServletResponse response)
             throws IOException {
 
+        int receiptId
+                = Integer.parseInt(
+                        request.getParameter("receiptId"));
+
+        int invoiceId
+                = Integer.parseInt(
+                        request.getParameter("invoiceId"));
+
+        double amount
+                = Double.parseDouble(
+                        request.getParameter("amount"));
+
+        HoaDon invoice = hoaDonDAO.getById(invoiceId);
+
+        double paidByOthers
+                = debtDAO.getTotalPaid(invoiceId, receiptId);
+
+        double maxAmount = invoice.getTotalAmount() - paidByOthers;
+
+        if (amount <= 0 || amount > maxAmount) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/phieuthu?action=edit&id=" + receiptId
+                    + "&error="
+                    + java.net.URLEncoder.encode(
+                            "Số tiền thu phải lớn hơn 0 và không "
+                            + "được vượt quá "
+                            + String.format("%,.0f", maxAmount)
+                            + " đ.",
+                            "UTF-8"));
+
+            return;
+
+        }
+
         Receipt r = new Receipt();
 
-        r.setReceiptId(
-                Integer.parseInt(
-                        request.getParameter("receiptId")));
+        r.setReceiptId(receiptId);
 
-        r.setInvoiceId(
-                Integer.parseInt(
-                        request.getParameter("invoiceId")));
+        r.setInvoiceId(invoiceId);
 
-        r.setAmount(
-                Double.parseDouble(
-                        request.getParameter("amount")));
+        r.setAmount(amount);
 
         r.setPaymentMethod(
                 request.getParameter("paymentMethod"));
@@ -243,6 +323,10 @@ public class ReceiptServlet extends HttpServlet {
                 request.getParameter("note"));
 
         dao.update(r);
+
+        // Đồng bộ lại công nợ + trạng thái hóa đơn sau khi sửa số
+        // tiền của phiếu thu.
+        debtDAO.updateFromInvoice(invoiceId);
 
         response.sendRedirect(
                 request.getContextPath()
@@ -261,7 +345,16 @@ public class ReceiptServlet extends HttpServlet {
                 = Integer.parseInt(
                         request.getParameter("id"));
 
+        // Lấy invoiceId TRƯỚC khi xóa để còn đồng bộ lại công nợ/
+        // trạng thái hóa đơn (hủy phiếu thu thì nợ phải tăng trở
+        // lại tương ứng).
+        Receipt r = dao.getById(id);
+
         dao.delete(id);
+
+        if (r != null) {
+            debtDAO.updateFromInvoice(r.getInvoiceId());
+        }
 
         response.sendRedirect(
                 request.getContextPath()

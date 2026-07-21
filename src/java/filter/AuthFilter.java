@@ -18,7 +18,8 @@ import jakarta.servlet.http.HttpSession;
     "/hoadon",
     "/congno",
     "/phieuthu",
-    "/phieuchi"
+    "/phieuchi",
+    "/baocao"
 })
 public class AuthFilter implements Filter {
 

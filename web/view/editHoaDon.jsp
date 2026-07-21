@@ -148,13 +148,17 @@ ArrayList<Customer> list=
                         </label>
 
                         <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            name="totalAmount"
+                            type="text"
                             class="form-control"
-                            value="<%=hd.getTotalAmount()%>"
-                            required>
+                            value="<%=hd.getMoney()%> đ"
+                            disabled>
+
+                        <div class="form-text">
+
+                            Tổng tiền được tính tự động từ chi tiết
+                            hóa đơn, không thể sửa trực tiếp ở đây.
+
+                        </div>
 
                     </div>
 
@@ -166,29 +170,20 @@ ArrayList<Customer> list=
 
                         </label>
 
-                        <select
-                            name="status"
-                            class="form-select">
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="<%=hd.getStatus()%>"
+                            disabled>
 
-                            <option
-                                value="Chưa thanh toán"
+                        <div class="form-text">
 
-                                <%="Chưa thanh toán".equals(hd.getStatus())?"selected":""%>>
+                            Trạng thái được tự động cập nhật dựa
+                            trên số tiền đã thu (phiếu thu), không
+                            thể sửa tay để tránh mâu thuẫn với công
+                            nợ.
 
-                                Chưa thanh toán
-
-                            </option>
-
-                            <option
-                                value="Đã thanh toán"
-
-                                <%="Đã thanh toán".equals(hd.getStatus())?"selected":""%>>
-
-                                Đã thanh toán
-
-                            </option>
-
-                        </select>
+                        </div>
 
                     </div>
 

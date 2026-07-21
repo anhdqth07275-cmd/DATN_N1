@@ -7,8 +7,13 @@
     Receipt receipt =
             (Receipt) request.getAttribute("receipt");
 
-    ArrayList<HoaDon> listHoaDon =
-            (ArrayList<HoaDon>) request.getAttribute("listHoaDon");
+    HoaDon invoice =
+            (HoaDon) request.getAttribute("invoice");
+
+    Double maxAmountObj =
+            (Double) request.getAttribute("maxAmount");
+
+    double maxAmount = maxAmountObj == null ? 0 : maxAmountObj;
 %>
 
 <!DOCTYPE html>
@@ -79,6 +84,20 @@ Cập nhật phiếu thu
 
 </h3>
 
+<%
+    String errorMsg = request.getParameter("error");
+    if (errorMsg != null && !errorMsg.isEmpty()) {
+%>
+<div class="alert alert-danger">
+
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <%=errorMsg%>
+
+</div>
+<%
+    }
+%>
+
 <form action="<%=request.getContextPath()%>/phieuthu"
 
       method="post">
@@ -109,41 +128,21 @@ Cập nhật phiếu thu
             class="form-select"
             disabled>
 
-        <%
-
-            if(listHoaDon != null){
-
-                for(HoaDon hd : listHoaDon){
-
-                    if(hd.getInvoiceId()==receipt.getInvoiceId()){
-
-        %>
-
         <option selected>
 
-            <%=hd.getInvoiceCode()%>
+            <%=invoice != null ? invoice.getInvoiceCode() : receipt.getInvoiceCode()%>
 
             |
 
-            <%=hd.getCustomerName()%>
+            <%=invoice != null ? invoice.getCustomerName() : ""%>
 
             |
 
-            Còn nợ:
+            Tổng hóa đơn:
 
-            <%=hd.getRemainingMoney()%> VNĐ
+            <%=invoice != null ? invoice.getMoney() : "0"%> đ
 
         </option>
-
-        <%
-
-                    }
-
-                }
-
-            }
-
-        %>
 
     </select>
 
@@ -180,7 +179,9 @@ Cập nhật phiếu thu
 
             min="1"
 
-            step="1000"
+            max="<%=(long) maxAmount%>"
+
+            step="1"
 
             required>
 
@@ -286,10 +287,13 @@ const amount = document.getElementById("amount");
 
 const form = document.querySelector("form");
 
-// Giá trị công nợ tối đa (lấy từ giá trị hiện tại)
-const debt = Number(amount.value);
+// Hạn mức tối đa được tính đúng ở server (tổng hóa đơn - đã thu
+// bởi các phiếu thu KHÁC), không dùng giá trị hiện tại của phiếu
+// thu này làm hạn mức (đó là lỗi cũ khiến không thể tăng số tiền
+// thu khi sửa phiếu thu).
+const debt = Number(amount.max);
 
-// Không cho nhập âm hoặc vượt quá công nợ
+// Không cho nhập âm hoặc vượt quá hạn mức
 amount.addEventListener("input", function () {
 
     let value = Number(this.value);
@@ -304,7 +308,7 @@ amount.addEventListener("input", function () {
 
     if (value > debt) {
 
-        alert("Số tiền thu không được lớn hơn số tiền còn nợ!");
+        alert("Số tiền thu không được lớn hơn " + debt.toLocaleString("vi-VN") + " VNĐ!");
 
         this.value = debt;
 
@@ -331,7 +335,7 @@ form.addEventListener("submit", function (e) {
 
     if (value > debt) {
 
-        alert("Số tiền thu vượt quá công nợ!");
+        alert("Số tiền thu vượt quá hạn mức cho phép!");
 
         amount.focus();
 

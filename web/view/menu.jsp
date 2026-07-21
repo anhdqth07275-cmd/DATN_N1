@@ -67,22 +67,25 @@
         📄 Hóa đơn
     </a>
 
-</a>
-<a href="${pageContext.request.contextPath}/congno">
-    💰 Công nợ
-</a>
+    <a href="${pageContext.request.contextPath}/congno">
+        💰 Công nợ
+    </a>
 
-<a href="${pageContext.request.contextPath}/phieuthu">
-    💵 Thu tiền
-</a>
-<a href="${pageContext.request.contextPath}/phieuchi">
+    <a href="${pageContext.request.contextPath}/phieuthu">
+        💵 Thu tiền
+    </a>
 
-    💸 chi tiền
-</a>
+    <a href="${pageContext.request.contextPath}/phieuchi">
+        💸 Chi tiền
+    </a>
 
-<a href="baocao.jsp">📊 Báo cáo</a>
+    <a href="${pageContext.request.contextPath}/baocao">
+        📊 Báo cáo
+    </a>
 
-<a href="hethong.jsp">⚙ Hệ thống</a>
+    <a href="${pageContext.request.contextPath}/view/hethong.jsp">
+        ⚙ Hệ thống
+    </a>
 
 <hr>
 

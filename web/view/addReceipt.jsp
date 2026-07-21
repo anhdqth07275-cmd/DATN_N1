@@ -74,6 +74,20 @@
 
             </h3>
 
+            <%
+                String errorMsg = request.getParameter("error");
+                if (errorMsg != null && !errorMsg.isEmpty()) {
+            %>
+            <div class="alert alert-danger">
+
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <%=errorMsg%>
+
+            </div>
+            <%
+                }
+            %>
+
             <form action="<%=request.getContextPath()%>/phieuthu"
 
                   method="post">
@@ -161,7 +175,7 @@
                         name="amount"
                         class="form-control"
                         min="1"
-                        step="1000"
+                        step="1"
                         required>
 
                 </div>

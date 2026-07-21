@@ -194,9 +194,11 @@ public class HoaDonServlet extends HttpServlet {
 
         hd.setTotalAmount(0);
 
-        hd.setStatus(request.getParameter("status"));
-
-        
+        // Hóa đơn mới luôn bắt đầu ở trạng thái "Chưa thanh toán":
+        // tổng tiền = 0 nên chưa có ý nghĩa gì để đánh dấu "đã
+        // thanh toán" ngay khi tạo. Trạng thái sẽ tự chuyển sang
+        // "Đã thanh toán" khi có đủ phiếu thu (xem DebtDAO).
+        hd.setStatus("Chưa thanh toán");
 
         int invoiceId = dao.insert(hd);
 
@@ -224,12 +226,10 @@ public class HoaDonServlet extends HttpServlet {
                 Integer.parseInt(request.getParameter("customerId"))
         );
 
-        hd.setTotalAmount(0);
-
-        hd.setStatus(
-                request.getParameter("status")
-        );
-
+        // Không set lại totalAmount/status ở đây nữa:
+        // - total_amount luôn do tổng chi tiết hóa đơn quyết định.
+        // - status luôn do số tiền đã thu quyết định (DebtDAO).
+        // dao.update() bên dưới cũng chỉ còn cập nhật customer_id.
         dao.update(hd);
 
         response.sendRedirect(request.getContextPath() + "/hoadon");
@@ -245,7 +245,37 @@ public class HoaDonServlet extends HttpServlet {
 
         int id = Integer.parseInt(request.getParameter("id"));
 
-        dao.delete(id);
+        // Hóa đơn đã có phiếu thu (đã phát sinh giao dịch tiền)
+        // thì không cho xóa, để không làm mất dấu vết thu tiền/
+        // công nợ đã ghi nhận trước đó.
+        if (!dao.canDelete(id)) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/hoadon?error="
+                    + java.net.URLEncoder.encode(
+                            "Không thể xóa hóa đơn đã có phiếu thu. "
+                            + "Vui lòng xóa các phiếu thu liên quan trước.",
+                            "UTF-8"));
+
+            return;
+
+        }
+
+        boolean ok = dao.delete(id);
+
+        if (!ok) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/hoadon?error="
+                    + java.net.URLEncoder.encode(
+                            "Xóa hóa đơn thất bại. Vui lòng thử lại.",
+                            "UTF-8"));
+
+            return;
+
+        }
 
         response.sendRedirect(request.getContextPath() + "/hoadon");
 

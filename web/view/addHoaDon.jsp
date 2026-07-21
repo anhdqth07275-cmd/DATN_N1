@@ -141,29 +141,16 @@ ArrayList<Customer> list =
 
                     <div class="mb-3">
 
-                        <label class="form-label">
+                        <div class="alert alert-info mb-0">
 
-                            Trạng thái
+                            <i class="bi bi-info-circle"></i>
+                            Hóa đơn mới sẽ ở trạng thái
+                            <strong>Chưa thanh toán</strong>.
+                            Trạng thái sẽ tự động chuyển sang
+                            <strong>Đã thanh toán</strong> khi khách
+                            hàng thanh toán đủ qua phiếu thu.
 
-                        </label>
-
-                        <select
-                            name="status"
-                            class="form-select">
-
-                            <option value="Chưa thanh toán">
-
-                                Chưa thanh toán
-
-                            </option>
-
-                            <option value="Đã thanh toán">
-
-                                Đã thanh toán
-
-                            </option>
-
-                        </select>
+                        </div>
 
                     </div>
 

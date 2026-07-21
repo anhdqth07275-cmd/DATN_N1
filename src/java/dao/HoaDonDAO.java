@@ -178,11 +178,21 @@ public class HoaDonDAO {
     // ==========================
     // Cập nhật hóa đơn
     // ==========================
+    // CHÚ Ý: total_amount KHÔNG được cập nhật ở đây. Nó luôn được
+    // tính lại tự động từ tổng Invoice_Detail (xem
+    // InvoiceDetailDAO.updateInvoiceTotal). Nếu ghi đè total_amount
+    // ở form sửa hóa đơn thì tổng tiền sẽ bị lệch/mất mỗi khi người
+    // dùng chỉ đổi khách hàng, đây chính là lỗi "tổng tiền về 0"
+    // trước đây.
+    // status cũng KHÔNG được sửa tay ở đây. Trạng thái thanh toán
+    // luôn được suy ra tự động từ số tiền đã thu (xem
+    // DebtDAO.updateFromInvoice), để tránh mâu thuẫn giữa hóa đơn -
+    // công nợ - phiếu thu.
     public boolean update(HoaDon hd) {
 
         String sql
                 = "UPDATE Invoice "
-                + "SET customer_id=?, total_amount=?, status=? "
+                + "SET customer_id=? "
                 + "WHERE invoice_id=?";
 
         try {
@@ -192,9 +202,7 @@ public class HoaDonDAO {
             PreparedStatement ps = con.prepareStatement(sql);
 
             ps.setInt(1, hd.getCustomerId());
-            ps.setDouble(2, hd.getTotalAmount());
-            ps.setString(3, hd.getStatus());
-            ps.setInt(4, hd.getInvoiceId());
+            ps.setInt(2, hd.getInvoiceId());
 
             int row = ps.executeUpdate();
 
@@ -213,12 +221,20 @@ public class HoaDonDAO {
     }
 
     // ==========================
-    // Xóa hóa đơn
+    // Kiểm tra hóa đơn có thể xóa hay không
     // ==========================
-    public boolean delete(int id) {
+    // Trước đây delete() gọi thẳng DELETE FROM Invoice trong khi
+    // Invoice_Detail/Debt/Receipt đều tham chiếu invoice_id -> nếu
+    // DB có ràng buộc khóa ngoại thì lệnh xóa sẽ ném lỗi, bị
+    // "nuốt" bởi catch(Exception) rồi vẫn redirect như xóa thành
+    // công, khiến hóa đơn "không thể xóa" mà không rõ lý do.
+    // Về nghiệp vụ: hóa đơn đã có phiếu thu (đã phát sinh giao
+    // dịch tiền) thì không nên xóa để giữ tính toàn vẹn của sổ
+    // sách kế toán - chỉ nên cho xóa hóa đơn chưa có phiếu thu nào.
+    public boolean canDelete(int invoiceId) {
 
         String sql
-                = "DELETE FROM Invoice WHERE invoice_id=?";
+                = "SELECT COUNT(*) cnt FROM Receipt WHERE invoice_id=?";
 
         try {
 
@@ -226,11 +242,66 @@ public class HoaDonDAO {
 
             PreparedStatement ps = con.prepareStatement(sql);
 
-            ps.setInt(1, id);
+            ps.setInt(1, invoiceId);
 
-            int row = ps.executeUpdate();
+            ResultSet rs = ps.executeQuery();
 
+            boolean ok = true;
+
+            if (rs.next()) {
+                ok = rs.getInt("cnt") == 0;
+            }
+
+            rs.close();
+            ps.close();
             con.close();
+
+            return ok;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+
+        return false;
+
+    }
+
+    // ==========================
+    // Xóa hóa đơn
+    // ==========================
+    // Xóa theo đúng thứ tự phụ thuộc khóa ngoại, trong 1 transaction:
+    // Debt -> Invoice_Detail -> Invoice. Chỉ nên gọi khi canDelete()
+    // trả về true (không còn phiếu thu nào gắn với hóa đơn).
+    public boolean delete(int id) {
+
+        Connection con = null;
+
+        try {
+
+            con = DBConnect.getConnection();
+            con.setAutoCommit(false);
+
+            PreparedStatement psDebt = con.prepareStatement(
+                    "DELETE FROM Debt WHERE invoice_id=?");
+            psDebt.setInt(1, id);
+            psDebt.executeUpdate();
+            psDebt.close();
+
+            PreparedStatement psDetail = con.prepareStatement(
+                    "DELETE FROM Invoice_Detail WHERE invoice_id=?");
+            psDetail.setInt(1, id);
+            psDetail.executeUpdate();
+            psDetail.close();
+
+            PreparedStatement psInvoice = con.prepareStatement(
+                    "DELETE FROM Invoice WHERE invoice_id=?");
+            psInvoice.setInt(1, id);
+            int row = psInvoice.executeUpdate();
+            psInvoice.close();
+
+            con.commit();
 
             return row > 0;
 
@@ -238,6 +309,23 @@ public class HoaDonDAO {
 
             e.printStackTrace();
 
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+        } finally {
+
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
 
         return false;

@@ -11,6 +11,9 @@ public class DebtDAO {
 
     // ==========================
     // Danh sách công nợ
+    // Chỉ hiển thị công nợ CÒN NỢ (remaining_amount > 0).
+    // Hóa đơn đã thanh toán hết thì công nợ phải biến mất khỏi
+    // danh sách đang theo dõi (vẫn còn lưu trong DB để đối chiếu).
     // ==========================
     public ArrayList<Debt> getAll() {
 
@@ -21,6 +24,7 @@ public class DebtDAO {
                 + "FROM Debt d "
                 + "JOIN Customer c "
                 + "ON d.customer_id = c.customer_id "
+                + "WHERE d.remaining_amount > 0 "
                 + "ORDER BY d.debt_id DESC";
 
         try {
@@ -254,38 +258,183 @@ public boolean createFromInvoice(int invoiceId){
 
 }
 // ==========================
-// Đồng bộ số tiền công nợ
+// Đồng bộ công nợ + trạng thái hóa đơn
 // ==========================
+// Đây là nơi DUY NHẤT quyết định số tiền còn nợ và trạng thái
+// thanh toán, dựa trên công thức:
+//
+//      còn nợ = tổng tiền hóa đơn - tổng đã thu (Receipt)
+//
+// Phải gọi lại hàm này mỗi khi:
+//  - tổng tiền hóa đơn thay đổi (thêm/sửa/xóa chi tiết hóa đơn)
+//  - có phiếu thu được thêm/sửa/xóa
+// để hóa đơn, công nợ và phiếu thu luôn khớp nhau.
+public void updateFromInvoice(int invoiceId) {
+
+    // remaining_amount không bao giờ âm, không bao giờ NULL
+    String sqlDebt =
+            "UPDATE Debt "
+            + "SET remaining_amount = CASE "
+            + "        WHEN i.total_amount - ISNULL(r.paid,0) < 0 THEN 0 "
+            + "        ELSE i.total_amount - ISNULL(r.paid,0) "
+            + "     END, "
+            + "     status = CASE "
+            + "        WHEN i.total_amount - ISNULL(r.paid,0) <= 0 "
+            + "             THEN N'Đã thanh toán' "
+            + "        WHEN d.due_date < CAST(GETDATE() AS DATE) "
+            + "             THEN N'Quá hạn' "
+            + "        ELSE N'Chưa thanh toán' "
+            + "     END "
+            + "FROM Debt d "
+            + "JOIN Invoice i ON d.invoice_id = i.invoice_id "
+            + "LEFT JOIN ("
+            + "     SELECT invoice_id, SUM(amount) AS paid "
+            + "     FROM Receipt "
+            + "     GROUP BY invoice_id"
+            + ") r ON r.invoice_id = i.invoice_id "
+            + "WHERE d.invoice_id = ?";
+
+    // Hóa đơn tự động chuyển "Đã thanh toán"/"Chưa thanh toán" dựa
+    // trên số tiền đã thu, không cho chỉnh tay để tránh mâu thuẫn
+    // với công nợ/phiếu thu.
+    String sqlInvoice =
+            "UPDATE Invoice "
+            + "SET status = CASE "
+            + "        WHEN total_amount > 0 AND total_amount <= ISNULL("
+            + "             (SELECT SUM(amount) FROM Receipt "
+            + "              WHERE invoice_id = Invoice.invoice_id),0) "
+            + "             THEN N'Đã thanh toán' "
+            + "        ELSE N'Chưa thanh toán' "
+            + "     END "
+            + "WHERE invoice_id = ?";
+
+    Connection con = null;
+
+    try {
+
+        con = DBConnect.getConnection();
+        con.setAutoCommit(false);
+
+        PreparedStatement psDebt = con.prepareStatement(sqlDebt);
+        psDebt.setInt(1, invoiceId);
+        psDebt.executeUpdate();
+        psDebt.close();
+
+        PreparedStatement psInvoice = con.prepareStatement(sqlInvoice);
+        psInvoice.setInt(1, invoiceId);
+        psInvoice.executeUpdate();
+        psInvoice.close();
+
+        con.commit();
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+        if (con != null) {
+            try {
+                con.rollback();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+    } finally {
+
+        if (con != null) {
+            try {
+                con.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+}
+
 // ==========================
-// Đồng bộ số tiền công nợ
+// Tổng tiền đã thu của 1 hóa đơn (tùy chọn loại trừ 1 phiếu thu,
+// dùng khi sửa phiếu thu để tính lại hạn mức cho đúng)
 // ==========================
-public void updateFromInvoice(int invoiceId){
+public double getTotalPaid(int invoiceId, int excludeReceiptId) {
 
     String sql =
-            "UPDATE Debt "
-            + "SET remaining_amount=i.total_amount "
-            + "FROM Debt d "
-            + "JOIN Invoice i "
-            + "ON d.invoice_id=i.invoice_id "
-            + "WHERE d.invoice_id=?";
+            "SELECT ISNULL(SUM(amount),0) AS paid "
+            + "FROM Receipt "
+            + "WHERE invoice_id=? AND receipt_id<>?";
 
-    try{
+    try {
 
-        Connection con=DBConnect.getConnection();
+        Connection con = DBConnect.getConnection();
 
-        PreparedStatement ps=con.prepareStatement(sql);
+        PreparedStatement ps = con.prepareStatement(sql);
 
-        ps.setInt(1,invoiceId);
+        ps.setInt(1, invoiceId);
+        ps.setInt(2, excludeReceiptId);
 
-        ps.executeUpdate();
+        ResultSet rs = ps.executeQuery();
 
+        double paid = 0;
+
+        if (rs.next()) {
+            paid = rs.getDouble("paid");
+        }
+
+        rs.close();
+        ps.close();
         con.close();
 
-    }catch(Exception e){
+        return paid;
+
+    } catch (Exception e) {
 
         e.printStackTrace();
 
     }
+
+    return 0;
+
+}
+
+// ==========================
+// Số tiền còn nợ hiện tại theo hóa đơn
+// (dùng để chặn xóa hóa đơn còn nợ/đã có thu tiền, và để
+// kiểm tra hạn mức khi lập phiếu thu)
+// ==========================
+public double getRemainingAmount(int invoiceId) {
+
+    String sql =
+            "SELECT remaining_amount FROM Debt WHERE invoice_id=?";
+
+    try {
+
+        Connection con = DBConnect.getConnection();
+
+        PreparedStatement ps = con.prepareStatement(sql);
+
+        ps.setInt(1, invoiceId);
+
+        ResultSet rs = ps.executeQuery();
+
+        double remaining = 0;
+
+        if (rs.next()) {
+            remaining = rs.getDouble("remaining_amount");
+        }
+
+        rs.close();
+        ps.close();
+        con.close();
+
+        return remaining;
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+    }
+
+    return 0;
 
 }
     // ==========================
@@ -338,8 +487,9 @@ public void updateFromInvoice(int invoiceId){
                 + "FROM Debt d "
                 + "JOIN Customer c "
                 + "ON d.customer_id=c.customer_id "
-                + "WHERE c.customer_name LIKE ? "
-                + "OR CAST(d.invoice_id AS NVARCHAR) LIKE ?";
+                + "WHERE d.remaining_amount > 0 "
+                + "AND (c.customer_name LIKE ? "
+                + "OR CAST(d.invoice_id AS NVARCHAR) LIKE ?)";
 
         try {
 
