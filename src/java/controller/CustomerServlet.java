@@ -138,6 +138,9 @@ public class CustomerServlet extends HttpServlet {
 
         dao.delete(id);
 
+        util.ActivityLogger.log(request, "XOA", "Khách hàng",
+                "Xóa khách hàng #" + id);
+
         response.sendRedirect(request.getContextPath() + "/khachhang");
 
     }
@@ -162,6 +165,9 @@ public class CustomerServlet extends HttpServlet {
         );
 
         dao.update(c);
+
+        util.ActivityLogger.log(request, "SUA", "Khách hàng",
+                "Cập nhật khách hàng \"" + c.getCustomerName() + "\"");
 
         response.sendRedirect(request.getContextPath() + "/khachhang");
 
@@ -204,6 +210,9 @@ public class CustomerServlet extends HttpServlet {
         c.setStatus(true);
 
         if (dao.insert(c)) {
+
+            util.ActivityLogger.log(request, "THEM", "Khách hàng",
+                    "Thêm khách hàng \"" + c.getCustomerName() + "\"");
 
             response.sendRedirect(request.getContextPath() + "/khachhang");
 

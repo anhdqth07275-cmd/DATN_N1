@@ -1,4 +1,11 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="model.DangKy"%>
+
+<%
+    DangKy menuUser = (DangKy) session.getAttribute("user");
+    boolean menuIsAdmin = menuUser != null
+            && "Quản trị viên".equals(menuUser.getRoleName());
+%>
 
 <style>
 
@@ -83,9 +90,11 @@
         📊 Báo cáo
     </a>
 
+    <% if (menuIsAdmin) { %>
     <a href="${pageContext.request.contextPath}/view/hethong.jsp">
         ⚙ Hệ thống
     </a>
+    <% } %>
 
 <hr>
 

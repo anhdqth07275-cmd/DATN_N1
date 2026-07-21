@@ -150,6 +150,15 @@ if(user == null){
 
             <div class="content">
 
+                <%
+                    String pageError = request.getParameter("error");
+                    if (pageError != null) {
+                %>
+                <div class="alert alert-danger"><%=pageError%></div>
+                <%
+                    }
+                %>
+
                 <div class="topbar">
 
                     <div>

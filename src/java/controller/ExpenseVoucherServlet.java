@@ -165,6 +165,10 @@ public class ExpenseVoucherServlet extends HttpServlet {
 
         dao.insert(expense);
 
+        util.ActivityLogger.log(request, "CHI", "Phiếu chi",
+                "Lập phiếu chi \"" + expense.getExpenseName() + "\"",
+                expense.getAmount());
+
         response.sendRedirect(
                 request.getContextPath()
                 + "/phieuchi");
@@ -197,6 +201,10 @@ public class ExpenseVoucherServlet extends HttpServlet {
 
         dao.update(expense);
 
+        util.ActivityLogger.log(request, "SUA", "Phiếu chi",
+                "Cập nhật phiếu chi #" + expense.getExpenseId(),
+                expense.getAmount());
+
         response.sendRedirect(
                 request.getContextPath()
                 + "/phieuchi");
@@ -213,6 +221,9 @@ public class ExpenseVoucherServlet extends HttpServlet {
                 request.getParameter("id"));
 
         dao.delete(id);
+
+        util.ActivityLogger.log(request, "XOA", "Phiếu chi",
+                "Xóa phiếu chi #" + id);
 
         response.sendRedirect(
                 request.getContextPath()

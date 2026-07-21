@@ -259,6 +259,9 @@ public class ReceiptServlet extends HttpServlet {
         // hóa đơn / công nợ / thu tiền.
         debtDAO.updateFromInvoice(invoiceId);
 
+        util.ActivityLogger.log(request, "THU", "Phiếu thu",
+                "Lập phiếu thu cho hóa đơn #" + invoiceId, amount);
+
         response.sendRedirect(
                 request.getContextPath()
                 + "/phieuthu");
@@ -328,6 +331,9 @@ public class ReceiptServlet extends HttpServlet {
         // tiền của phiếu thu.
         debtDAO.updateFromInvoice(invoiceId);
 
+        util.ActivityLogger.log(request, "SUA", "Phiếu thu",
+                "Cập nhật phiếu thu #" + receiptId, amount);
+
         response.sendRedirect(
                 request.getContextPath()
                 + "/phieuthu");
@@ -355,6 +361,9 @@ public class ReceiptServlet extends HttpServlet {
         if (r != null) {
             debtDAO.updateFromInvoice(r.getInvoiceId());
         }
+
+        util.ActivityLogger.log(request, "XOA", "Phiếu thu",
+                "Xóa phiếu thu #" + id);
 
         response.sendRedirect(
                 request.getContextPath()

@@ -95,6 +95,9 @@ public class DangNhapServlet extends HttpServlet {
 
             session.setMaxInactiveInterval(30 * 60);
 
+            util.ActivityLogger.log(request, "DANG_NHAP", "Đăng nhập",
+                    "Người dùng \"" + user.getUsername() + "\" đăng nhập hệ thống");
+
             response.sendRedirect(request.getContextPath() + "/trangchu");
 
         } else {

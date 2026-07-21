@@ -202,6 +202,9 @@ public class HoaDonServlet extends HttpServlet {
 
         int invoiceId = dao.insert(hd);
 
+        util.ActivityLogger.log(request, "THEM", "Hóa đơn",
+                "Tạo hóa đơn mới #" + invoiceId);
+
         response.sendRedirect(
                 request.getContextPath()
                 + "/invoice-detail?action=add&id="
@@ -231,6 +234,9 @@ public class HoaDonServlet extends HttpServlet {
         // - status luôn do số tiền đã thu quyết định (DebtDAO).
         // dao.update() bên dưới cũng chỉ còn cập nhật customer_id.
         dao.update(hd);
+
+        util.ActivityLogger.log(request, "SUA", "Hóa đơn",
+                "Cập nhật hóa đơn #" + hd.getInvoiceId());
 
         response.sendRedirect(request.getContextPath() + "/hoadon");
 
@@ -276,6 +282,9 @@ public class HoaDonServlet extends HttpServlet {
             return;
 
         }
+
+        util.ActivityLogger.log(request, "XOA", "Hóa đơn",
+                "Xóa hóa đơn #" + id);
 
         response.sendRedirect(request.getContextPath() + "/hoadon");
 

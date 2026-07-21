@@ -10,6 +10,15 @@ public class DangKy {
     private int roleId;
     private int userId;
     private String roleName;
+    private boolean status = true;
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
 
     public String getRoleName() {
         return roleName;
