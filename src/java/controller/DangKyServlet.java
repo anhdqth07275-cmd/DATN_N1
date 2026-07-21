@@ -21,6 +21,11 @@ import model.DangKy;
 @WebServlet(name = "DangKyServlet", urlPatterns = {"/dangky"})
 public class DangKyServlet extends HttpServlet {
 
+    // Vai trò mặc định (thấp nhất) cho mọi tài khoản tự đăng ký.
+    // Không cho phép người dùng tự chọn quyền của mình khi đăng ký -
+    // việc đó sẽ do Quản trị viên (QA) phân quyền lại sau nếu cần.
+    private static final int DEFAULT_ROLE_ID_CUSTOMER = 1;
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -84,7 +89,10 @@ public class DangKyServlet extends HttpServlet {
         String fullName = request.getParameter("fullName");
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
-        int roleId = Integer.parseInt(request.getParameter("roleId"));
+
+        // Không tin dữ liệu roleId từ client (form/POST param) nữa - mọi tài
+        // khoản tự đăng ký đều mặc định là Khách hàng (quyền thấp nhất).
+        int roleId = DEFAULT_ROLE_ID_CUSTOMER;
 
         DangKyDAO dao = new DangKyDAO();
 

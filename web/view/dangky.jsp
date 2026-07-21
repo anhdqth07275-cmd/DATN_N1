@@ -329,28 +329,6 @@
                             required>
 
                     </div>
-                    <div class="input-group">
-
-                        <label>Phân quyền</label>
-
-                        <select name="roleId" required>
-
-                            <option value="">------ Chọn quyền ------</option>
-
-                            <option value="1">Khách hàng</option>
-
-                            <option value="2">Nhân viên kế toán</option>
-
-                            <option value="3">Nhân viên kinh doanh</option>
-
-                            <option value="4">Quản trị viên</option>
-
-                            <option value="5">Giám đốc / Quản lí</option>
-
-                        </select>
-
-                    </div>
-
                     <button class="btn" type="submit">
 
                         ĐĂNG KÝ
