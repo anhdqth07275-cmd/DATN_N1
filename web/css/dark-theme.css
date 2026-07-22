@@ -69,20 +69,24 @@ a{ color:var(--accent-2); }
 .sidebar .logo,
 .logo{
     border-bottom:1px solid var(--border-soft) !important;
-    padding:22px 20px 20px !important;
+    padding:20px 16px 18px !important;
+    text-align:center !important;
 }
 
 .sidebar .brand{
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:4px;
+    gap:8px;
+    width:100%;
 }
 
 .sidebar .brand img{
     height:80px;
     width:auto;
+    max-width:120px;
     object-fit:contain;
+    flex-shrink:0;
     filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));
 }
 
