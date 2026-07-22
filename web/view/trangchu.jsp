@@ -140,7 +140,8 @@ if(user == null){
             }
         </style>
 
-    </head>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dark-theme.css">
+</head>
 
     <body>
 
@@ -471,6 +472,10 @@ if(user == null){
 
         <script>
 
+                        Chart.defaults.color = "#aab4c8";
+                        Chart.defaults.borderColor = "#26314a";
+                        Chart.defaults.font.family = "Segoe UI";
+
                         new Chart(document.getElementById("chart1"), {
 
                             type: "line",
@@ -485,11 +490,17 @@ if(user == null){
 
                                         data: [15, 20, 25, 18, 40, 35, 42, 50, 46, 58, 65, 70],
 
+                                        borderColor: "#3b82f6",
+
+                                        backgroundColor: "rgba(59,130,246,.15)",
+
                                         borderWidth: 3,
 
-                                        fill: false,
+                                        fill: true,
 
-                                        tension: .35
+                                        tension: .35,
+
+                                        pointBackgroundColor: "#3b82f6"
 
                                     }]
 
@@ -497,7 +508,14 @@ if(user == null){
 
                             options: {
 
-                                responsive: true
+                                responsive: true,
+
+                                plugins: { legend: { labels: { color: "#aab4c8" } } },
+
+                                scales: {
+                                    x: { grid: { color: "#1e2740" }, ticks: { color: "#7c869c" } },
+                                    y: { grid: { color: "#1e2740" }, ticks: { color: "#7c869c" } }
+                                }
 
                             }
 
@@ -513,7 +531,13 @@ if(user == null){
 
                                 datasets: [{
 
-                                        data: [75, 25]
+                                        data: [75, 25],
+
+                                        backgroundColor: ["#22c55e", "#f5b942"],
+
+                                        borderColor: "#131b2e",
+
+                                        borderWidth: 3
 
                                     }]
 
@@ -521,7 +545,9 @@ if(user == null){
 
                             options: {
 
-                                responsive: true
+                                responsive: true,
+
+                                plugins: { legend: { labels: { color: "#aab4c8" } } }
 
                             }
 

@@ -108,6 +108,7 @@ body{
 
 </style>
 
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dark-theme.css">
 </head>
 
 <body>
@@ -122,7 +123,7 @@ body{
 
             <h3>📊 Báo cáo - Thống kê</h3>
 
-            <div>
+            <div class="user-box">
                 👤 <strong><%= user.getFullName() %></strong>
             </div>
 
@@ -298,6 +299,10 @@ body{
 
 <script>
 
+Chart.defaults.color = "#aab4c8";
+Chart.defaults.borderColor = "#26314a";
+Chart.defaults.font.family = "Segoe UI";
+
 new Chart(document.getElementById("chartRevenue"), {
 
     type: "bar",
@@ -307,7 +312,8 @@ new Chart(document.getElementById("chartRevenue"), {
         datasets: [{
             label: "Doanh thu (VNĐ)",
             data: <%= report.getMonthlyRevenueJson() %>,
-            backgroundColor: "#0d6efd"
+            backgroundColor: "#3b82f6",
+            borderRadius: 6
         }]
     },
 
@@ -315,6 +321,10 @@ new Chart(document.getElementById("chartRevenue"), {
         responsive: true,
         plugins: {
             legend: { display: false }
+        },
+        scales: {
+            x: { grid: { color: "#1e2740" }, ticks: { color: "#7c869c" } },
+            y: { grid: { color: "#1e2740" }, ticks: { color: "#7c869c" } }
         }
     }
 
@@ -331,12 +341,15 @@ new Chart(document.getElementById("chartInvoiceStatus"), {
                 <%= report.getPaidInvoiceCount() %>,
                 <%= report.getUnpaidInvoiceCount() %>
             ],
-            backgroundColor: ["#198754", "#ffc107"]
+            backgroundColor: ["#22c55e", "#f5b942"],
+            borderColor: "#131b2e",
+            borderWidth: 3
         }]
     },
 
     options: {
-        responsive: true
+        responsive: true,
+        plugins: { legend: { labels: { color: "#aab4c8" } } }
     }
 
 });

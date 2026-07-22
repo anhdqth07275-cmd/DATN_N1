@@ -217,6 +217,7 @@
 
     </style>
 
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dark-theme.css">
 </head>
 
 <body>
@@ -225,7 +226,9 @@
 
 <div class="left">
 
-<h1>SMEFAD</h1>
+<img class="brand-logo" src="${pageContext.request.contextPath}/img/logo.png" alt="SME:FAD">
+
+<h1>SME:FAD</h1>
 
 <p>
 

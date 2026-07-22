@@ -5,6 +5,9 @@
     DangKy menuUser = (DangKy) session.getAttribute("user");
     boolean menuIsAdmin = menuUser != null
             && "Quản trị viên".equals(menuUser.getRoleName());
+
+    String menuCtx = request.getContextPath();
+    String menuURI = request.getRequestURI();
 %>
 
 <style>
@@ -58,40 +61,51 @@
 <div class="sidebar">
 
     <div class="logo">
-        <h4>QUẢN LÍ TÀI CHÍNH</h4>
+        <div class="brand">
+            <img src="<%=menuCtx%>/img/logo.png" alt="SME:FAD">
+            <p class="brand-text">SME:FAD</p>
+        </div>
+        <span class="brand-sub">Quản lý tài chính &amp; công nợ</span>
     </div>
 
-
-    <a href="${pageContext.request.contextPath}/trangchu">
+    <a class="<%=menuURI.endsWith("/trangchu") ? "active" : ""%>"
+       href="${pageContext.request.contextPath}/trangchu">
         🏠 Trang chủ
     </a>
 
-
-    <a href="${pageContext.request.contextPath}/khachhang">
+    <a class="<%=menuURI.endsWith("/khachhang") ? "active" : ""%>"
+       href="${pageContext.request.contextPath}/khachhang">
         👤 Khách hàng
     </a>
-    <a href="${pageContext.request.contextPath}/hoadon">
+
+    <a class="<%=menuURI.endsWith("/hoadon") ? "active" : ""%>"
+       href="${pageContext.request.contextPath}/hoadon">
         📄 Hóa đơn
     </a>
 
-    <a href="${pageContext.request.contextPath}/congno">
+    <a class="<%=menuURI.endsWith("/congno") ? "active" : ""%>"
+       href="${pageContext.request.contextPath}/congno">
         💰 Công nợ
     </a>
 
-    <a href="${pageContext.request.contextPath}/phieuthu">
+    <a class="<%=menuURI.endsWith("/phieuthu") ? "active" : ""%>"
+       href="${pageContext.request.contextPath}/phieuthu">
         💵 Thu tiền
     </a>
 
-    <a href="${pageContext.request.contextPath}/phieuchi">
+    <a class="<%=menuURI.endsWith("/phieuchi") ? "active" : ""%>"
+       href="${pageContext.request.contextPath}/phieuchi">
         💸 Chi tiền
     </a>
 
-    <a href="${pageContext.request.contextPath}/baocao">
+    <a class="<%=menuURI.endsWith("/baocao") ? "active" : ""%>"
+       href="${pageContext.request.contextPath}/baocao">
         📊 Báo cáo
     </a>
 
     <% if (menuIsAdmin) { %>
-    <a href="${pageContext.request.contextPath}/view/hethong.jsp">
+    <a class="<%=menuURI.endsWith("hethong.jsp") ? "active" : ""%>"
+       href="${pageContext.request.contextPath}/view/hethong.jsp">
         ⚙ Hệ thống
     </a>
     <% } %>

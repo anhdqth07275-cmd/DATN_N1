@@ -70,6 +70,7 @@
 
     </style>
 
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dark-theme.css">
 </head>
 
 <body>
