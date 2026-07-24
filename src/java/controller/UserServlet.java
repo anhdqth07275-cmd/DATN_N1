@@ -261,8 +261,34 @@ public class UserServlet extends HttpServlet {
 
         dao.update(u);
 
+        // ==========================
+        // FIX LỖ HỔNG NGHIỆP VỤ: nếu user này đang có session hoạt động
+        // (đang đăng nhập trên hệ thống), áp dụng NGAY vai trò/quyền mới
+        // vào session đó. Trước đây session chỉ được nạp 1 lần lúc đăng
+        // nhập nên user phải đăng xuất - đăng nhập lại mới thấy quyền mới,
+        // thậm chí nếu bị hạ quyền thì vẫn thao tác được với quyền cũ cho
+        // tới khi session hết hạn (30 phút) -> rất rủi ro về bảo mật.
+        // ==========================
+        DangKy freshUser = dao.getById(u.getUserId());
+
+        boolean sessionRefreshed = false;
+
+        if (freshUser != null) {
+            sessionRefreshed = util.SessionRegistry.refreshUser(
+                    u.getUserId(), freshUser);
+        }
+
+        // Nếu tài khoản vừa bị khóa (status = false), buộc đăng xuất ngay
+        // lập tức thay vì chờ session tự hết hạn.
+        if (!u.isStatus()) {
+            util.SessionRegistry.forceLogout(u.getUserId());
+        }
+
         ActivityLogger.log(request, "SUA", "Người dùng",
-                "Cập nhật thông tin người dùng #" + u.getUserId());
+                "Cập nhật thông tin người dùng #" + u.getUserId()
+                + (sessionRefreshed
+                        ? " (đã áp dụng quyền mới ngay lên session đang hoạt động)"
+                        : ""));
 
         response.sendRedirect(request.getContextPath() + "/nguoidung");
 
@@ -279,8 +305,21 @@ public class UserServlet extends HttpServlet {
 
         dao.setStatus(id, status);
 
+        // Khóa tài khoản -> buộc đăng xuất session đang hoạt động ngay lập
+        // tức, không để user tiếp tục thao tác cho tới khi session hết hạn.
+        String note = "";
+
+        if (!status) {
+
+            boolean forced = util.SessionRegistry.forceLogout(id);
+
+            note = forced ? " (đã buộc đăng xuất ngay)" : "";
+
+        }
+
         ActivityLogger.log(request, "SUA", "Người dùng",
-                (status ? "Mở khóa" : "Khóa") + " tài khoản người dùng #" + id);
+                (status ? "Mở khóa" : "Khóa") + " tài khoản người dùng #" + id
+                + note);
 
         response.sendRedirect(request.getContextPath() + "/nguoidung");
 

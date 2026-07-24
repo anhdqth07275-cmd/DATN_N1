@@ -62,6 +62,13 @@ public class DangXuatServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
 
         if (session != null) {
+
+            model.DangKy user = (model.DangKy) session.getAttribute("user");
+
+            if (user != null) {
+                util.SessionRegistry.unregister(user.getUserId());
+            }
+
             session.invalidate();
         }
 

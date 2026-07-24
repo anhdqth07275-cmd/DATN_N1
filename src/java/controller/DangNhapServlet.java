@@ -95,6 +95,11 @@ public class DangNhapServlet extends HttpServlet {
 
             session.setMaxInactiveInterval(30 * 60);
 
+            // Ghi nhận session đang hoạt động của user này, để khi QTV đổi
+            // quyền/khóa tài khoản thì áp dụng được ngay lập tức lên session
+            // đang sống, không cần đợi user đăng xuất - đăng nhập lại.
+            util.SessionRegistry.register(user.getUserId(), session);
+
             util.ActivityLogger.log(request, "DANG_NHAP", "Đăng nhập",
                     "Người dùng \"" + user.getUsername() + "\" đăng nhập hệ thống");
 
