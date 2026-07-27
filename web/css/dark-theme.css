@@ -5,6 +5,8 @@
    ghi đè lên style mặc định (sáng) đã có sẵn trong từng JSP.
    ============================================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
 :root{
     --bg-app:#0a0e18;
     --bg-sidebar:#0b1120;
@@ -16,9 +18,9 @@
     --bg-input:#101828;
     --border:#26314a;
     --border-soft:#1e2740;
-    --text-primary:#eef1f8;
-    --text-secondary:#aab4c8;
-    --text-muted:#7c869c;
+    --text-primary:#f3f5fa;
+    --text-secondary:#b7c0d4;
+    --text-muted:#8f9ab2;
     --accent:#3b82f6;
     --accent-2:#60a5fa;
     --accent-dark:#1d4ed8;
@@ -35,7 +37,46 @@
     --shadow-lg:0 12px 32px rgba(0,0,0,.45);
     --shadow-sm:0 4px 14px rgba(0,0,0,.3);
     --radius:14px;
+
+    /* ---- Bảng màu nâng cấp: teal -> tím (tone chuyên nghiệp kiểu FINA) ---- */
+    --teal:#2dd4bf;
+    --teal-2:#5eead4;
+    --violet:#a78bfa;
+    --violet-2:#c084fc;
+    --grad-brand:linear-gradient(135deg, var(--teal) 0%, var(--violet) 100%);
+    --grad-brand-soft:linear-gradient(135deg, rgba(45,212,191,.18) 0%, rgba(167,139,250,.18) 100%);
+    --grad-glow:radial-gradient(60% 100% at 50% 0%, rgba(167,139,250,.28), rgba(45,212,191,.10) 45%, transparent 75%);
+    --shadow-glow:0 10px 30px rgba(124,58,237,.25);
+
+    /* ---- Typography ---- */
+    --font-ui:'Manrope', 'Segoe UI', sans-serif;
+    --font-mono:'JetBrains Mono', 'Consolas', monospace;
 }
+
+/* ---------- HỆ THỐNG TYPOGRAPHY ---------- */
+html, body, .btn, .form-control, .form-select, input, select, textarea, table{
+    font-family:var(--font-ui) !important;
+}
+
+/* Số tiền dùng font mono canh cột đều — đặc trưng của phần mềm tài chính:
+   không phải trang trí, giúp các con số dễ so sánh/đối chiếu hơn chữ thường. */
+.card-stat h3, .card-box h4, .money, .total,
+td.money-cell, .kpi-figure{
+    font-family:var(--font-mono) !important;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:-.3px;
+}
+
+h6, .form-label, label{ letter-spacing:.2px; }
+
+.card-stat h6, .eyebrow{
+    text-transform:uppercase;
+    font-size:11.5px !important;
+    letter-spacing:1.2px !important;
+    font-weight:700 !important;
+}
+
+
 
 /* ---------- NỀN CHUNG ---------- */
 html, body{
@@ -118,23 +159,33 @@ a{ color:var(--accent-2); }
 
 .sidebar a{
     color:var(--text-secondary) !important;
-    border-left:3px solid transparent;
-    font-size:15.5px !important;
-    padding:14px 26px !important;
+    border-left:none !important;
+    font-size:15px !important;
+    font-weight:500;
+    padding:13px 20px !important;
+    margin:5px 14px !important;
+    border-radius:12px !important;
+    display:flex !important;
+    align-items:center;
+    gap:10px;
+    transition:all .18s ease;
 }
 
 .sidebar a:hover{
     background:var(--bg-hover) !important;
     color:#fff !important;
-    border-left:3px solid var(--accent);
+    border-left:none !important;
+    transform:translateX(2px);
 }
 
 .sidebar .active,
 .sidebar a.active{
-    background:var(--accent-soft) !important;
-    color:#fff !important;
-    border-left:3px solid var(--accent);
-    font-weight:600;
+    background:var(--grad-brand) !important;
+    color:#0b1120 !important;
+    text-shadow:0 1px 0 rgba(255,255,255,.25);
+    border-left:none !important;
+    font-weight:700;
+    box-shadow:var(--shadow-glow);
 }
 
 /* ---------- TOPBAR + KHUNG PHIÊN NGƯỜI DÙNG ---------- */
@@ -176,14 +227,22 @@ a{ color:var(--accent-2); }
     border:1px solid var(--border-soft) !important;
     box-shadow:var(--shadow-sm) !important;
     color:var(--text-primary) !important;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.card-stat:hover, .card-box:hover{
+    transform:translateY(-3px);
+    border-color:rgba(167,139,250,.35) !important;
+    box-shadow:var(--shadow-lg) !important;
 }
 
 .card{ border-radius:var(--radius) !important; }
 
 .card-header{
-    background:linear-gradient(120deg, var(--accent-dark), var(--accent)) !important;
-    color:#fff !important;
+    background:var(--grad-brand) !important;
+    color:#0b1120 !important;
     border-bottom:none !important;
+    font-weight:700;
 }
 
 .card-body{ background:transparent !important; color:var(--text-primary) !important; }
@@ -205,14 +264,16 @@ a{ color:var(--accent-2); }
 table{ color:var(--text-primary) !important; }
 
 thead{
-    background:linear-gradient(90deg, var(--accent-dark), var(--accent)) !important;
-    color:#fff !important;
+    background:var(--grad-brand) !important;
+    color:#0b1120 !important;
 }
 
 .table thead, .info table thead{
-    background:linear-gradient(90deg, var(--accent-dark), var(--accent)) !important;
-    color:#fff !important;
+    background:var(--grad-brand) !important;
+    color:#0b1120 !important;
 }
+
+thead th{ font-weight:700 !important; }
 
 table td, table th,
 .table td, .table th{
@@ -273,8 +334,66 @@ input[type=date], input[type=email], input[type=search], textarea, select{
 .btn-primary{ background:var(--accent) !important; border-color:var(--accent) !important; }
 .btn-primary:hover{ background:var(--accent-dark) !important; border-color:var(--accent-dark) !important; }
 
+.btn-primary{ background:var(--grad-brand) !important; border-color:transparent !important; color:#0b1120 !important; font-weight:700; }
+.btn-primary:hover{ filter:brightness(1.08); box-shadow:var(--shadow-glow); }
+
 .btn-outline-secondary{ color:var(--text-secondary) !important; border-color:var(--border) !important; }
 .btn-outline-secondary:hover{ background:var(--bg-hover) !important; color:#fff !important; }
+
+/* ---------- ICON BADGE (card số liệu kiểu FINA) ---------- */
+.icon-badge{
+    width:44px; height:44px;
+    display:inline-flex; align-items:center; justify-content:center;
+    border-radius:12px;
+    background:var(--grad-brand-soft);
+    border:1px solid rgba(167,139,250,.25);
+    font-size:20px;
+    margin-bottom:10px;
+}
+
+.card-stat{ position:relative; overflow:hidden; }
+.card-stat::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:0;
+    height:3px;
+    background:var(--grad-brand);
+    opacity:.65;
+}
+
+.trend-pill{
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:12px; font-weight:700;
+    padding:3px 10px;
+    border-radius:999px;
+    font-family:var(--font-ui) !important;
+}
+.trend-pill.up{ background:var(--success-soft); color:#34d399; }
+.trend-pill.down{ background:var(--danger-soft); color:#ff8a9a; }
+
+/* ---------- NHÓM MỤC TRONG SIDEBAR (cấu trúc thông tin thật) ---------- */
+.nav-group-label{
+    display:block;
+    color:var(--text-muted) !important;
+    font-size:11px !important;
+    font-weight:800 !important;
+    letter-spacing:1.6px !important;
+    text-transform:uppercase;
+    margin:18px 24px 6px !important;
+}
+.nav-group-label:first-of-type{ margin-top:10px !important; }
+
+/* ---------- GLOW NỀN TRANG (hero header) ---------- */
+.page-title{ position:relative; }
+.page-title::before{
+    content:"";
+    position:absolute;
+    top:-40px; left:50%; transform:translateX(-50%);
+    width:70%; height:140px;
+    background:var(--grad-glow);
+    pointer-events:none;
+    z-index:0;
+}
+.page-title h2, .page-title p{ position:relative; z-index:1; }
 
 /* ---------- BADGE / TRẠNG THÁI ---------- */
 .badge{ font-weight:600; letter-spacing:.2px; }
@@ -300,9 +419,10 @@ input[type=date], input[type=email], input[type=search], textarea, select{
     color:var(--text-secondary) !important;
 }
 .pagination .page-item.active .page-link{
-    background:var(--accent) !important;
-    border-color:var(--accent) !important;
-    color:#fff !important;
+    background:var(--grad-brand) !important;
+    border-color:transparent !important;
+    color:#0b1120 !important;
+    font-weight:700;
 }
 .pagination .page-item.disabled .page-link{
     background:var(--bg-app) !important;
@@ -376,11 +496,12 @@ body:has(.container){
 .input-group label{ color:var(--text-secondary) !important; }
 
 .btn{
-    background:linear-gradient(120deg, var(--accent-dark), var(--accent)) !important;
-    color:#fff !important;
+    background:var(--grad-brand) !important;
+    color:#0b1120 !important;
     border:none !important;
+    font-weight:700;
 }
-.btn:hover{ filter:brightness(1.12); }
+.btn:hover{ filter:brightness(1.1); box-shadow:var(--shadow-glow); }
 
 .register, .login-link{ color:var(--text-muted) !important; }
 .register a, .login-link a{ color:var(--accent-2) !important; }
@@ -414,3 +535,67 @@ body:has(.container){
 
 /* ---------- HR ---------- */
 hr{ border-color:var(--border-soft) !important; opacity:1; }
+
+/* ============================================================
+   IN ẤN (PRINT) — dùng chung cho toàn hệ thống.
+   Khi người dùng bấm "In báo cáo" (window.print()) hoặc Ctrl+P:
+   - Ẩn sidebar, topbar, form lọc, nút bấm, phân trang, khung chat...
+   - Chuyển toàn bộ nền/chữ sang trắng-đen để đỡ tốn mực và dễ đọc
+     trên giấy (thay vì in nguyên nền tối như trên màn hình).
+   - Hiện phần .print-only (tiêu đề báo cáo dành riêng cho bản in).
+   ============================================================ */
+.print-only{ display:none; }
+
+@media print{
+
+    .sidebar, .topbar, .pagination,
+    .btn, button, .no-print, form.box, .filter-bar{
+        display:none !important;
+    }
+
+    .print-only{ display:block !important; }
+
+    html, body{
+        background:#fff !important;
+        color:#111 !important;
+    }
+
+    .wrapper, .content, .main{
+        background:#fff !important;
+        padding:0 !important;
+        margin:0 !important;
+        display:block !important;
+    }
+
+    .box, .card, .card-box, .card-stat, .info{
+        background:#fff !important;
+        border:1px solid #ccc !important;
+        box-shadow:none !important;
+        color:#111 !important;
+        break-inside:avoid;
+    }
+
+    .card-header{
+        background:#eee !important;
+        color:#111 !important;
+    }
+
+    h1,h2,h3,h4,h5,h6, p, span, td, th, div, small, strong{
+        color:#111 !important;
+        text-shadow:none !important;
+    }
+
+    thead, .table thead{
+        background:#e5e7eb !important;
+        color:#111 !important;
+    }
+
+    table, table td, table th,
+    .table td, .table th{
+        border-color:#ccc !important;
+    }
+
+    canvas{ display:none !important; }
+
+    a[href]:after{ content:""; }
+}

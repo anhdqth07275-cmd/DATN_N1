@@ -188,7 +188,9 @@ if(user == null){
 
                             <div class="card-stat">
 
-                                <h6>💰 Tổng doanh thu</h6>
+                                <div class="icon-badge">💰</div>
+
+                                <h6>Tổng doanh thu</h6>
 
                                 <h3 class="text-primary">
 
@@ -207,7 +209,9 @@ if(user == null){
 
                             <div class="card-stat">
 
-                                <h6>💵 Tổng thu</h6>
+                                <div class="icon-badge">💵</div>
+
+                                <h6>Tổng thu</h6>
 
                                 <h3 class="text-success">
 
@@ -226,7 +230,9 @@ if(user == null){
 
                             <div class="card-stat">
 
-                                <h6>💸 Tổng chi</h6>
+                                <div class="icon-badge">💸</div>
+
+                                <h6>Tổng chi</h6>
 
                                 <h3 class="text-danger">
 
@@ -245,7 +251,9 @@ if(user == null){
 
                             <div class="card-stat">
 
-                                <h6>📋 Công nợ</h6>
+                                <div class="icon-badge">📋</div>
+
+                                <h6>Công nợ</h6>
 
                                 <h3 class="text-warning">
 
@@ -472,86 +480,139 @@ if(user == null){
 
         <script>
 
-                        Chart.defaults.color = "#aab4c8";
-                        Chart.defaults.borderColor = "#26314a";
-                        Chart.defaults.font.family = "Segoe UI";
+            // ===== Định dạng tiền VNĐ dùng chung cho tooltip =====
+            const fmtVND = (v) => new Intl.NumberFormat('vi-VN').format(Math.round(v)) + " VNĐ";
 
-                        new Chart(document.getElementById("chart1"), {
+            Chart.defaults.color = "#b7c0d4";
+            Chart.defaults.borderColor = "#1e2740";
+            Chart.defaults.font.family = "'Manrope', 'Segoe UI', sans-serif";
 
-                            type: "line",
+            // Style chung cho tooltip - đồng bộ theme tối, viền gradient thương hiệu
+            const tooltipStyle = {
+                backgroundColor: "#1a2437",
+                titleColor: "#f3f5fa",
+                bodyColor: "#eef1f8",
+                borderColor: "#2dd4bf",
+                borderWidth: 1,
+                padding: 12,
+                cornerRadius: 10,
+                displayColors: false,
+                titleFont: { family: "'Manrope', sans-serif", weight: "700" },
+                bodyFont: { family: "'JetBrains Mono', monospace", size: 13 }
+            };
 
-                            data: {
+            // ===== BIỂU ĐỒ 1: DOANH THU THEO THÁNG (dữ liệu thật, gradient fill) =====
+            const ctx1 = document.getElementById("chart1").getContext("2d");
 
-                                labels: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"],
+            const gradFill = ctx1.createLinearGradient(0, 0, 0, 280);
+            gradFill.addColorStop(0, "rgba(45,212,191,.35)");
+            gradFill.addColorStop(1, "rgba(167,139,250,.02)");
 
-                                datasets: [{
+            const gradLine = ctx1.createLinearGradient(0, 0, 800, 0);
+            gradLine.addColorStop(0, "#2dd4bf");
+            gradLine.addColorStop(1, "#a78bfa");
 
-                                        label: "Doanh thu",
+            new Chart(ctx1, {
 
-                                        data: [15, 20, 25, 18, 40, 35, 42, 50, 46, 58, 65, 70],
+                type: "line",
 
-                                        borderColor: "#3b82f6",
+                data: {
+                    labels: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"],
+                    datasets: [{
+                        label: "Doanh thu",
+                        data: <%= dashboard.getMonthlyRevenueJson() %>,
+                        borderColor: gradLine,
+                        backgroundColor: gradFill,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: .4,
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: "#0a0e18",
+                        pointBorderColor: "#2dd4bf",
+                        pointBorderWidth: 2
+                    }]
+                },
 
-                                        backgroundColor: "rgba(59,130,246,.15)",
-
-                                        borderWidth: 3,
-
-                                        fill: true,
-
-                                        tension: .35,
-
-                                        pointBackgroundColor: "#3b82f6"
-
-                                    }]
-
-                            },
-
-                            options: {
-
-                                responsive: true,
-
-                                plugins: { legend: { labels: { color: "#aab4c8" } } },
-
-                                scales: {
-                                    x: { grid: { color: "#1e2740" }, ticks: { color: "#7c869c" } },
-                                    y: { grid: { color: "#1e2740" }, ticks: { color: "#7c869c" } }
-                                }
-
+                options: {
+                    responsive: true,
+                    interaction: { mode: "index", intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { ...tooltipStyle,
+                            callbacks: { label: (c) => fmtVND(c.parsed.y) }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: "#8f9ab2" } },
+                        y: {
+                            grid: { color: "#1e2740" },
+                            ticks: {
+                                color: "#8f9ab2",
+                                callback: (v) => (v / 1000000) + "tr"
                             }
+                        }
+                    }
+                }
 
-                        });
+            });
 
-                        new Chart(document.getElementById("chart2"), {
+            // ===== BIỂU ĐỒ 2: CÔNG NỢ THEO TRẠNG THÁI (dữ liệu thật, doughnut có số ở tâm) =====
+            const paidCount = <%= dashboard.getPaidInvoiceCount() %>;
+            const unpaidCount = <%= dashboard.getUnpaidInvoiceCount() %>;
+            const totalInvoiceCount = paidCount + unpaidCount;
 
-                            type: "doughnut",
+            const centerTextPlugin = {
+                id: "centerText",
+                afterDraw(chart) {
+                    const { ctx, chartArea } = chart;
+                    if (!chartArea) return;
+                    const cx = (chartArea.left + chartArea.right) / 2;
+                    const cy = (chartArea.top + chartArea.bottom) / 2;
+                    ctx.save();
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.font = "700 26px 'JetBrains Mono', monospace";
+                    ctx.fillStyle = "#f3f5fa";
+                    ctx.fillText(totalInvoiceCount, cx, cy - 10);
+                    ctx.font = "600 12px 'Manrope', sans-serif";
+                    ctx.fillStyle = "#8f9ab2";
+                    ctx.fillText("HÓA ĐƠN", cx, cy + 14);
+                    ctx.restore();
+                }
+            };
 
-                            data: {
+            new Chart(document.getElementById("chart2"), {
 
-                                labels: ["Đã thanh toán", "Còn nợ"],
+                type: "doughnut",
 
-                                datasets: [{
+                data: {
+                    labels: ["Đã thanh toán", "Còn nợ"],
+                    datasets: [{
+                        data: [paidCount, unpaidCount],
+                        backgroundColor: ["#2dd4bf", "#a78bfa"],
+                        borderColor: "#131b2e",
+                        borderWidth: 4,
+                        hoverOffset: 6
+                    }]
+                },
 
-                                        data: [75, 25],
+                options: {
+                    responsive: true,
+                    cutout: "72%",
+                    plugins: {
+                        legend: {
+                            labels: { color: "#b7c0d4", usePointStyle: true, pointStyle: "circle", padding: 18 }
+                        },
+                        tooltip: { ...tooltipStyle,
+                            callbacks: { label: (c) => c.label + ": " + c.parsed + " hóa đơn" }
+                        }
+                    }
+                },
 
-                                        backgroundColor: ["#22c55e", "#f5b942"],
+                plugins: [centerTextPlugin]
 
-                                        borderColor: "#131b2e",
-
-                                        borderWidth: 3
-
-                                    }]
-
-                            },
-
-                            options: {
-
-                                responsive: true,
-
-                                plugins: { legend: { labels: { color: "#aab4c8" } } }
-
-                            }
-
-                        });
+            });
 
         </script>
 

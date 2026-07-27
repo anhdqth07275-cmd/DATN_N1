@@ -152,6 +152,64 @@ if (rs.next()) {
             rs.getInt(1));
 
 }
+
+        // ==========================
+        // Doanh thu theo 12 tháng của năm hiện tại (phục vụ biểu đồ)
+        // ==========================
+
+        double[] monthlyRevenue = new double[12];
+
+        int currentYear = java.util.Calendar.getInstance()
+                .get(java.util.Calendar.YEAR);
+
+        ps = con.prepareStatement(
+                "SELECT MONTH(invoice_date) AS mo, "
+                + "SUM(total_amount) AS amt "
+                + "FROM Invoice "
+                + "WHERE YEAR(invoice_date) = ? "
+                + "GROUP BY MONTH(invoice_date)");
+
+        ps.setInt(1, currentYear);
+
+        rs = ps.executeQuery();
+
+        while (rs.next()) {
+
+            int month = rs.getInt("mo");
+
+            if (month >= 1 && month <= 12) {
+                monthlyRevenue[month - 1] = rs.getDouble("amt");
+            }
+
+        }
+
+        d.setMonthlyRevenue(monthlyRevenue);
+
+        // ==========================
+        // Số hóa đơn đã thanh toán / còn nợ (phục vụ biểu đồ)
+        // ==========================
+
+        ps = con.prepareStatement(
+                "SELECT status, COUNT(*) AS cnt "
+                + "FROM Invoice "
+                + "GROUP BY status");
+
+        rs = ps.executeQuery();
+
+        while (rs.next()) {
+
+            String status = rs.getString("status");
+            int cnt = rs.getInt("cnt");
+
+            if ("Đã thanh toán".equalsIgnoreCase(status)) {
+                d.setPaidInvoiceCount(cnt);
+            } else {
+                d.setUnpaidInvoiceCount(
+                        d.getUnpaidInvoiceCount() + cnt);
+            }
+
+        }
+
         con.close();
 
     } catch (Exception e) {

@@ -131,6 +131,17 @@ body{
 
         <div class="main">
 
+            <div class="print-only" style="margin-bottom:20px;">
+                <h2 style="margin:0;">SME:FAD — Báo cáo tài chính &amp; công nợ</h2>
+                <p style="margin:4px 0 0;">
+                    Khoảng thời gian: <strong><%= report.getRangeLabel() %></strong>
+                    &nbsp;|&nbsp; Người lập: <strong><%= user.getFullName() %></strong>
+                    &nbsp;|&nbsp; Ngày in:
+                    <strong><%= new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date()) %></strong>
+                </p>
+                <hr>
+            </div>
+
             <form method="get"
                   action="${pageContext.request.contextPath}/baocao"
                   class="box d-flex align-items-end gap-3 flex-wrap">
@@ -161,6 +172,13 @@ body{
                 <div>
                     <button type="submit" class="btn btn-primary">
                         Xem báo cáo
+                    </button>
+                </div>
+
+                <div>
+                    <button type="button" class="btn btn-outline-secondary"
+                            onclick="window.print()">
+                        🖨️ In báo cáo
                     </button>
                 </div>
 
@@ -299,36 +317,85 @@ body{
 
 <script>
 
-Chart.defaults.color = "#aab4c8";
-Chart.defaults.borderColor = "#26314a";
-Chart.defaults.font.family = "Segoe UI";
+const fmtVND = (v) => new Intl.NumberFormat('vi-VN').format(Math.round(v)) + " VNĐ";
 
-new Chart(document.getElementById("chartRevenue"), {
+Chart.defaults.color = "#b7c0d4";
+Chart.defaults.borderColor = "#1e2740";
+Chart.defaults.font.family = "'Manrope', 'Segoe UI', sans-serif";
+
+const tooltipStyle = {
+    backgroundColor: "#1a2437",
+    titleColor: "#f3f5fa",
+    bodyColor: "#eef1f8",
+    borderColor: "#2dd4bf",
+    borderWidth: 1,
+    padding: 12,
+    cornerRadius: 10,
+    displayColors: false,
+    titleFont: { family: "'Manrope', sans-serif", weight: "700" },
+    bodyFont: { family: "'JetBrains Mono', monospace", size: 13 }
+};
+
+const ctxRevenue = document.getElementById("chartRevenue").getContext("2d");
+const gradBar = ctxRevenue.createLinearGradient(0, 0, 0, 260);
+gradBar.addColorStop(0, "#2dd4bf");
+gradBar.addColorStop(1, "#a78bfa");
+
+new Chart(ctxRevenue, {
 
     type: "bar",
 
     data: {
         labels: <%= report.getMonthLabelsJson() %>,
         datasets: [{
-            label: "Doanh thu (VNĐ)",
+            label: "Doanh thu",
             data: <%= report.getMonthlyRevenueJson() %>,
-            backgroundColor: "#3b82f6",
-            borderRadius: 6
+            backgroundColor: gradBar,
+            borderRadius: 8,
+            maxBarThickness: 34,
+            hoverBackgroundColor: "#5eead4"
         }]
     },
 
     options: {
         responsive: true,
         plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: { ...tooltipStyle, callbacks: { label: (c) => fmtVND(c.parsed.y) } }
         },
         scales: {
-            x: { grid: { color: "#1e2740" }, ticks: { color: "#7c869c" } },
-            y: { grid: { color: "#1e2740" }, ticks: { color: "#7c869c" } }
+            x: { grid: { display: false }, ticks: { color: "#8f9ab2" } },
+            y: {
+                grid: { color: "#1e2740" },
+                ticks: { color: "#8f9ab2", callback: (v) => (v / 1000000) + "tr" }
+            }
         }
     }
 
 });
+
+const paidCnt = <%= report.getPaidInvoiceCount() %>;
+const unpaidCnt = <%= report.getUnpaidInvoiceCount() %>;
+
+const centerTextPlugin = {
+    id: "centerText",
+    afterDraw(chart) {
+        const { ctx, chartArea } = chart;
+        if (!chartArea) return;
+        const cx = (chartArea.left + chartArea.right) / 2;
+        const cy = (chartArea.top + chartArea.bottom) / 2;
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "700 26px 'JetBrains Mono', monospace";
+        ctx.fillStyle = "#f3f5fa";
+        ctx.fillText(paidCnt + unpaidCnt, cx, cy - 10);
+        ctx.font = "600 12px 'Manrope', sans-serif";
+        ctx.fillStyle = "#8f9ab2";
+        ctx.fillText("HÓA ĐƠN", cx, cy + 14);
+        ctx.restore();
+    }
+};
 
 new Chart(document.getElementById("chartInvoiceStatus"), {
 
@@ -337,20 +404,24 @@ new Chart(document.getElementById("chartInvoiceStatus"), {
     data: {
         labels: ["Đã thanh toán", "Còn nợ"],
         datasets: [{
-            data: [
-                <%= report.getPaidInvoiceCount() %>,
-                <%= report.getUnpaidInvoiceCount() %>
-            ],
-            backgroundColor: ["#22c55e", "#f5b942"],
+            data: [paidCnt, unpaidCnt],
+            backgroundColor: ["#2dd4bf", "#a78bfa"],
             borderColor: "#131b2e",
-            borderWidth: 3
+            borderWidth: 4,
+            hoverOffset: 6
         }]
     },
 
     options: {
         responsive: true,
-        plugins: { legend: { labels: { color: "#aab4c8" } } }
-    }
+        cutout: "72%",
+        plugins: {
+            legend: { labels: { color: "#b7c0d4", usePointStyle: true, pointStyle: "circle", padding: 18 } },
+            tooltip: { ...tooltipStyle, callbacks: { label: (c) => c.label + ": " + c.parsed + " hóa đơn" } }
+        }
+    },
+
+    plugins: [centerTextPlugin]
 
 });
 

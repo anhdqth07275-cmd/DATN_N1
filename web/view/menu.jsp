@@ -68,10 +68,14 @@
         <span class="brand-sub">Quản lý tài chính &amp; công nợ</span>
     </div>
 
+    <span class="nav-group-label">Tổng quan</span>
+
     <a class="<%=menuURI.endsWith("/trangchu") ? "active" : ""%>"
        href="${pageContext.request.contextPath}/trangchu">
         🏠 Trang chủ
     </a>
+
+    <span class="nav-group-label">Nghiệp vụ</span>
 
     <a class="<%=menuURI.endsWith("/khachhang") ? "active" : ""%>"
        href="${pageContext.request.contextPath}/khachhang">
@@ -104,6 +108,8 @@
     </a>
 
     <% if (menuIsAdmin) { %>
+    <span class="nav-group-label">Hệ thống</span>
+
     <a class="<%=menuURI.endsWith("hethong.jsp") ? "active" : ""%>"
        href="${pageContext.request.contextPath}/view/hethong.jsp">
         ⚙ Hệ thống

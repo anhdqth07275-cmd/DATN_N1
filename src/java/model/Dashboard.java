@@ -164,4 +164,59 @@ public class Dashboard {
         this.revenueYear = revenueYear;
     }
 
+    // ==========================
+    // Doanh thu 12 tháng trong năm hiện tại + trạng thái hóa đơn
+    // (phục vụ biểu đồ ở Trang chủ - dữ liệu thật thay vì số liệu mẫu)
+    // ==========================
+
+    private double[] monthlyRevenue = new double[12];
+    private int paidInvoiceCount;
+    private int unpaidInvoiceCount;
+
+    public double[] getMonthlyRevenue() {
+        return monthlyRevenue;
+    }
+
+    public void setMonthlyRevenue(double[] monthlyRevenue) {
+        this.monthlyRevenue = monthlyRevenue;
+    }
+
+    public int getPaidInvoiceCount() {
+        return paidInvoiceCount;
+    }
+
+    public void setPaidInvoiceCount(int paidInvoiceCount) {
+        this.paidInvoiceCount = paidInvoiceCount;
+    }
+
+    public int getUnpaidInvoiceCount() {
+        return unpaidInvoiceCount;
+    }
+
+    public void setUnpaidInvoiceCount(int unpaidInvoiceCount) {
+        this.unpaidInvoiceCount = unpaidInvoiceCount;
+    }
+
+    // Trả về chuỗi JSON dạng [1000000,2000000,...] để nhúng thẳng vào
+    // script Chart.js trên trangchu.jsp, không cần thư viện JSON ngoài.
+    public String getMonthlyRevenueJson() {
+
+        StringBuilder sb = new StringBuilder("[");
+
+        for (int i = 0; i < monthlyRevenue.length; i++) {
+
+            if (i > 0) {
+                sb.append(",");
+            }
+
+            sb.append(monthlyRevenue[i]);
+
+        }
+
+        sb.append("]");
+
+        return sb.toString();
+
+    }
+
 }
