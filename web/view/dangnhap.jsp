@@ -137,6 +137,16 @@
 
         }
 
+        .password-wrapper{position:relative;}
+        .password-wrapper input{padding-right:42px;}
+        .toggle-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);
+            cursor:pointer;display:flex;align-items:center;justify-content:center;
+            width:24px;height:24px;color:#8a8a8a;user-select:none;}
+        .toggle-eye svg{width:22px;height:22px;pointer-events:none;}
+
+        .forgot-password{text-align:right;margin-top:-10px;margin-bottom:20px;}
+        .forgot-password a{font-size:13px;color:#0b4f86;text-decoration:none;font-weight:bold;}
+
         .btn{
 
             width:100%;
@@ -303,11 +313,25 @@ required>
 
 <label>Mật khẩu</label>
 
+<div class="password-wrapper">
 <input
 type="password"
+id="loginPassword"
 name="password"
 required>
+<span class="toggle-eye" onclick="togglePassword('loginPassword', this)">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/>
+<circle cx="12" cy="12" r="3"/>
+</svg>
+</span>
+</div>
 
+</div>
+
+<div class="forgot-password">
+<a href="${pageContext.request.contextPath}/quenmatkhau">Quên mật khẩu?</a>
 </div>
 
 <button class="btn" type="submit">
@@ -330,6 +354,27 @@ Chưa có tài khoản?
 </div>
 
 </div>
+
+<script>
+    var EYE_OPEN =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+        'stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/>' +
+        '<circle cx="12" cy="12" r="3"/></svg>';
+
+    var EYE_CLOSED =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+        'stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.6 21.6 0 0 1 5.06-5.94M9.9 4.24A10.6 10.6 0 0 1 12 4c7 0 11 7 11 7a21.6 21.6 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/>' +
+        '<line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+    function togglePassword(inputId, iconEl) {
+        var input = document.getElementById(inputId);
+        var isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        iconEl.innerHTML = isHidden ? EYE_CLOSED : EYE_OPEN;
+    }
+</script>
 
 </body>
 
