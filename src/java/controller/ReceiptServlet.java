@@ -158,6 +158,8 @@ public class ReceiptServlet extends HttpServlet {
 
         boolean canSoftDelete = hasAction(request, "XOAMEM");
         boolean canHardDelete = hasAction(request, "XOACUNG");
+        boolean canAdd = hasAction(request, "THEM");
+        boolean canEdit = hasAction(request, "SUA");
 
         boolean showInactive = canSoftDelete
                 && "1".equals(request.getParameter("showInactive"));
@@ -169,6 +171,8 @@ public class ReceiptServlet extends HttpServlet {
         request.setAttribute("listReceipt", list);
         request.setAttribute("canSoftDelete", canSoftDelete);
         request.setAttribute("canHardDelete", canHardDelete);
+        request.setAttribute("canAdd", canAdd);
+        request.setAttribute("canEdit", canEdit);
         request.setAttribute("pendingIds", pendingIds);
         request.setAttribute("showInactive", showInactive);
 
@@ -217,6 +221,11 @@ public class ReceiptServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+        if (!hasAction(request, "THEM")) {
+            response.sendRedirect(request.getContextPath() + "/phieuthu");
+            return;
+        }
+
         ArrayList<HoaDon> listHoaDon
                 = hoaDonDAO.getUnpaidInvoice();
 
@@ -236,6 +245,11 @@ public class ReceiptServlet extends HttpServlet {
     private void showEditForm(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!hasAction(request, "SUA")) {
+            response.sendRedirect(request.getContextPath() + "/phieuthu");
+            return;
+        }
 
         int id
                 = Integer.parseInt(
@@ -285,6 +299,11 @@ public class ReceiptServlet extends HttpServlet {
     private void insertReceipt(HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
+
+        if (!hasAction(request, "THEM")) {
+            response.sendRedirect(request.getContextPath() + "/phieuthu");
+            return;
+        }
 
         HttpSession session = request.getSession();
 
@@ -356,6 +375,11 @@ public class ReceiptServlet extends HttpServlet {
     private void updateReceipt(HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
+
+        if (!hasAction(request, "SUA")) {
+            response.sendRedirect(request.getContextPath() + "/phieuthu");
+            return;
+        }
 
         int receiptId
                 = Integer.parseInt(

@@ -7,10 +7,14 @@
 <%
 Boolean canSoftDelete = (Boolean) request.getAttribute("canSoftDelete");
 Boolean canHardDelete = (Boolean) request.getAttribute("canHardDelete");
+Boolean canAdd = (Boolean) request.getAttribute("canAdd");
+Boolean canEdit = (Boolean) request.getAttribute("canEdit");
 Boolean showInactive = (Boolean) request.getAttribute("showInactive");
 HashSet<Integer> pendingIds = (HashSet<Integer>) request.getAttribute("pendingIds");
 if (canSoftDelete == null) canSoftDelete = false;
 if (canHardDelete == null) canHardDelete = false;
+if (canAdd == null) canAdd = false;
+if (canEdit == null) canEdit = false;
 if (showInactive == null) showInactive = false;
 if (pendingIds == null) pendingIds = new HashSet<>();
 
@@ -256,6 +260,7 @@ ArrayList<HoaDon> list =
 
                         <div class="left">
 
+                            <% if (canAdd) { %>
                             <a
                                 href="<%=request.getContextPath()%>/hoadon?action=add"
                                 class="btn btn-primary">
@@ -265,6 +270,7 @@ ArrayList<HoaDon> list =
                                 Thêm hóa đơn
 
                             </a>
+                            <% } %>
 
                         </div>
 
@@ -462,6 +468,7 @@ ArrayList<HoaDon> list =
 
                                     </a>
 
+                                    <% if (canEdit) { %>
                                     <a
                                         href="<%=request.getContextPath()%>/hoadon?action=edit&id=<%=hd.getInvoiceId()%>"
                                         class="btn btn-warning btn-sm"
@@ -470,11 +477,14 @@ ArrayList<HoaDon> list =
                                         <i class="bi bi-pencil-square"></i>
 
                                     </a>
+                                    <% } %>
 
+                                    <% String hdBaseUrl = request.getContextPath() + "/hoadon"; %>
+                                    <% String hdLabel = "HD" + String.format("%04d", hd.getInvoiceId()); %>
                                     <my:deleteActions
-                                        baseUrl="<%=request.getContextPath()%>/hoadon"
-                                        entityId="<%=hd.getInvoiceId()%>"
-                                        entityLabel="<%=\"HD\"+String.format(\"%04d\",hd.getInvoiceId())%>"
+                                        baseUrl="<%=hdBaseUrl%>"
+                                        entityId="<%=String.valueOf(hd.getInvoiceId())%>"
+                                        entityLabel="<%=hdLabel%>"
                                         isActive="<%=hd.isActive()%>"
                                         canSoftDelete="<%=canSoftDelete%>"
                                         canHardDelete="<%=canHardDelete%>"

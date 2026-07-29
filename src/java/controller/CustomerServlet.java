@@ -334,6 +334,11 @@ public class CustomerServlet extends HttpServlet {
             HttpServletResponse response)
             throws IOException {
 
+        if (!hasAction(request, "SUA")) {
+            response.sendRedirect(request.getContextPath() + "/khachhang");
+            return;
+        }
+
         Customer c = new Customer();
 
         c.setCustomerId(
@@ -362,6 +367,11 @@ public class CustomerServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+        if (!hasAction(request, "SUA")) {
+            response.sendRedirect(request.getContextPath() + "/khachhang");
+            return;
+        }
+
         int id = Integer.parseInt(request.getParameter("id"));
 
         Customer customer = dao.getById(id);
@@ -377,6 +387,11 @@ public class CustomerServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+        if (!hasAction(request, "THEM")) {
+            response.sendRedirect(request.getContextPath() + "/khachhang");
+            return;
+        }
+
         request.getRequestDispatcher("/view/addCustomer.jsp")
                 .forward(request, response);
 
@@ -385,6 +400,11 @@ public class CustomerServlet extends HttpServlet {
     private void insertCustomer(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!hasAction(request, "THEM")) {
+            response.sendRedirect(request.getContextPath() + "/khachhang");
+            return;
+        }
 
         Customer c = new Customer();
 
@@ -418,6 +438,8 @@ public class CustomerServlet extends HttpServlet {
 
         boolean canSoftDelete = hasAction(request, "XOAMEM");
         boolean canHardDelete = hasAction(request, "XOACUNG");
+        boolean canAdd = hasAction(request, "THEM");
+        boolean canEdit = hasAction(request, "SUA");
 
         boolean showInactive = canSoftDelete
                 && "1".equals(request.getParameter("showInactive"));
@@ -429,6 +451,8 @@ public class CustomerServlet extends HttpServlet {
         request.setAttribute("listCustomer", list);
         request.setAttribute("canSoftDelete", canSoftDelete);
         request.setAttribute("canHardDelete", canHardDelete);
+        request.setAttribute("canAdd", canAdd);
+        request.setAttribute("canEdit", canEdit);
         request.setAttribute("pendingIds", pendingIds);
         request.setAttribute("showInactive", showInactive);
 

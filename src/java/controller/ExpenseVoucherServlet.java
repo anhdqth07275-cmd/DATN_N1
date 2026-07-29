@@ -124,6 +124,8 @@ public class ExpenseVoucherServlet extends HttpServlet {
 
         boolean canSoftDelete = hasAction(request, "XOAMEM");
         boolean canHardDelete = hasAction(request, "XOACUNG");
+        boolean canAdd = hasAction(request, "THEM");
+        boolean canEdit = hasAction(request, "SUA");
 
         boolean showInactive = canSoftDelete
                 && "1".equals(request.getParameter("showInactive"));
@@ -136,6 +138,8 @@ public class ExpenseVoucherServlet extends HttpServlet {
         request.setAttribute("listExpense", list);
         request.setAttribute("canSoftDelete", canSoftDelete);
         request.setAttribute("canHardDelete", canHardDelete);
+        request.setAttribute("canAdd", canAdd);
+        request.setAttribute("canEdit", canEdit);
         request.setAttribute("pendingIds", pendingIds);
         request.setAttribute("showInactive", showInactive);
 
@@ -184,6 +188,11 @@ public class ExpenseVoucherServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+        if (!hasAction(request, "THEM")) {
+            response.sendRedirect(request.getContextPath() + "/phieuchi");
+            return;
+        }
+
         request.getRequestDispatcher("/view/addExpense.jsp")
                 .forward(request, response);
 
@@ -195,6 +204,11 @@ public class ExpenseVoucherServlet extends HttpServlet {
     private void showEditForm(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!hasAction(request, "SUA")) {
+            response.sendRedirect(request.getContextPath() + "/phieuchi");
+            return;
+        }
 
         int id = Integer.parseInt(request.getParameter("id"));
 
@@ -213,6 +227,11 @@ public class ExpenseVoucherServlet extends HttpServlet {
     private void insertExpense(HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
+
+        if (!hasAction(request, "THEM")) {
+            response.sendRedirect(request.getContextPath() + "/phieuchi");
+            return;
+        }
 
         HttpSession session = request.getSession();
 
@@ -252,6 +271,11 @@ public class ExpenseVoucherServlet extends HttpServlet {
     private void updateExpense(HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
+
+        if (!hasAction(request, "SUA")) {
+            response.sendRedirect(request.getContextPath() + "/phieuchi");
+            return;
+        }
 
         ExpenseVoucher expense =
                 new ExpenseVoucher();

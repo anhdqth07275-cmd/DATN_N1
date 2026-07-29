@@ -10,10 +10,14 @@
 
     Boolean canSoftDelete = (Boolean) request.getAttribute("canSoftDelete");
     Boolean canHardDelete = (Boolean) request.getAttribute("canHardDelete");
+    Boolean canAdd = (Boolean) request.getAttribute("canAdd");
+    Boolean canEdit = (Boolean) request.getAttribute("canEdit");
     Boolean showInactive = (Boolean) request.getAttribute("showInactive");
     HashSet<Integer> pendingIds = (HashSet<Integer>) request.getAttribute("pendingIds");
     if (canSoftDelete == null) canSoftDelete = false;
     if (canHardDelete == null) canHardDelete = false;
+    if (canAdd == null) canAdd = false;
+    if (canEdit == null) canEdit = false;
     if (showInactive == null) showInactive = false;
     if (pendingIds == null) pendingIds = new HashSet<>();
 %>
@@ -111,6 +115,7 @@
 
                         </div>
 
+                        <% if (canAdd) { %>
                         <a href="<%=request.getContextPath()%>/phieuthu?action=add"
                            class="btn btn-primary">
 
@@ -119,6 +124,7 @@
                             Thêm phiếu thu
 
                         </a>
+                        <% } %>
 
                     </div>
 
@@ -278,16 +284,19 @@
 
                                 <td align="center">
 
+                                    <% if (canEdit) { %>
                                     <a href="<%=request.getContextPath()%>/phieuthu?action=edit&id=<%=r.getReceiptId()%>"
                                        class="btn btn-warning btn-sm">
 
                                         <i class="bi bi-pencil-square"></i>
 
                                     </a>
+                                    <% } %>
 
+                                    <% String ptBaseUrl = request.getContextPath() + "/phieuthu"; %>
                                     <my:deleteActions
-                                        baseUrl="<%=request.getContextPath()%>/phieuthu"
-                                        entityId="<%=r.getReceiptId()%>"
+                                        baseUrl="<%=ptBaseUrl%>"
+                                        entityId="<%=String.valueOf(r.getReceiptId())%>"
                                         entityLabel="<%=r.getReceiptCode()%>"
                                         isActive="<%=r.isActive()%>"
                                         canSoftDelete="<%=canSoftDelete%>"

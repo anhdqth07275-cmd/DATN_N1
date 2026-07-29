@@ -10,12 +10,16 @@
 
     Boolean canSoftDelete = (Boolean) request.getAttribute("canSoftDelete");
     Boolean canHardDelete = (Boolean) request.getAttribute("canHardDelete");
+    Boolean canAdd = (Boolean) request.getAttribute("canAdd");
+    Boolean canEdit = (Boolean) request.getAttribute("canEdit");
     Boolean showInactive = (Boolean) request.getAttribute("showInactive");
     HashSet<Integer> pendingIds =
             (HashSet<Integer>) request.getAttribute("pendingIds");
 
     if (canSoftDelete == null) canSoftDelete = false;
     if (canHardDelete == null) canHardDelete = false;
+    if (canAdd == null) canAdd = false;
+    if (canEdit == null) canEdit = false;
     if (showInactive == null) showInactive = false;
     if (pendingIds == null) pendingIds = new HashSet<>();
 %>
@@ -223,6 +227,7 @@
 
                 <div class="left">
 
+                    <% if (canAdd) { %>
                     <a href="<%=request.getContextPath()%>/khachhang?action=add"
                        class="btn btn-primary">
 
@@ -231,6 +236,7 @@
                         Thêm khách hàng
 
                     </a>
+                    <% } %>
 
                 </div>
 
@@ -364,16 +370,19 @@
 
                     <td align="center">
 
+                        <% if (canEdit) { %>
                         <a href="<%=request.getContextPath()%>/khachhang?action=edit&id=<%=c.getCustomerId()%>"
                            class="btn btn-warning btn-sm">
 
                             <i class="bi bi-pencil-square"></i>
 
                         </a>
+                        <% } %>
 
+                        <% String khBaseUrl = request.getContextPath() + "/khachhang"; %>
                         <my:deleteActions
-                            baseUrl="<%=request.getContextPath()%>/khachhang"
-                            entityId="<%=c.getCustomerId()%>"
+                            baseUrl="<%=khBaseUrl%>"
+                            entityId="<%=String.valueOf(c.getCustomerId())%>"
                             entityLabel="<%=c.getCustomerName()%>"
                             isActive="<%=c.isStatus()%>"
                             canSoftDelete="<%=canSoftDelete%>"
