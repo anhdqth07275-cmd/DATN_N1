@@ -217,8 +217,7 @@ a{ color:var(--accent-2); }
     display:flex;
     align-items:center;
     color:var(--text-secondary);
-    font-size:22px;
-    margin-right: 10px;
+    font-size:19px;
 }
 
 /* ---------- CARD / BOX / PANEL ---------- */
@@ -599,4 +598,70 @@ hr{ border-color:var(--border-soft) !important; opacity:1; }
     canvas{ display:none !important; }
 
     a[href]:after{ content:""; }
+}
+
+/* ============================================================
+   SEARCHABLE SELECT — ô tìm kiếm thay cho <select> thường khi
+   danh sách lựa chọn nhiều (khách hàng, hóa đơn...)
+   ============================================================ */
+.ss-wrap{ position:relative; }
+
+.ss-input{
+    background:var(--bg-input) !important;
+    border:1px solid var(--border) !important;
+    color:var(--text-primary) !important;
+}
+.ss-input::placeholder{ color:var(--text-muted) !important; opacity:1; }
+.ss-input:focus{
+    border-color:var(--teal) !important;
+    box-shadow:0 0 0 .2rem rgba(45,212,191,.20) !important;
+    outline:none;
+}
+
+.ss-dropdown{
+    position:absolute;
+    top:calc(100% + 6px);
+    left:0; right:0;
+    max-height:280px;
+    overflow-y:auto;
+    background:var(--bg-elevated);
+    border:1px solid var(--border);
+    border-radius:10px;
+    box-shadow:var(--shadow-lg);
+    z-index:80;
+}
+
+.ss-item{
+    padding:10px 14px;
+    cursor:pointer;
+    border-bottom:1px solid var(--border-soft);
+    transition:background .12s ease;
+}
+.ss-item:last-child{ border-bottom:none; }
+.ss-item:hover, .ss-item.active{
+    background:var(--grad-brand-soft);
+}
+
+.ss-item-main{
+    color:var(--text-primary);
+    font-weight:600;
+    font-size:14.5px;
+}
+.ss-item-sub{
+    color:var(--text-secondary);
+    font-size:12.5px;
+    margin-top:2px;
+    font-family:var(--font-mono);
+}
+
+.ss-empty{
+    padding:16px 14px;
+    text-align:center;
+    color:var(--text-muted);
+    font-size:13.5px;
+}
+
+.ss-dropdown::-webkit-scrollbar{ width:8px; }
+.ss-dropdown::-webkit-scrollbar-thumb{
+    background:var(--border); border-radius:8px;
 }

@@ -13,6 +13,10 @@ public class ReceiptDAO {
     // Lấy toàn bộ phiếu thu
     // ==========================
     public ArrayList<Receipt> getAll() {
+        return getAll(false);
+    }
+
+    public ArrayList<Receipt> getAll(boolean includeInactive) {
 
         ArrayList<Receipt> list = new ArrayList<>();
 
@@ -27,6 +31,7 @@ public class ReceiptDAO {
                 + "ON i.customer_id=c.customer_id "
                 + "JOIN [User] u "
                 + "ON r.user_id=u.user_id "
+                + (includeInactive ? "" : "WHERE r.is_active = 1 ")
                 + "ORDER BY r.receipt_id DESC";
 
         try {
@@ -68,6 +73,9 @@ public class ReceiptDAO {
 
                 r.setUserName(
                         rs.getString("full_name"));
+
+                r.setActive(
+                        rs.getBoolean("is_active"));
 
                 list.add(r);
 
@@ -257,9 +265,32 @@ public class ReceiptDAO {
     }
 
 // ==========================
-// Xóa phiếu thu
+// Giữ tương thích ngược - trước đây delete() = xóa cứng
 // ==========================
     public boolean delete(int id) {
+        return hardDelete(id);
+    }
+
+// ==========================
+// Xóa mềm: ẩn phiếu thu khỏi hệ thống, có thể khôi phục
+// ==========================
+    public boolean softDelete(int id) {
+        return util.SoftDeleteHelper.setActive(
+                "Receipt", "receipt_id", "is_active", id, false);
+    }
+
+// ==========================
+// Khôi phục phiếu thu đã bị vô hiệu hóa
+// ==========================
+    public boolean restore(int id) {
+        return util.SoftDeleteHelper.setActive(
+                "Receipt", "receipt_id", "is_active", id, true);
+    }
+
+// ==========================
+// Xóa vĩnh viễn phiếu thu
+// ==========================
+    public boolean hardDelete(int id) {
 
         String sql
                 = "DELETE FROM Receipt "

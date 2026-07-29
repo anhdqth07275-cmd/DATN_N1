@@ -11,11 +11,18 @@ import util.DBConnect;
 public class CustomerDAO {
 
     public ArrayList<Customer> getAll() {
+        return getAll(false);
+    }
+
+    // includeInactive = true -> lấy cả khách hàng đã bị vô hiệu hóa (status=0)
+    // Dùng khi Admin/Giám đốc bật "Hiển thị cả đã vô hiệu hóa" để có thể
+    // khôi phục hoặc xóa cứng những bản ghi đó.
+    public ArrayList<Customer> getAll(boolean includeInactive) {
 
         ArrayList<Customer> list = new ArrayList<>();
 
         String sql = "SELECT * FROM Customer\n"
-                + "WHERE status = 1\n"
+                + (includeInactive ? "" : "WHERE status = 1\n")
                 + "ORDER BY customer_id DESC;";
 
         try {
@@ -160,32 +167,33 @@ public class CustomerDAO {
 
     }
 
+    // Giữ tương thích ngược - delete() thực chất luôn là xóa mềm
     public boolean delete(int id) {
+        return softDelete(id);
+    }
 
-        String sql = "UPDATE Customer SET status=0 WHERE customer_id=?";
+    // ==========================
+    // Xóa mềm: chỉ ẩn khỏi hệ thống, có thể khôi phục lại
+    // ==========================
+    public boolean softDelete(int id) {
+        return util.SoftDeleteHelper.setActive(
+                "Customer", "customer_id", "status", id, false);
+    }
 
-        try {
+    // ==========================
+    // Khôi phục khách hàng đã bị vô hiệu hóa
+    // ==========================
+    public boolean restore(int id) {
+        return util.SoftDeleteHelper.setActive(
+                "Customer", "customer_id", "status", id, true);
+    }
 
-            Connection con = DBConnect.getConnection();
-
-            PreparedStatement ps = con.prepareStatement(sql);
-
-            ps.setInt(1, id);
-
-            int row = ps.executeUpdate();
-
-            con.close();
-
-            return row > 0;
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
-
-        return false;
-
+    // ==========================
+    // Xóa vĩnh viễn khỏi cơ sở dữ liệu - chỉ Admin mới được gọi
+    // ==========================
+    public boolean hardDelete(int id) {
+        return util.SoftDeleteHelper.hardDelete(
+                "Customer", "customer_id", id);
     }
 
     public ArrayList<Customer> search(String keyword) {

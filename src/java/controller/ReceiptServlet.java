@@ -2,7 +2,9 @@ package controller;
 
 import dao.DebtDAO;
 import dao.HoaDonDAO;
+import dao.PermissionDAO;
 import dao.ReceiptDAO;
+import dao.RequestDisableDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import model.DangKy;
 import model.HoaDon;
 import model.Receipt;
@@ -23,6 +26,10 @@ public class ReceiptServlet extends HttpServlet {
     HoaDonDAO hoaDonDAO = new HoaDonDAO();
 
     DebtDAO debtDAO = new DebtDAO();
+
+    PermissionDAO permissionDAO = new PermissionDAO();
+    RequestDisableDAO requestDAO = new RequestDisableDAO();
+    private static final String MODULE = "PHIEUTHU";
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -54,6 +61,36 @@ public class ReceiptServlet extends HttpServlet {
             case "delete":
 
                 deleteReceipt(request, response);
+
+                break;
+
+            case "softdelete":
+
+                softDeleteReceipt(request, response);
+
+                break;
+
+            case "restore":
+
+                restoreReceipt(request, response);
+
+                break;
+
+            case "harddelete":
+
+                deleteReceipt(request, response);
+
+                break;
+
+            case "requestdisable":
+
+                requestDisableReceipt(request, response);
+
+                break;
+
+            case "dismissrequest":
+
+                dismissRequestReceipt(request, response);
 
                 break;
 
@@ -119,12 +156,57 @@ public class ReceiptServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        ArrayList<Receipt> list = dao.getAll();
+        boolean canSoftDelete = hasAction(request, "XOAMEM");
+        boolean canHardDelete = hasAction(request, "XOACUNG");
+
+        boolean showInactive = canSoftDelete
+                && "1".equals(request.getParameter("showInactive"));
+
+        ArrayList<Receipt> list = dao.getAll(showInactive);
+
+        HashSet<Integer> pendingIds = requestDAO.getPendingEntityIds(MODULE);
 
         request.setAttribute("listReceipt", list);
+        request.setAttribute("canSoftDelete", canSoftDelete);
+        request.setAttribute("canHardDelete", canHardDelete);
+        request.setAttribute("pendingIds", pendingIds);
+        request.setAttribute("showInactive", showInactive);
 
         request.getRequestDispatcher("/view/phieuthu.jsp")
                 .forward(request, response);
+
+    }
+
+    // ==========================
+    // Kiểm tra quyền hành động chi tiết (THEM/SUA/XOAMEM/XOACUNG)
+    // ==========================
+    private boolean hasAction(HttpServletRequest request, String actionCode) {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            return false;
+        }
+
+        DangKy user = (DangKy) session.getAttribute("user");
+
+        if (user == null) {
+            return false;
+        }
+
+        return permissionDAO.hasPermission(
+                user.getRoleId(), MODULE + "_" + actionCode);
+
+    }
+
+    private int currentUserId(HttpServletRequest request) {
+
+        HttpSession session = request.getSession(false);
+
+        DangKy user = session == null ? null
+                : (DangKy) session.getAttribute("user");
+
+        return user == null ? 0 : user.getUserId();
 
     }
     // ==========================
@@ -347,6 +429,11 @@ public class ReceiptServlet extends HttpServlet {
             HttpServletResponse response)
             throws IOException {
 
+        if (!hasAction(request, "XOACUNG")) {
+            response.sendRedirect(request.getContextPath() + "/phieuthu");
+            return;
+        }
+
         int id
                 = Integer.parseInt(
                         request.getParameter("id"));
@@ -356,18 +443,118 @@ public class ReceiptServlet extends HttpServlet {
         // lại tương ứng).
         Receipt r = dao.getById(id);
 
-        dao.delete(id);
+        dao.hardDelete(id);
 
         if (r != null) {
             debtDAO.updateFromInvoice(r.getInvoiceId());
         }
 
         util.ActivityLogger.log(request, "XOA", "Phiếu thu",
-                "Xóa phiếu thu #" + id);
+                "Xóa vĩnh viễn phiếu thu #" + id);
 
         response.sendRedirect(
                 request.getContextPath()
                 + "/phieuthu");
+
+    }
+
+    // ==========================
+    // Xóa mềm (vô hiệu hóa) - Admin/Giám đốc. Đồng bộ lại công nợ vì
+    // phiếu thu bị ẩn không còn được tính là "đã thu" nữa.
+    // ==========================
+    private void softDeleteReceipt(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/phieuthu");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        Receipt r = dao.getById(id);
+
+        dao.softDelete(id);
+
+        if (r != null) {
+            debtDAO.updateFromInvoice(r.getInvoiceId());
+        }
+
+        requestDAO.resolve(MODULE, id, currentUserId(request), "Approved");
+
+        util.ActivityLogger.log(request, "XOA", "Phiếu thu",
+                "Vô hiệu hóa phiếu thu #" + id);
+
+        response.sendRedirect(request.getContextPath() + "/phieuthu");
+
+    }
+
+    // ==========================
+    // Khôi phục phiếu thu đã bị vô hiệu hóa - đồng bộ lại công nợ
+    // ==========================
+    private void restoreReceipt(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/phieuthu");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        Receipt r = dao.getById(id);
+
+        dao.restore(id);
+
+        if (r != null) {
+            debtDAO.updateFromInvoice(r.getInvoiceId());
+        }
+
+        util.ActivityLogger.log(request, "SUA", "Phiếu thu",
+                "Khôi phục phiếu thu #" + id);
+
+        response.sendRedirect(request.getContextPath() + "/phieuthu");
+
+    }
+
+    // ==========================
+    // Nhân viên "Xin quyền vô hiệu hóa"
+    // ==========================
+    private void requestDisableReceipt(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        requestDAO.create(MODULE, id, "Phiếu thu #" + id,
+                currentUserId(request));
+
+        util.ActivityLogger.log(request, "SUA", "Phiếu thu",
+                "Đề xuất vô hiệu hóa phiếu thu #" + id);
+
+        response.sendRedirect(request.getContextPath() + "/phieuthu");
+
+    }
+
+    // ==========================
+    // Admin/Giám đốc bỏ qua đề xuất
+    // ==========================
+    private void dismissRequestReceipt(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/phieuthu");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        requestDAO.resolve(MODULE, id, currentUserId(request), "Rejected");
+
+        response.sendRedirect(request.getContextPath() + "/phieuthu");
 
     }
 // ==========================
@@ -384,9 +571,15 @@ public class ReceiptServlet extends HttpServlet {
         ArrayList<Receipt> list
                 = dao.search(keyword);
 
+        HashSet<Integer> pendingIds = requestDAO.getPendingEntityIds(MODULE);
+
         request.setAttribute(
                 "listReceipt",
                 list);
+        request.setAttribute("canSoftDelete", hasAction(request, "XOAMEM"));
+        request.setAttribute("canHardDelete", hasAction(request, "XOACUNG"));
+        request.setAttribute("pendingIds", pendingIds);
+        request.setAttribute("showInactive", false);
 
         request.getRequestDispatcher(
                 "/view/phieuthu.jsp")

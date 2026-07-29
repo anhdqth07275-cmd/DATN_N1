@@ -13,6 +13,11 @@ public class HoaDonDAO {
     // Lấy toàn bộ hóa đơn
     // ==========================
     public ArrayList<HoaDon> getAll() {
+        return getAll(false);
+    }
+
+    // includeInactive = true -> lấy cả hóa đơn đã bị vô hiệu hóa
+    public ArrayList<HoaDon> getAll(boolean includeInactive) {
 
         ArrayList<HoaDon> list = new ArrayList<>();
 
@@ -21,6 +26,7 @@ public class HoaDonDAO {
                 + "FROM Invoice i "
                 + "JOIN Customer c ON i.customer_id = c.customer_id "
                 + "JOIN [User] u ON i.user_id = u.user_id "
+                + (includeInactive ? "" : "WHERE i.is_active = 1 ")
                 + "ORDER BY i.invoice_id DESC";
 
         try {
@@ -41,6 +47,7 @@ public class HoaDonDAO {
                 hd.setInvoiceDate(rs.getDate("invoice_date"));
                 hd.setTotalAmount(rs.getDouble("total_amount"));
                 hd.setStatus(rs.getString("status"));
+                hd.setActive(rs.getBoolean("is_active"));
 
                 hd.setCustomerName(rs.getString("customer_name"));
                 hd.setUserName(rs.getString("full_name"));
@@ -93,6 +100,7 @@ public class HoaDonDAO {
                 hd.setInvoiceDate(rs.getDate("invoice_date"));
                 hd.setTotalAmount(rs.getDouble("total_amount"));
                 hd.setStatus(rs.getString("status"));
+                hd.setActive(rs.getBoolean("is_active"));
 
                 hd.setCustomerName(rs.getString("customer_name"));
                 hd.setUserName(rs.getString("full_name"));
@@ -274,7 +282,30 @@ public class HoaDonDAO {
     // Xóa theo đúng thứ tự phụ thuộc khóa ngoại, trong 1 transaction:
     // Debt -> Invoice_Detail -> Invoice. Chỉ nên gọi khi canDelete()
     // trả về true (không còn phiếu thu nào gắn với hóa đơn).
+    // Giữ tương thích ngược - trước đây delete() = xóa cứng
     public boolean delete(int id) {
+        return hardDelete(id);
+    }
+
+    // ==========================
+    // Xóa mềm: chỉ ẩn hóa đơn khỏi hệ thống, có thể khôi phục.
+    // Không cần điều kiện canDelete() vì thao tác này an toàn, có thể
+    // đảo ngược - không ảnh hưởng tới Debt/Invoice_Detail/Receipt liên quan.
+    // ==========================
+    public boolean softDelete(int id) {
+        return util.SoftDeleteHelper.setActive(
+                "Invoice", "invoice_id", "is_active", id, false);
+    }
+
+    // ==========================
+    // Khôi phục hóa đơn đã bị vô hiệu hóa
+    // ==========================
+    public boolean restore(int id) {
+        return util.SoftDeleteHelper.setActive(
+                "Invoice", "invoice_id", "is_active", id, true);
+    }
+
+    public boolean hardDelete(int id) {
 
         Connection con = null;
 
@@ -410,6 +441,7 @@ public class HoaDonDAO {
                 + "LEFT JOIN Debt d "
                 + "ON i.invoice_id=d.invoice_id "
                 + "WHERE i.status<>N'Đã thanh toán' "
+                + "AND i.is_active = 1 "
                 + "ORDER BY i.invoice_id DESC";
 
         try {
@@ -485,6 +517,7 @@ public ArrayList<HoaDon> getTop5Newest() {
         + "FROM Invoice i "
         + "INNER JOIN Customer c "
         + "ON i.customer_id = c.customer_id "
+        + "WHERE i.is_active = 1 "
         + "ORDER BY i.invoice_date DESC";
 
     try {

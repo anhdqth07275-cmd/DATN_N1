@@ -1,10 +1,21 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.ArrayList"%>
+<%@page import="java.util.HashSet"%>
 <%@page import="model.Receipt"%>
+<%@taglib prefix="my" tagdir="/WEB-INF/tags" %>
 
 <%
     ArrayList<Receipt> list =
             (ArrayList<Receipt>) request.getAttribute("listReceipt");
+
+    Boolean canSoftDelete = (Boolean) request.getAttribute("canSoftDelete");
+    Boolean canHardDelete = (Boolean) request.getAttribute("canHardDelete");
+    Boolean showInactive = (Boolean) request.getAttribute("showInactive");
+    HashSet<Integer> pendingIds = (HashSet<Integer>) request.getAttribute("pendingIds");
+    if (canSoftDelete == null) canSoftDelete = false;
+    if (canHardDelete == null) canHardDelete = false;
+    if (showInactive == null) showInactive = false;
+    if (pendingIds == null) pendingIds = new HashSet<>();
 %>
 
 <!DOCTYPE html>
@@ -113,6 +124,17 @@
 
                     <div class="toolbar">
 
+                        <% if (canSoftDelete) { %>
+                        <div class="form-check form-switch mb-0 me-3">
+                            <input class="form-check-input" type="checkbox" id="showInactiveToggle"
+                                   <%=showInactive ? "checked" : ""%>
+                                   onchange="window.location.href='<%=request.getContextPath()%>/phieuthu?showInactive=' + (this.checked ? '1' : '0')">
+                            <label class="form-check-label" for="showInactiveToggle" style="white-space:nowrap;">
+                                Hiện cả đã vô hiệu hóa
+                            </label>
+                        </div>
+                        <% } %>
+
                         <form action="<%=request.getContextPath()%>/phieuthu"
                               method="get"
                               class="d-flex">
@@ -181,6 +203,10 @@
                                 <td align="center">
 
                                     <%=r.getReceiptCode()%>
+
+                                    <% if (!r.isActive()) { %>
+                                    <br><span class="badge bg-secondary" style="font-size:10px;">Đã vô hiệu hóa</span>
+                                    <% } %>
 
                                 </td>
 
@@ -259,13 +285,14 @@
 
                                     </a>
 
-                                    <a href="<%=request.getContextPath()%>/phieuthu?action=delete&id=<%=r.getReceiptId()%>"
-                                       class="btn btn-danger btn-sm"
-                                       onclick="return confirm('Bạn có chắc muốn xóa phiếu thu này?')">
-
-                                        <i class="bi bi-trash"></i>
-
-                                    </a>
+                                    <my:deleteActions
+                                        baseUrl="<%=request.getContextPath()%>/phieuthu"
+                                        entityId="<%=r.getReceiptId()%>"
+                                        entityLabel="<%=r.getReceiptCode()%>"
+                                        isActive="<%=r.isActive()%>"
+                                        canSoftDelete="<%=canSoftDelete%>"
+                                        canHardDelete="<%=canHardDelete%>"
+                                        pendingRequest="<%=pendingIds.contains(r.getReceiptId())%>" />
 
                                 </td>
 

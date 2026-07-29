@@ -13,6 +13,10 @@ public class ExpenseVoucherDAO {
     // Lấy tất cả phiếu chi
     // ==========================
     public ArrayList<ExpenseVoucher> getAll() {
+        return getAll(false);
+    }
+
+    public ArrayList<ExpenseVoucher> getAll(boolean includeInactive) {
 
         ArrayList<ExpenseVoucher> list = new ArrayList<>();
 
@@ -21,6 +25,7 @@ public class ExpenseVoucherDAO {
                 + "FROM Expense_Voucher e "
                 + "JOIN [User] u "
                 + "ON e.user_id=u.user_id "
+                + (includeInactive ? "" : "WHERE e.is_active = 1 ")
                 + "ORDER BY expense_id DESC";
 
         try {
@@ -58,6 +63,9 @@ public class ExpenseVoucherDAO {
 
                 e.setDescription(
                         rs.getString("description"));
+
+                e.setActive(
+                        rs.getBoolean("is_active"));
 
                 list.add(e);
 
@@ -232,9 +240,32 @@ public class ExpenseVoucherDAO {
 
     }
         // ==========================
-    // Xóa phiếu chi
+    // Giữ tương thích ngược - trước đây delete() = xóa cứng
     // ==========================
     public boolean delete(int id) {
+        return hardDelete(id);
+    }
+
+    // ==========================
+    // Xóa mềm: ẩn phiếu chi khỏi hệ thống, có thể khôi phục
+    // ==========================
+    public boolean softDelete(int id) {
+        return util.SoftDeleteHelper.setActive(
+                "Expense_Voucher", "expense_id", "is_active", id, false);
+    }
+
+    // ==========================
+    // Khôi phục phiếu chi đã bị vô hiệu hóa
+    // ==========================
+    public boolean restore(int id) {
+        return util.SoftDeleteHelper.setActive(
+                "Expense_Voucher", "expense_id", "is_active", id, true);
+    }
+
+    // ==========================
+    // Xóa vĩnh viễn phiếu chi
+    // ==========================
+    public boolean hardDelete(int id) {
 
         String sql =
                 "DELETE FROM Expense_Voucher "

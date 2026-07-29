@@ -101,6 +101,7 @@ ArrayList<Customer> list =
                         </label>
 
                         <select
+                            id="customerId"
                             name="customerId"
                             class="form-select"
                             required>
@@ -120,7 +121,9 @@ ArrayList<Customer> list =
                             %>
 
                             <option
-                                value="<%=c.getCustomerId()%>">
+                                value="<%=c.getCustomerId()%>"
+                                data-search="<%=c.getPhone()!=null?c.getPhone():""%>"
+                                data-sub="<%=c.getPhone()!=null?c.getPhone():"Không có SĐT"%><%=c.getAddress()!=null && !c.getAddress().isEmpty() ? " • " + c.getAddress() : ""%>">
 
                                 <%=c.getCustomerName()%>
 
@@ -183,6 +186,14 @@ ArrayList<Customer> list =
             </div>
 
         </div>
+
+        <script src="${pageContext.request.contextPath}/js/searchable-select.js"></script>
+        <script>
+            initSearchableSelect('customerId', {
+                placeholder: '🔍 Tìm kiếm khách hàng theo tên hoặc số điện thoại...',
+                emptyText: 'Không tìm thấy khách hàng phù hợp'
+            });
+        </script>
 
     </body>
 

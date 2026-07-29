@@ -22,6 +22,15 @@ public class Receipt {
     // Hiển thị
     private String customerName;
     private String userName;
+    private boolean isActive = true;
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
 
     public Receipt() {
     }

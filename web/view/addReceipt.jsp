@@ -135,15 +135,13 @@
                             data-money="<%=hd.getRemainingAmount()%>"
                             data-total="<%=hd.getTotalAmount()%>"
                             data-customer="<%=hd.getCustomerName()%>"
-                            data-invoice="<%=hd.getInvoiceCode()%>">
+                            data-invoice="<%=hd.getInvoiceCode()%>"
+                            data-search="<%=hd.getCustomerName()%>"
+                            data-sub="Còn nợ: <%=hd.getRemainingMoney()%> VNĐ">
 
-                            <%=hd.getInvoiceCode()%> |
+                            <%=hd.getInvoiceCode()%> —
 
-                            <%=hd.getCustomerName()%> |
-
-                            Còn nợ:
-
-                            <%=hd.getRemainingMoney()%> VNĐ
+                            <%=hd.getCustomerName()%>
 
                         </option>
 
@@ -415,6 +413,15 @@
             updateInvoiceInfo();
 
         </script>
+
+        <script src="${pageContext.request.contextPath}/js/searchable-select.js"></script>
+        <script>
+            initSearchableSelect('invoice', {
+                placeholder: '🔍 Tìm kiếm theo mã hóa đơn hoặc tên khách hàng...',
+                emptyText: 'Không tìm thấy hóa đơn phù hợp'
+            });
+        </script>
+
     </body>
 
 </html>

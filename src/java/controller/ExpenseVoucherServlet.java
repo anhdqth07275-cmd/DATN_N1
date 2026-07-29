@@ -1,6 +1,8 @@
 package controller;
 
 import dao.ExpenseVoucherDAO;
+import dao.PermissionDAO;
+import dao.RequestDisableDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -9,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import model.DangKy;
 import model.ExpenseVoucher;
 
@@ -16,6 +19,9 @@ import model.ExpenseVoucher;
 public class ExpenseVoucherServlet extends HttpServlet {
 
     ExpenseVoucherDAO dao = new ExpenseVoucherDAO();
+    PermissionDAO permissionDAO = new PermissionDAO();
+    RequestDisableDAO requestDAO = new RequestDisableDAO();
+    private static final String MODULE = "PHIEUCHI";
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -40,6 +46,26 @@ public class ExpenseVoucherServlet extends HttpServlet {
 
             case "delete":
                 deleteExpense(request, response);
+                break;
+
+            case "softdelete":
+                softDeleteExpense(request, response);
+                break;
+
+            case "restore":
+                restoreExpense(request, response);
+                break;
+
+            case "harddelete":
+                deleteExpense(request, response);
+                break;
+
+            case "requestdisable":
+                requestDisableExpense(request, response);
+                break;
+
+            case "dismissrequest":
+                dismissRequestExpense(request, response);
                 break;
 
             case "search":
@@ -96,13 +122,58 @@ public class ExpenseVoucherServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+        boolean canSoftDelete = hasAction(request, "XOAMEM");
+        boolean canHardDelete = hasAction(request, "XOACUNG");
+
+        boolean showInactive = canSoftDelete
+                && "1".equals(request.getParameter("showInactive"));
+
         ArrayList<ExpenseVoucher> list =
-                dao.getAll();
+                dao.getAll(showInactive);
+
+        HashSet<Integer> pendingIds = requestDAO.getPendingEntityIds(MODULE);
 
         request.setAttribute("listExpense", list);
+        request.setAttribute("canSoftDelete", canSoftDelete);
+        request.setAttribute("canHardDelete", canHardDelete);
+        request.setAttribute("pendingIds", pendingIds);
+        request.setAttribute("showInactive", showInactive);
 
         request.getRequestDispatcher("/view/phieuchi.jsp")
                 .forward(request, response);
+
+    }
+
+    // ==========================
+    // Kiểm tra quyền hành động chi tiết (THEM/SUA/XOAMEM/XOACUNG)
+    // ==========================
+    private boolean hasAction(HttpServletRequest request, String actionCode) {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            return false;
+        }
+
+        DangKy user = (DangKy) session.getAttribute("user");
+
+        if (user == null) {
+            return false;
+        }
+
+        return permissionDAO.hasPermission(
+                user.getRoleId(), MODULE + "_" + actionCode);
+
+    }
+
+    private int currentUserId(HttpServletRequest request) {
+
+        HttpSession session = request.getSession(false);
+
+        DangKy user = session == null ? null
+                : (DangKy) session.getAttribute("user");
+
+        return user == null ? 0 : user.getUserId();
 
     }
 
@@ -217,17 +288,112 @@ public class ExpenseVoucherServlet extends HttpServlet {
             HttpServletResponse response)
             throws IOException {
 
+        if (!hasAction(request, "XOACUNG")) {
+            response.sendRedirect(request.getContextPath() + "/phieuchi");
+            return;
+        }
+
         int id = Integer.parseInt(
                 request.getParameter("id"));
 
-        dao.delete(id);
+        dao.hardDelete(id);
 
         util.ActivityLogger.log(request, "XOA", "Phiếu chi",
-                "Xóa phiếu chi #" + id);
+                "Xóa vĩnh viễn phiếu chi #" + id);
 
         response.sendRedirect(
                 request.getContextPath()
                 + "/phieuchi");
+
+    }
+
+    // ==========================
+    // Xóa mềm (vô hiệu hóa) - Admin/Giám đốc
+    // ==========================
+    private void softDeleteExpense(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/phieuchi");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        dao.softDelete(id);
+
+        requestDAO.resolve(MODULE, id, currentUserId(request), "Approved");
+
+        util.ActivityLogger.log(request, "XOA", "Phiếu chi",
+                "Vô hiệu hóa phiếu chi #" + id);
+
+        response.sendRedirect(request.getContextPath() + "/phieuchi");
+
+    }
+
+    // ==========================
+    // Khôi phục phiếu chi đã bị vô hiệu hóa
+    // ==========================
+    private void restoreExpense(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/phieuchi");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        dao.restore(id);
+
+        util.ActivityLogger.log(request, "SUA", "Phiếu chi",
+                "Khôi phục phiếu chi #" + id);
+
+        response.sendRedirect(request.getContextPath() + "/phieuchi");
+
+    }
+
+    // ==========================
+    // Nhân viên "Xin quyền vô hiệu hóa"
+    // ==========================
+    private void requestDisableExpense(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        ExpenseVoucher e = dao.getById(id);
+
+        String label = e != null ? e.getExpenseName() : ("#" + id);
+
+        requestDAO.create(MODULE, id, label, currentUserId(request));
+
+        util.ActivityLogger.log(request, "SUA", "Phiếu chi",
+                "Đề xuất vô hiệu hóa phiếu chi \"" + label + "\"");
+
+        response.sendRedirect(request.getContextPath() + "/phieuchi");
+
+    }
+
+    // ==========================
+    // Admin/Giám đốc bỏ qua đề xuất
+    // ==========================
+    private void dismissRequestExpense(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/phieuchi");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        requestDAO.resolve(MODULE, id, currentUserId(request), "Rejected");
+
+        response.sendRedirect(request.getContextPath() + "/phieuchi");
 
     }
 
@@ -244,9 +410,15 @@ public class ExpenseVoucherServlet extends HttpServlet {
         ArrayList<ExpenseVoucher> list =
                 dao.search(keyword);
 
+        HashSet<Integer> pendingIds = requestDAO.getPendingEntityIds(MODULE);
+
         request.setAttribute(
                 "listExpense",
                 list);
+        request.setAttribute("canSoftDelete", hasAction(request, "XOAMEM"));
+        request.setAttribute("canHardDelete", hasAction(request, "XOACUNG"));
+        request.setAttribute("pendingIds", pendingIds);
+        request.setAttribute("showInactive", false);
 
         request.getRequestDispatcher(
                 "/view/phieuchi.jsp")

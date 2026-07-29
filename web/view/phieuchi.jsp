@@ -1,10 +1,21 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.ArrayList"%>
+<%@page import="java.util.HashSet"%>
 <%@page import="model.ExpenseVoucher"%>
+<%@taglib prefix="my" tagdir="/WEB-INF/tags" %>
 
 <%
     ArrayList<ExpenseVoucher> list =
             (ArrayList<ExpenseVoucher>) request.getAttribute("listExpense");
+
+    Boolean canSoftDelete = (Boolean) request.getAttribute("canSoftDelete");
+    Boolean canHardDelete = (Boolean) request.getAttribute("canHardDelete");
+    Boolean showInactive = (Boolean) request.getAttribute("showInactive");
+    HashSet<Integer> pendingIds = (HashSet<Integer>) request.getAttribute("pendingIds");
+    if (canSoftDelete == null) canSoftDelete = false;
+    if (canHardDelete == null) canHardDelete = false;
+    if (showInactive == null) showInactive = false;
+    if (pendingIds == null) pendingIds = new HashSet<>();
 %>
 
 <!DOCTYPE html>
@@ -212,6 +223,17 @@
 
 <div class="toolbar">
 
+    <% if (canSoftDelete) { %>
+    <div class="form-check form-switch mb-0 me-3">
+        <input class="form-check-input" type="checkbox" id="showInactiveToggle"
+               <%=showInactive ? "checked" : ""%>
+               onchange="window.location.href='<%=request.getContextPath()%>/phieuchi?showInactive=' + (this.checked ? '1' : '0')">
+        <label class="form-check-label" for="showInactiveToggle" style="white-space:nowrap;">
+            Hiện cả đã vô hiệu hóa
+        </label>
+    </div>
+    <% } %>
+
     <form action="<%=request.getContextPath()%>/phieuchi"
           method="post"
           class="d-flex">
@@ -280,6 +302,10 @@
 
             PC<%=String.format("%04d",e.getExpenseId())%>
 
+            <% if (!e.isActive()) { %>
+            <br><span class="badge bg-secondary" style="font-size:10px;">Đã vô hiệu hóa</span>
+            <% } %>
+
         </td>
 
         <td>
@@ -326,14 +352,14 @@
 
             </a>
 
-            <a
-                href="<%=request.getContextPath()%>/phieuchi?action=delete&id=<%=e.getExpenseId()%>"
-                class="btn btn-danger btn-sm"
-                onclick="return confirm('Bạn có chắc muốn xóa phiếu chi này?');">
-
-                <i class="bi bi-trash"></i>
-
-            </a>
+            <my:deleteActions
+                baseUrl="<%=request.getContextPath()%>/phieuchi"
+                entityId="<%=e.getExpenseId()%>"
+                entityLabel="<%=e.getExpenseName()%>"
+                isActive="<%=e.isActive()%>"
+                canSoftDelete="<%=canSoftDelete%>"
+                canHardDelete="<%=canHardDelete%>"
+                pendingRequest="<%=pendingIds.contains(e.getExpenseId())%>" />
 
         </td>
 

@@ -20,6 +20,15 @@ public class ExpenseVoucher {
     private Date expenseDate;
 
     private String description;
+    private boolean isActive = true;
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
 
     public ExpenseVoucher() {
     }

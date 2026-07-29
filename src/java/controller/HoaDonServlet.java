@@ -3,6 +3,8 @@ package controller;
 import dao.CustomerDAO;
 import dao.HoaDonDAO;
 import dao.InvoiceDetailDAO;
+import dao.PermissionDAO;
+import dao.RequestDisableDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import model.DangKy;
 import model.HoaDon;
 
@@ -18,6 +21,9 @@ import model.HoaDon;
 public class HoaDonServlet extends HttpServlet {
 
     HoaDonDAO dao = new HoaDonDAO();
+    PermissionDAO permissionDAO = new PermissionDAO();
+    RequestDisableDAO requestDAO = new RequestDisableDAO();
+    private static final String MODULE = "HOADON";
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -46,6 +52,26 @@ public class HoaDonServlet extends HttpServlet {
 
             case "delete":
                 deleteHoaDon(request, response);
+                break;
+
+            case "softdelete":
+                softDeleteHoaDon(request, response);
+                break;
+
+            case "restore":
+                restoreHoaDon(request, response);
+                break;
+
+            case "harddelete":
+                deleteHoaDon(request, response);
+                break;
+
+            case "requestdisable":
+                requestDisableHoaDon(request, response);
+                break;
+
+            case "dismissrequest":
+                dismissRequestHoaDon(request, response);
                 break;
 
             case "search":
@@ -102,9 +128,21 @@ public class HoaDonServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        ArrayList<HoaDon> list = dao.getAll();
+        boolean canSoftDelete = hasAction(request, "XOAMEM");
+        boolean canHardDelete = hasAction(request, "XOACUNG");
+
+        boolean showInactive = canSoftDelete
+                && "1".equals(request.getParameter("showInactive"));
+
+        ArrayList<HoaDon> list = dao.getAll(showInactive);
+
+        HashSet<Integer> pendingIds = requestDAO.getPendingEntityIds(MODULE);
 
         request.setAttribute("listHoaDon", list);
+        request.setAttribute("canSoftDelete", canSoftDelete);
+        request.setAttribute("canHardDelete", canHardDelete);
+        request.setAttribute("pendingIds", pendingIds);
+        request.setAttribute("showInactive", showInactive);
 
         request.getRequestDispatcher("/view/qlhoadon.jsp")
                 .forward(request, response);
@@ -243,11 +281,49 @@ public class HoaDonServlet extends HttpServlet {
     }
 
     // ==========================
-    // Xóa
+    // Kiểm tra quyền hành động chi tiết (THEM/SUA/XOAMEM/XOACUNG)
+    // ==========================
+    private boolean hasAction(HttpServletRequest request, String actionCode) {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            return false;
+        }
+
+        DangKy user = (DangKy) session.getAttribute("user");
+
+        if (user == null) {
+            return false;
+        }
+
+        return permissionDAO.hasPermission(
+                user.getRoleId(), MODULE + "_" + actionCode);
+
+    }
+
+    private int currentUserId(HttpServletRequest request) {
+
+        HttpSession session = request.getSession(false);
+
+        DangKy user = session == null ? null
+                : (DangKy) session.getAttribute("user");
+
+        return user == null ? 0 : user.getUserId();
+
+    }
+
+    // ==========================
+    // Xóa vĩnh viễn - chỉ Admin (quyền HOADON_XOACUNG)
     // ==========================
     private void deleteHoaDon(HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
+
+        if (!hasAction(request, "XOACUNG")) {
+            response.sendRedirect(request.getContextPath() + "/hoadon");
+            return;
+        }
 
         int id = Integer.parseInt(request.getParameter("id"));
 
@@ -268,7 +344,7 @@ public class HoaDonServlet extends HttpServlet {
 
         }
 
-        boolean ok = dao.delete(id);
+        boolean ok = dao.hardDelete(id);
 
         if (!ok) {
 
@@ -284,7 +360,99 @@ public class HoaDonServlet extends HttpServlet {
         }
 
         util.ActivityLogger.log(request, "XOA", "Hóa đơn",
-                "Xóa hóa đơn #" + id);
+                "Xóa vĩnh viễn hóa đơn #" + id);
+
+        response.sendRedirect(request.getContextPath() + "/hoadon");
+
+    }
+
+    // ==========================
+    // Xóa mềm (vô hiệu hóa) - Admin/Giám đốc (quyền HOADON_XOAMEM)
+    // ==========================
+    private void softDeleteHoaDon(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/hoadon");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        dao.softDelete(id);
+
+        requestDAO.resolve(MODULE, id, currentUserId(request), "Approved");
+
+        util.ActivityLogger.log(request, "XOA", "Hóa đơn",
+                "Vô hiệu hóa hóa đơn #" + id);
+
+        response.sendRedirect(request.getContextPath() + "/hoadon");
+
+    }
+
+    // ==========================
+    // Khôi phục hóa đơn đã bị vô hiệu hóa
+    // ==========================
+    private void restoreHoaDon(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/hoadon");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        dao.restore(id);
+
+        util.ActivityLogger.log(request, "SUA", "Hóa đơn",
+                "Khôi phục hóa đơn #" + id);
+
+        response.sendRedirect(request.getContextPath() + "/hoadon");
+
+    }
+
+    // ==========================
+    // Nhân viên "Xin quyền vô hiệu hóa"
+    // ==========================
+    private void requestDisableHoaDon(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        HoaDon hd = dao.getById(id);
+
+        String label = hd != null
+                ? ("HD" + String.format("%04d", hd.getInvoiceId()))
+                : ("#" + id);
+
+        requestDAO.create(MODULE, id, label, currentUserId(request));
+
+        util.ActivityLogger.log(request, "SUA", "Hóa đơn",
+                "Đề xuất vô hiệu hóa hóa đơn " + label);
+
+        response.sendRedirect(request.getContextPath() + "/hoadon");
+
+    }
+
+    // ==========================
+    // Admin/Giám đốc bỏ qua đề xuất
+    // ==========================
+    private void dismissRequestHoaDon(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/hoadon");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        requestDAO.resolve(MODULE, id, currentUserId(request), "Rejected");
 
         response.sendRedirect(request.getContextPath() + "/hoadon");
 
@@ -301,7 +469,13 @@ public class HoaDonServlet extends HttpServlet {
 
         ArrayList<HoaDon> list = dao.search(keyword);
 
+        HashSet<Integer> pendingIds = requestDAO.getPendingEntityIds(MODULE);
+
         request.setAttribute("listHoaDon", list);
+        request.setAttribute("canSoftDelete", hasAction(request, "XOAMEM"));
+        request.setAttribute("canHardDelete", hasAction(request, "XOACUNG"));
+        request.setAttribute("pendingIds", pendingIds);
+        request.setAttribute("showInactive", false);
 
         request.getRequestDispatcher("/view/qlhoadon.jsp")
                 .forward(request, response);

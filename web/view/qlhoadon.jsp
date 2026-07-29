@@ -1,8 +1,19 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.ArrayList"%>
+<%@page import="java.util.HashSet"%>
 <%@page import="model.HoaDon"%>
+<%@taglib prefix="my" tagdir="/WEB-INF/tags" %>
 
 <%
+Boolean canSoftDelete = (Boolean) request.getAttribute("canSoftDelete");
+Boolean canHardDelete = (Boolean) request.getAttribute("canHardDelete");
+Boolean showInactive = (Boolean) request.getAttribute("showInactive");
+HashSet<Integer> pendingIds = (HashSet<Integer>) request.getAttribute("pendingIds");
+if (canSoftDelete == null) canSoftDelete = false;
+if (canHardDelete == null) canHardDelete = false;
+if (showInactive == null) showInactive = false;
+if (pendingIds == null) pendingIds = new HashSet<>();
+
 ArrayList<HoaDon> list =
 (ArrayList<HoaDon>)request.getAttribute("listHoaDon");
 %>
@@ -257,7 +268,18 @@ ArrayList<HoaDon> list =
 
                         </div>
 
-                        <div class="right">
+                        <div class="right d-flex align-items-center gap-3">
+
+                            <% if (canSoftDelete) { %>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" id="showInactiveToggle"
+                                       <%=showInactive ? "checked" : ""%>
+                                       onchange="window.location.href='<%=request.getContextPath()%>/hoadon?showInactive=' + (this.checked ? '1' : '0')">
+                                <label class="form-check-label" for="showInactiveToggle" style="white-space:nowrap;">
+                                    Hiện cả đã vô hiệu hóa
+                                </label>
+                            </div>
+                            <% } %>
 
                             <form
                                 action="<%=request.getContextPath()%>/hoadon"
@@ -385,7 +407,17 @@ ArrayList<HoaDon> list =
 
                                     <%
 
-                                    if("Đã thanh toán".equals(hd.getStatus())){
+                                    if (!hd.isActive()) {
+
+                                    %>
+
+                                    <span class="badge bg-secondary">
+                                        Đã vô hiệu hóa
+                                    </span>
+
+                                    <%
+
+                                    } else if("Đã thanh toán".equals(hd.getStatus())){
 
                                     %>
 
@@ -439,15 +471,14 @@ ArrayList<HoaDon> list =
 
                                     </a>
 
-                                    <a
-                                        href="<%=request.getContextPath()%>/hoadon?action=delete&id=<%=hd.getInvoiceId()%>"
-                                        class="btn btn-danger btn-sm"
-                                        title="Xóa"
-                                        onclick="return confirm('Bạn có chắc muốn xóa hóa đơn này?')">
-
-                                        <i class="bi bi-trash-fill"></i>
-
-                                    </a>
+                                    <my:deleteActions
+                                        baseUrl="<%=request.getContextPath()%>/hoadon"
+                                        entityId="<%=hd.getInvoiceId()%>"
+                                        entityLabel="<%=\"HD\"+String.format(\"%04d\",hd.getInvoiceId())%>"
+                                        isActive="<%=hd.isActive()%>"
+                                        canSoftDelete="<%=canSoftDelete%>"
+                                        canHardDelete="<%=canHardDelete%>"
+                                        pendingRequest="<%=pendingIds.contains(hd.getInvoiceId())%>" />
 
                                 </td>
 

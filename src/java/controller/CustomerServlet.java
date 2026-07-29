@@ -5,6 +5,8 @@
 package controller;
 
 import dao.CustomerDAO;
+import dao.PermissionDAO;
+import dao.RequestDisableDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -12,8 +14,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
+import java.util.HashSet;
 import model.Customer;
+import model.DangKy;
 
 /**
  *
@@ -23,6 +28,9 @@ import model.Customer;
 public class CustomerServlet extends HttpServlet {
 
     CustomerDAO dao = new CustomerDAO();
+    PermissionDAO permissionDAO = new PermissionDAO();
+    RequestDisableDAO requestDAO = new RequestDisableDAO();
+    private static final String MODULE = "KHACHHANG";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -64,6 +72,26 @@ public class CustomerServlet extends HttpServlet {
 
             case "delete":
                 deleteCustomer(request, response);
+                break;
+
+            case "softdelete":
+                softDeleteCustomer(request, response);
+                break;
+
+            case "restore":
+                restoreCustomer(request, response);
+                break;
+
+            case "harddelete":
+                hardDeleteCustomer(request, response);
+                break;
+
+            case "requestdisable":
+                requestDisableCustomer(request, response);
+                break;
+
+            case "dismissrequest":
+                dismissRequestCustomer(request, response);
                 break;
 
             case "search":
@@ -123,7 +151,13 @@ public class CustomerServlet extends HttpServlet {
 
         ArrayList<Customer> list = dao.search(keyword);
 
+        HashSet<Integer> pendingIds = requestDAO.getPendingEntityIds(MODULE);
+
         request.setAttribute("listCustomer", list);
+        request.setAttribute("canSoftDelete", hasAction(request, "XOAMEM"));
+        request.setAttribute("canHardDelete", hasAction(request, "XOACUNG"));
+        request.setAttribute("pendingIds", pendingIds);
+        request.setAttribute("showInactive", false);
 
         request.getRequestDispatcher("/view/qlkh.jsp")
                 .forward(request, response);
@@ -134,12 +168,163 @@ public class CustomerServlet extends HttpServlet {
             HttpServletResponse response)
             throws IOException {
 
+        softDeleteCustomer(request, response);
+
+    }
+
+    // ==========================
+    // Kiểm tra người dùng hiện tại có quyền hành động cụ thể trên module
+    // này không (THEM/SUA/XOAMEM/XOACUNG) - đọc trực tiếp từ session.
+    // ==========================
+    private boolean hasAction(HttpServletRequest request, String actionCode) {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            return false;
+        }
+
+        DangKy user = (DangKy) session.getAttribute("user");
+
+        if (user == null) {
+            return false;
+        }
+
+        return permissionDAO.hasPermission(
+                user.getRoleId(), MODULE + "_" + actionCode);
+
+    }
+
+    private int currentUserId(HttpServletRequest request) {
+
+        HttpSession session = request.getSession(false);
+
+        DangKy user = session == null ? null
+                : (DangKy) session.getAttribute("user");
+
+        return user == null ? 0 : user.getUserId();
+
+    }
+
+    // ==========================
+    // Xóa mềm (vô hiệu hóa) - chỉ Admin/Giám đốc (có quyền KHACHHANG_XOAMEM)
+    // ==========================
+    private void softDeleteCustomer(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/khachhang");
+            return;
+        }
+
         int id = Integer.parseInt(request.getParameter("id"));
 
-        dao.delete(id);
+        Customer c = dao.getById(id);
+
+        dao.softDelete(id);
+
+        // Nếu bản ghi này từng có yêu cầu "xin quyền vô hiệu hóa" đang chờ
+        // của Nhân viên thì tự động đánh dấu yêu cầu đó đã được chấp thuận.
+        requestDAO.resolve(MODULE, id, currentUserId(request), "Approved");
 
         util.ActivityLogger.log(request, "XOA", "Khách hàng",
-                "Xóa khách hàng #" + id);
+                "Vô hiệu hóa khách hàng \""
+                + (c != null ? c.getCustomerName() : "#" + id) + "\"");
+
+        response.sendRedirect(request.getContextPath() + "/khachhang");
+
+    }
+
+    // ==========================
+    // Khôi phục bản ghi đã bị vô hiệu hóa - chỉ Admin/Giám đốc
+    // ==========================
+    private void restoreCustomer(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/khachhang");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        Customer c = dao.getById(id);
+
+        dao.restore(id);
+
+        util.ActivityLogger.log(request, "SUA", "Khách hàng",
+                "Khôi phục khách hàng \""
+                + (c != null ? c.getCustomerName() : "#" + id) + "\"");
+
+        response.sendRedirect(request.getContextPath() + "/khachhang");
+
+    }
+
+    // ==========================
+    // Xóa vĩnh viễn - chỉ Admin (có quyền KHACHHANG_XOACUNG)
+    // ==========================
+    private void hardDeleteCustomer(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOACUNG")) {
+            response.sendRedirect(request.getContextPath() + "/khachhang");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        Customer c = dao.getById(id);
+
+        dao.hardDelete(id);
+
+        util.ActivityLogger.log(request, "XOA", "Khách hàng",
+                "Xóa vĩnh viễn khách hàng \""
+                + (c != null ? c.getCustomerName() : "#" + id) + "\"");
+
+        response.sendRedirect(request.getContextPath() + "/khachhang");
+
+    }
+
+    // ==========================
+    // Nhân viên "Xin quyền vô hiệu hóa" - chỉ đánh dấu, không xóa gì cả
+    // ==========================
+    private void requestDisableCustomer(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        Customer c = dao.getById(id);
+
+        String label = c != null ? c.getCustomerName() : ("#" + id);
+
+        requestDAO.create(MODULE, id, label, currentUserId(request));
+
+        util.ActivityLogger.log(request, "SUA", "Khách hàng",
+                "Đề xuất vô hiệu hóa khách hàng \"" + label + "\"");
+
+        response.sendRedirect(request.getContextPath() + "/khachhang");
+
+    }
+
+    // ==========================
+    // Admin/Giám đốc bỏ qua đề xuất (không vô hiệu hóa)
+    // ==========================
+    private void dismissRequestCustomer(HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        if (!hasAction(request, "XOAMEM")) {
+            response.sendRedirect(request.getContextPath() + "/khachhang");
+            return;
+        }
+
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        requestDAO.resolve(MODULE, id, currentUserId(request), "Rejected");
 
         response.sendRedirect(request.getContextPath() + "/khachhang");
 
@@ -231,9 +416,21 @@ public class CustomerServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        ArrayList<Customer> list = dao.getAll();
+        boolean canSoftDelete = hasAction(request, "XOAMEM");
+        boolean canHardDelete = hasAction(request, "XOACUNG");
+
+        boolean showInactive = canSoftDelete
+                && "1".equals(request.getParameter("showInactive"));
+
+        ArrayList<Customer> list = dao.getAll(showInactive);
+
+        HashSet<Integer> pendingIds = requestDAO.getPendingEntityIds(MODULE);
 
         request.setAttribute("listCustomer", list);
+        request.setAttribute("canSoftDelete", canSoftDelete);
+        request.setAttribute("canHardDelete", canHardDelete);
+        request.setAttribute("pendingIds", pendingIds);
+        request.setAttribute("showInactive", showInactive);
 
         request.getRequestDispatcher("/view/qlkh.jsp")
                 .forward(request, response);

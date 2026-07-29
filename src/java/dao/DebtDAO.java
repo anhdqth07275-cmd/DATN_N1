@@ -290,6 +290,7 @@ public void updateFromInvoice(int invoiceId) {
             + "LEFT JOIN ("
             + "     SELECT invoice_id, SUM(amount) AS paid "
             + "     FROM Receipt "
+            + "     WHERE is_active = 1 "
             + "     GROUP BY invoice_id"
             + ") r ON r.invoice_id = i.invoice_id "
             + "WHERE d.invoice_id = ?";
@@ -302,7 +303,8 @@ public void updateFromInvoice(int invoiceId) {
             + "SET status = CASE "
             + "        WHEN total_amount > 0 AND total_amount <= ISNULL("
             + "             (SELECT SUM(amount) FROM Receipt "
-            + "              WHERE invoice_id = Invoice.invoice_id),0) "
+            + "              WHERE invoice_id = Invoice.invoice_id "
+            + "              AND is_active = 1),0) "
             + "             THEN N'Đã thanh toán' "
             + "        ELSE N'Chưa thanh toán' "
             + "     END "
@@ -361,7 +363,7 @@ public double getTotalPaid(int invoiceId, int excludeReceiptId) {
     String sql =
             "SELECT ISNULL(SUM(amount),0) AS paid "
             + "FROM Receipt "
-            + "WHERE invoice_id=? AND receipt_id<>?";
+            + "WHERE invoice_id=? AND receipt_id<>? AND is_active=1";
 
     try {
 
