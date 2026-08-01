@@ -82,10 +82,6 @@ public class CustomerServlet extends HttpServlet {
                 restoreCustomer(request, response);
                 break;
 
-            case "harddelete":
-                hardDeleteCustomer(request, response);
-                break;
-
             case "requestdisable":
                 requestDisableCustomer(request, response);
                 break;
@@ -155,7 +151,6 @@ public class CustomerServlet extends HttpServlet {
 
         request.setAttribute("listCustomer", list);
         request.setAttribute("canSoftDelete", hasAction(request, "XOAMEM"));
-        request.setAttribute("canHardDelete", hasAction(request, "XOACUNG"));
         request.setAttribute("pendingIds", pendingIds);
         request.setAttribute("showInactive", false);
 
@@ -174,7 +169,7 @@ public class CustomerServlet extends HttpServlet {
 
     // ==========================
     // Kiểm tra người dùng hiện tại có quyền hành động cụ thể trên module
-    // này không (THEM/SUA/XOAMEM/XOACUNG) - đọc trực tiếp từ session.
+    // này không (THEM/SUA/XOAMEM) - đọc trực tiếp từ session.
     // ==========================
     private boolean hasAction(HttpServletRequest request, String actionCode) {
 
@@ -256,32 +251,6 @@ public class CustomerServlet extends HttpServlet {
 
         util.ActivityLogger.log(request, "SUA", "Khách hàng",
                 "Khôi phục khách hàng \""
-                + (c != null ? c.getCustomerName() : "#" + id) + "\"");
-
-        response.sendRedirect(request.getContextPath() + "/khachhang");
-
-    }
-
-    // ==========================
-    // Xóa vĩnh viễn - chỉ Admin (có quyền KHACHHANG_XOACUNG)
-    // ==========================
-    private void hardDeleteCustomer(HttpServletRequest request,
-            HttpServletResponse response)
-            throws IOException {
-
-        if (!hasAction(request, "XOACUNG")) {
-            response.sendRedirect(request.getContextPath() + "/khachhang");
-            return;
-        }
-
-        int id = Integer.parseInt(request.getParameter("id"));
-
-        Customer c = dao.getById(id);
-
-        dao.hardDelete(id);
-
-        util.ActivityLogger.log(request, "XOA", "Khách hàng",
-                "Xóa vĩnh viễn khách hàng \""
                 + (c != null ? c.getCustomerName() : "#" + id) + "\"");
 
         response.sendRedirect(request.getContextPath() + "/khachhang");
@@ -437,7 +406,6 @@ public class CustomerServlet extends HttpServlet {
             throws ServletException, IOException {
 
         boolean canSoftDelete = hasAction(request, "XOAMEM");
-        boolean canHardDelete = hasAction(request, "XOACUNG");
         boolean canAdd = hasAction(request, "THEM");
         boolean canEdit = hasAction(request, "SUA");
 
@@ -450,7 +418,6 @@ public class CustomerServlet extends HttpServlet {
 
         request.setAttribute("listCustomer", list);
         request.setAttribute("canSoftDelete", canSoftDelete);
-        request.setAttribute("canHardDelete", canHardDelete);
         request.setAttribute("canAdd", canAdd);
         request.setAttribute("canEdit", canEdit);
         request.setAttribute("pendingIds", pendingIds);

@@ -45,6 +45,7 @@ public class HoaDonDAO {
                 hd.setCustomerId(rs.getInt("customer_id"));
                 hd.setUserId(rs.getInt("user_id"));
                 hd.setInvoiceDate(rs.getDate("invoice_date"));
+                hd.setDueDate(rs.getDate("due_date"));
                 hd.setTotalAmount(rs.getDouble("total_amount"));
                 hd.setStatus(rs.getString("status"));
                 hd.setActive(rs.getBoolean("is_active"));
@@ -98,6 +99,7 @@ public class HoaDonDAO {
                 hd.setCustomerId(rs.getInt("customer_id"));
                 hd.setUserId(rs.getInt("user_id"));
                 hd.setInvoiceDate(rs.getDate("invoice_date"));
+                hd.setDueDate(rs.getDate("due_date"));
                 hd.setTotalAmount(rs.getDouble("total_amount"));
                 hd.setStatus(rs.getString("status"));
                 hd.setActive(rs.getBoolean("is_active"));
@@ -129,8 +131,8 @@ public class HoaDonDAO {
     public int insert(HoaDon hd) {
 
         String sql
-                = "INSERT INTO Invoice(customer_id,user_id,total_amount,status) "
-                + "VALUES(?,?,?,?)";
+                = "INSERT INTO Invoice(customer_id,user_id,total_amount,status,due_date) "
+                + "VALUES(?,?,?,?,?)";
 
         try {
 
@@ -148,6 +150,8 @@ public class HoaDonDAO {
             ps.setDouble(3, 0);
 
             ps.setString(4, hd.getStatus());
+
+            ps.setDate(5, new java.sql.Date(hd.getDueDate().getTime()));
 
             int row = ps.executeUpdate();
 
@@ -229,20 +233,17 @@ public class HoaDonDAO {
     }
 
     // ==========================
-    // Kiểm tra hóa đơn có thể xóa hay không
+    // Kiểm tra hóa đơn còn phiếu thu đang hoạt động hay không.
+    // Hóa đơn và phiếu thu ràng buộc chặt với nhau (phiếu thu trừ
+    // tiền vào công nợ của hóa đơn) nên KHÔNG cho vô hiệu hóa hóa
+    // đơn khi vẫn còn phiếu thu đang hoạt động - phải vô hiệu hóa
+    // (xóa mềm) hết các phiếu thu liên quan trước.
     // ==========================
-    // Trước đây delete() gọi thẳng DELETE FROM Invoice trong khi
-    // Invoice_Detail/Debt/Receipt đều tham chiếu invoice_id -> nếu
-    // DB có ràng buộc khóa ngoại thì lệnh xóa sẽ ném lỗi, bị
-    // "nuốt" bởi catch(Exception) rồi vẫn redirect như xóa thành
-    // công, khiến hóa đơn "không thể xóa" mà không rõ lý do.
-    // Về nghiệp vụ: hóa đơn đã có phiếu thu (đã phát sinh giao
-    // dịch tiền) thì không nên xóa để giữ tính toàn vẹn của sổ
-    // sách kế toán - chỉ nên cho xóa hóa đơn chưa có phiếu thu nào.
-    public boolean canDelete(int invoiceId) {
+    public boolean hasActiveReceipt(int invoiceId) {
 
-        String sql
-                = "SELECT COUNT(*) cnt FROM Receipt WHERE invoice_id=?";
+        String sql =
+                "SELECT COUNT(*) cnt FROM Receipt "
+                + "WHERE invoice_id=? AND is_active=1";
 
         try {
 
@@ -254,17 +255,17 @@ public class HoaDonDAO {
 
             ResultSet rs = ps.executeQuery();
 
-            boolean ok = true;
+            boolean has = false;
 
             if (rs.next()) {
-                ok = rs.getInt("cnt") == 0;
+                has = rs.getInt("cnt") > 0;
             }
 
             rs.close();
             ps.close();
             con.close();
 
-            return ok;
+            return has;
 
         } catch (Exception e) {
 
@@ -277,14 +278,11 @@ public class HoaDonDAO {
     }
 
     // ==========================
-    // Xóa hóa đơn
+    // Xóa hóa đơn - giữ tương thích ngược, delete() thực chất luôn
+    // là xóa mềm (không còn hỗ trợ xóa vĩnh viễn).
     // ==========================
-    // Xóa theo đúng thứ tự phụ thuộc khóa ngoại, trong 1 transaction:
-    // Debt -> Invoice_Detail -> Invoice. Chỉ nên gọi khi canDelete()
-    // trả về true (không còn phiếu thu nào gắn với hóa đơn).
-    // Giữ tương thích ngược - trước đây delete() = xóa cứng
     public boolean delete(int id) {
-        return hardDelete(id);
+        return softDelete(id);
     }
 
     // ==========================
@@ -303,64 +301,6 @@ public class HoaDonDAO {
     public boolean restore(int id) {
         return util.SoftDeleteHelper.setActive(
                 "Invoice", "invoice_id", "is_active", id, true);
-    }
-
-    public boolean hardDelete(int id) {
-
-        Connection con = null;
-
-        try {
-
-            con = DBConnect.getConnection();
-            con.setAutoCommit(false);
-
-            PreparedStatement psDebt = con.prepareStatement(
-                    "DELETE FROM Debt WHERE invoice_id=?");
-            psDebt.setInt(1, id);
-            psDebt.executeUpdate();
-            psDebt.close();
-
-            PreparedStatement psDetail = con.prepareStatement(
-                    "DELETE FROM Invoice_Detail WHERE invoice_id=?");
-            psDetail.setInt(1, id);
-            psDetail.executeUpdate();
-            psDetail.close();
-
-            PreparedStatement psInvoice = con.prepareStatement(
-                    "DELETE FROM Invoice WHERE invoice_id=?");
-            psInvoice.setInt(1, id);
-            int row = psInvoice.executeUpdate();
-            psInvoice.close();
-
-            con.commit();
-
-            return row > 0;
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            if (con != null) {
-                try {
-                    con.rollback();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-
-        } finally {
-
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
-
-        return false;
-
     }
 
     // ==========================
@@ -401,6 +341,7 @@ public class HoaDonDAO {
                 hd.setUserName(rs.getString("full_name"));
 
                 hd.setInvoiceDate(rs.getDate("invoice_date"));
+                hd.setDueDate(rs.getDate("due_date"));
                 hd.setTotalAmount(rs.getDouble("total_amount"));
                 hd.setStatus(rs.getString("status"));
 

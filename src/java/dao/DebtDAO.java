@@ -207,6 +207,9 @@ public class DebtDAO {
     // ==========================
 // Tạo công nợ từ hóa đơn
 // ==========================
+// Hạn thanh toán của công nợ LẤY THEO hạn thanh toán do người
+// dùng nhập khi lập hóa đơn (Invoice.due_date) - không còn cộng
+// cứng 30 ngày như trước đây.
 public boolean createFromInvoice(int invoiceId){
 
     String sql =
@@ -221,7 +224,7 @@ public boolean createFromInvoice(int invoiceId){
             + "customer_id,"
             + "invoice_id,"
             + "total_amount,"
-            + "DATEADD(DAY,30,invoice_date),"
+            + "due_date,"
             + "'Chưa thanh toán' "
             + "FROM Invoice "
             + "WHERE invoice_id=? "

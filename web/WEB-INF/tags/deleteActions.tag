@@ -4,15 +4,13 @@
 <%@ attribute name="entityLabel" required="false" rtexprvalue="true" %>
 <%@ attribute name="isActive" required="true" rtexprvalue="true" type="java.lang.Boolean" %>
 <%@ attribute name="canSoftDelete" required="true" rtexprvalue="true" type="java.lang.Boolean" %>
-<%@ attribute name="canHardDelete" required="true" rtexprvalue="true" type="java.lang.Boolean" %>
 <%@ attribute name="pendingRequest" required="false" rtexprvalue="true" type="java.lang.Boolean" %>
 
 <%
     // Nhãn dùng trong hộp thoại xác nhận / gửi lên server
     String labelForJs = (entityLabel == null ? "" : entityLabel).replace("'", "\\'");
     boolean pending = pendingRequest != null && pendingRequest;
-    boolean privileged = (canSoftDelete != null && canSoftDelete)
-            || (canHardDelete != null && canHardDelete);
+    boolean privileged = canSoftDelete != null && canSoftDelete;
 %>
 
 <div class="d-inline-flex align-items-center gap-1">
@@ -44,14 +42,6 @@
         </a>
         <% } %>
 
-        <% if (canHardDelete != null && canHardDelete) { %>
-        <a href="<%=baseUrl%>?action=harddelete&id=<%=entityId%>"
-           class="btn btn-outline-danger btn-sm" title="Xóa vĩnh viễn (KHÔNG thể khôi phục)"
-           onclick="return confirm('XÓA VĨNH VIỄN \'<%=labelForJs%>\'?\n\nHành động này KHÔNG THỂ hoàn tác!')">
-            🗑️
-        </a>
-        <% } %>
-
     <% } else { %>
 
         <%-- Nhân viên: không có quyền xóa -> chỉ được đề xuất --%>
@@ -78,14 +68,6 @@
        class="btn btn-outline-success btn-sm" title="Khôi phục lại hoạt động"
        onclick="return confirm('Khôi phục \'<%=labelForJs%>\'?')">
         ↩️ Khôi phục
-    </a>
-    <% } %>
-
-    <% if (canHardDelete != null && canHardDelete) { %>
-    <a href="<%=baseUrl%>?action=harddelete&id=<%=entityId%>"
-       class="btn btn-outline-danger btn-sm" title="Xóa vĩnh viễn (KHÔNG thể khôi phục)"
-       onclick="return confirm('XÓA VĨNH VIỄN \'<%=labelForJs%>\'?\n\nHành động này KHÔNG THỂ hoàn tác!')">
-        🗑️
     </a>
     <% } %>
 

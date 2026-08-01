@@ -265,10 +265,10 @@ public class ReceiptDAO {
     }
 
 // ==========================
-// Giữ tương thích ngược - trước đây delete() = xóa cứng
+// Giữ tương thích ngược - delete() thực chất luôn là xóa mềm
 // ==========================
     public boolean delete(int id) {
-        return hardDelete(id);
+        return softDelete(id);
     }
 
 // ==========================
@@ -287,39 +287,6 @@ public class ReceiptDAO {
                 "Receipt", "receipt_id", "is_active", id, true);
     }
 
-// ==========================
-// Xóa vĩnh viễn phiếu thu
-// ==========================
-    public boolean hardDelete(int id) {
-
-        String sql
-                = "DELETE FROM Receipt "
-                + "WHERE receipt_id=?";
-
-        try {
-
-            Connection con = DBConnect.getConnection();
-
-            PreparedStatement ps
-                    = con.prepareStatement(sql);
-
-            ps.setInt(1, id);
-
-            int row = ps.executeUpdate();
-
-            con.close();
-
-            return row > 0;
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
-
-        return false;
-
-    }
 // ==========================
 // Tìm kiếm phiếu thu
 // ==========================

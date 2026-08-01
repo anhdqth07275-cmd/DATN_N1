@@ -50,20 +50,12 @@ public class HoaDonServlet extends HttpServlet {
                 viewHoaDon(request, response);
                 break;
 
-            case "delete":
-                deleteHoaDon(request, response);
-                break;
-
             case "softdelete":
                 softDeleteHoaDon(request, response);
                 break;
 
             case "restore":
                 restoreHoaDon(request, response);
-                break;
-
-            case "harddelete":
-                deleteHoaDon(request, response);
                 break;
 
             case "requestdisable":
@@ -109,10 +101,6 @@ public class HoaDonServlet extends HttpServlet {
                 updateHoaDon(request, response);
                 break;
 
-            case "delete":
-                deleteHoaDon(request, response);
-                break;
-
             case "search":
                 searchHoaDon(request, response);
                 break;
@@ -129,7 +117,6 @@ public class HoaDonServlet extends HttpServlet {
             throws ServletException, IOException {
 
         boolean canSoftDelete = hasAction(request, "XOAMEM");
-        boolean canHardDelete = hasAction(request, "XOACUNG");
         boolean canAdd = hasAction(request, "THEM");
         boolean canEdit = hasAction(request, "SUA");
 
@@ -142,7 +129,6 @@ public class HoaDonServlet extends HttpServlet {
 
         request.setAttribute("listHoaDon", list);
         request.setAttribute("canSoftDelete", canSoftDelete);
-        request.setAttribute("canHardDelete", canHardDelete);
         request.setAttribute("canAdd", canAdd);
         request.setAttribute("canEdit", canEdit);
         request.setAttribute("pendingIds", pendingIds);
@@ -230,11 +216,53 @@ public class HoaDonServlet extends HttpServlet {
     // ==========================
     private void insertHoaDon(HttpServletRequest request,
             HttpServletResponse response)
-            throws IOException {
+            throws IOException, ServletException {
 
         if (!hasAction(request, "THEM")) {
             response.sendRedirect(request.getContextPath() + "/hoadon");
             return;
+        }
+
+        // Hóa đơn được lập vào đúng thời điểm hiện tại (invoice_date
+        // = GETDATE() ở tầng CSDL) nên "ngày lập hóa đơn" để so sánh
+        // với hạn thanh toán chính là ngày hôm nay.
+        java.time.LocalDate today = java.time.LocalDate.now();
+
+        String dueDateStr = request.getParameter("dueDate");
+
+        java.time.LocalDate dueDate = null;
+
+        try {
+            dueDate = java.time.LocalDate.parse(dueDateStr);
+        } catch (Exception ex) {
+            dueDate = null;
+        }
+
+        // Hạn thanh toán bắt buộc phải >= ngày lập hóa đơn (hôm nay),
+        // nếu không hợp lệ thì trả lại form kèm thông báo lỗi, KHÔNG
+        // tạo hóa đơn.
+        if (dueDate == null || dueDate.isBefore(today)) {
+
+            CustomerDAO customerDAO = new CustomerDAO();
+
+            request.setAttribute("listCustomer", customerDAO.getAll());
+
+            request.setAttribute("error",
+                    "Hạn thanh toán không hợp lệ. Hạn thanh toán phải "
+                    + "lớn hơn hoặc bằng ngày lập hóa đơn ("
+                    + today.format(java.time.format.DateTimeFormatter
+                            .ofPattern("dd/MM/yyyy")) + ").");
+
+            request.setAttribute("selectedCustomerId",
+                    request.getParameter("customerId"));
+
+            request.setAttribute("dueDateInput", dueDateStr);
+
+            request.getRequestDispatcher("/view/addHoaDon.jsp")
+                    .forward(request, response);
+
+            return;
+
         }
 
         HttpSession session = request.getSession();
@@ -250,6 +278,10 @@ public class HoaDonServlet extends HttpServlet {
         hd.setUserId(user.getUserId());
 
         hd.setTotalAmount(0);
+
+        hd.setDueDate(
+                java.sql.Date.valueOf(dueDate)
+        );
 
         // Hóa đơn mới luôn bắt đầu ở trạng thái "Chưa thanh toán":
         // tổng tiền = 0 nên chưa có ý nghĩa gì để đánh dấu "đã
@@ -305,7 +337,7 @@ public class HoaDonServlet extends HttpServlet {
     }
 
     // ==========================
-    // Kiểm tra quyền hành động chi tiết (THEM/SUA/XOAMEM/XOACUNG)
+    // Kiểm tra quyền hành động chi tiết (THEM/SUA/XOAMEM)
     // ==========================
     private boolean hasAction(HttpServletRequest request, String actionCode) {
 
@@ -338,59 +370,6 @@ public class HoaDonServlet extends HttpServlet {
     }
 
     // ==========================
-    // Xóa vĩnh viễn - chỉ Admin (quyền HOADON_XOACUNG)
-    // ==========================
-    private void deleteHoaDon(HttpServletRequest request,
-            HttpServletResponse response)
-            throws IOException {
-
-        if (!hasAction(request, "XOACUNG")) {
-            response.sendRedirect(request.getContextPath() + "/hoadon");
-            return;
-        }
-
-        int id = Integer.parseInt(request.getParameter("id"));
-
-        // Hóa đơn đã có phiếu thu (đã phát sinh giao dịch tiền)
-        // thì không cho xóa, để không làm mất dấu vết thu tiền/
-        // công nợ đã ghi nhận trước đó.
-        if (!dao.canDelete(id)) {
-
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/hoadon?error="
-                    + java.net.URLEncoder.encode(
-                            "Không thể xóa hóa đơn đã có phiếu thu. "
-                            + "Vui lòng xóa các phiếu thu liên quan trước.",
-                            "UTF-8"));
-
-            return;
-
-        }
-
-        boolean ok = dao.hardDelete(id);
-
-        if (!ok) {
-
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/hoadon?error="
-                    + java.net.URLEncoder.encode(
-                            "Xóa hóa đơn thất bại. Vui lòng thử lại.",
-                            "UTF-8"));
-
-            return;
-
-        }
-
-        util.ActivityLogger.log(request, "XOA", "Hóa đơn",
-                "Xóa vĩnh viễn hóa đơn #" + id);
-
-        response.sendRedirect(request.getContextPath() + "/hoadon");
-
-    }
-
-    // ==========================
     // Xóa mềm (vô hiệu hóa) - Admin/Giám đốc (quyền HOADON_XOAMEM)
     // ==========================
     private void softDeleteHoaDon(HttpServletRequest request,
@@ -403,6 +382,24 @@ public class HoaDonServlet extends HttpServlet {
         }
 
         int id = Integer.parseInt(request.getParameter("id"));
+
+        // Hóa đơn - phiếu thu ràng buộc chặt chẽ với nhau: chỉ khi
+        // phiếu thu liên quan đã bị vô hiệu hóa hết thì hóa đơn mới
+        // được vô hiệu hóa.
+        if (dao.hasActiveReceipt(id)) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/hoadon?error="
+                    + java.net.URLEncoder.encode(
+                            "Không thể vô hiệu hóa hóa đơn này vì vẫn còn "
+                            + "phiếu thu đang hoạt động. Vui lòng vô hiệu "
+                            + "hóa các phiếu thu liên quan trước.",
+                            "UTF-8"));
+
+            return;
+
+        }
 
         dao.softDelete(id);
 
@@ -497,7 +494,6 @@ public class HoaDonServlet extends HttpServlet {
 
         request.setAttribute("listHoaDon", list);
         request.setAttribute("canSoftDelete", hasAction(request, "XOAMEM"));
-        request.setAttribute("canHardDelete", hasAction(request, "XOACUNG"));
         request.setAttribute("pendingIds", pendingIds);
         request.setAttribute("showInactive", false);
 

@@ -58,12 +58,6 @@ public class ReceiptServlet extends HttpServlet {
 
                 break;
 
-            case "delete":
-
-                deleteReceipt(request, response);
-
-                break;
-
             case "softdelete":
 
                 softDeleteReceipt(request, response);
@@ -73,12 +67,6 @@ public class ReceiptServlet extends HttpServlet {
             case "restore":
 
                 restoreReceipt(request, response);
-
-                break;
-
-            case "harddelete":
-
-                deleteReceipt(request, response);
 
                 break;
 
@@ -157,7 +145,6 @@ public class ReceiptServlet extends HttpServlet {
             throws ServletException, IOException {
 
         boolean canSoftDelete = hasAction(request, "XOAMEM");
-        boolean canHardDelete = hasAction(request, "XOACUNG");
         boolean canAdd = hasAction(request, "THEM");
         boolean canEdit = hasAction(request, "SUA");
 
@@ -170,7 +157,6 @@ public class ReceiptServlet extends HttpServlet {
 
         request.setAttribute("listReceipt", list);
         request.setAttribute("canSoftDelete", canSoftDelete);
-        request.setAttribute("canHardDelete", canHardDelete);
         request.setAttribute("canAdd", canAdd);
         request.setAttribute("canEdit", canEdit);
         request.setAttribute("pendingIds", pendingIds);
@@ -182,7 +168,7 @@ public class ReceiptServlet extends HttpServlet {
     }
 
     // ==========================
-    // Kiểm tra quyền hành động chi tiết (THEM/SUA/XOAMEM/XOACUNG)
+    // Kiểm tra quyền hành động chi tiết (THEM/SUA/XOAMEM)
     // ==========================
     private boolean hasAction(HttpServletRequest request, String actionCode) {
 
@@ -445,43 +431,6 @@ public class ReceiptServlet extends HttpServlet {
                 + "/phieuthu");
 
     }
-// ==========================
-// Xóa phiếu thu
-// ==========================
-
-    private void deleteReceipt(HttpServletRequest request,
-            HttpServletResponse response)
-            throws IOException {
-
-        if (!hasAction(request, "XOACUNG")) {
-            response.sendRedirect(request.getContextPath() + "/phieuthu");
-            return;
-        }
-
-        int id
-                = Integer.parseInt(
-                        request.getParameter("id"));
-
-        // Lấy invoiceId TRƯỚC khi xóa để còn đồng bộ lại công nợ/
-        // trạng thái hóa đơn (hủy phiếu thu thì nợ phải tăng trở
-        // lại tương ứng).
-        Receipt r = dao.getById(id);
-
-        dao.hardDelete(id);
-
-        if (r != null) {
-            debtDAO.updateFromInvoice(r.getInvoiceId());
-        }
-
-        util.ActivityLogger.log(request, "XOA", "Phiếu thu",
-                "Xóa vĩnh viễn phiếu thu #" + id);
-
-        response.sendRedirect(
-                request.getContextPath()
-                + "/phieuthu");
-
-    }
-
     // ==========================
     // Xóa mềm (vô hiệu hóa) - Admin/Giám đốc. Đồng bộ lại công nợ vì
     // phiếu thu bị ẩn không còn được tính là "đã thu" nữa.
@@ -601,7 +550,6 @@ public class ReceiptServlet extends HttpServlet {
                 "listReceipt",
                 list);
         request.setAttribute("canSoftDelete", hasAction(request, "XOAMEM"));
-        request.setAttribute("canHardDelete", hasAction(request, "XOACUNG"));
         request.setAttribute("pendingIds", pendingIds);
         request.setAttribute("showInactive", false);
 

@@ -241,6 +241,22 @@
 
                         </tr>
 
+                        <tr>
+
+                            <td>
+
+                                <b>Hạn thanh toán</b>
+
+                            </td>
+
+                            <td colspan="3">
+
+                                <%=hd.getDueDateVN()%>
+
+                            </td>
+
+                        </tr>
+
                     </table>
 
                 </div>

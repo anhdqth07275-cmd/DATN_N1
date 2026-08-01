@@ -6,13 +6,11 @@
 
 <%
 Boolean canSoftDelete = (Boolean) request.getAttribute("canSoftDelete");
-Boolean canHardDelete = (Boolean) request.getAttribute("canHardDelete");
 Boolean canAdd = (Boolean) request.getAttribute("canAdd");
 Boolean canEdit = (Boolean) request.getAttribute("canEdit");
 Boolean showInactive = (Boolean) request.getAttribute("showInactive");
 HashSet<Integer> pendingIds = (HashSet<Integer>) request.getAttribute("pendingIds");
 if (canSoftDelete == null) canSoftDelete = false;
-if (canHardDelete == null) canHardDelete = false;
 if (canAdd == null) canAdd = false;
 if (canEdit == null) canEdit = false;
 if (showInactive == null) showInactive = false;
@@ -346,6 +344,12 @@ ArrayList<HoaDon> list =
 
                                 </th>
 
+                                <th width="140">
+
+                                    Hạn TT
+
+                                </th>
+
                                 <th width="170">
 
                                     Tổng tiền
@@ -400,6 +404,12 @@ ArrayList<HoaDon> list =
                                 <td align="center">
 
                                     <%=hd.getInvoiceDate()%>
+
+                                </td>
+
+                                <td align="center">
+
+                                    <%=hd.getDueDateVN()%>
 
                                 </td>
 
@@ -487,7 +497,6 @@ ArrayList<HoaDon> list =
                                         entityLabel="<%=hdLabel%>"
                                         isActive="<%=hd.isActive()%>"
                                         canSoftDelete="<%=canSoftDelete%>"
-                                        canHardDelete="<%=canHardDelete%>"
                                         pendingRequest="<%=pendingIds.contains(hd.getInvoiceId())%>" />
 
                                 </td>
@@ -504,7 +513,7 @@ ArrayList<HoaDon> list =
 
                             <tr>
 
-                                <td colspan="7" class="empty-row">
+                                <td colspan="8" class="empty-row">
 
                                     <i class="bi bi-database-exclamation fs-3"></i>
 

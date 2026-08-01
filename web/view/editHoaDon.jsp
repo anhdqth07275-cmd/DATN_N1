@@ -188,6 +188,30 @@ ArrayList<Customer> list=
 
                     </div>
 
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Hạn thanh toán
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="<%=hd.getDueDateVN()%>"
+                            disabled>
+
+                        <div class="form-text">
+
+                            Hạn thanh toán được xác định ngay khi lập
+                            hóa đơn và cũng là hạn thanh toán của công
+                            nợ tương ứng, không thể sửa ở đây.
+
+                        </div>
+
+                    </div>
+
                     <div class="row mt-4">
 
                         <div class="col text-center">

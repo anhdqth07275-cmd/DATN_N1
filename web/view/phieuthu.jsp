@@ -9,13 +9,11 @@
             (ArrayList<Receipt>) request.getAttribute("listReceipt");
 
     Boolean canSoftDelete = (Boolean) request.getAttribute("canSoftDelete");
-    Boolean canHardDelete = (Boolean) request.getAttribute("canHardDelete");
     Boolean canAdd = (Boolean) request.getAttribute("canAdd");
     Boolean canEdit = (Boolean) request.getAttribute("canEdit");
     Boolean showInactive = (Boolean) request.getAttribute("showInactive");
     HashSet<Integer> pendingIds = (HashSet<Integer>) request.getAttribute("pendingIds");
     if (canSoftDelete == null) canSoftDelete = false;
-    if (canHardDelete == null) canHardDelete = false;
     if (canAdd == null) canAdd = false;
     if (canEdit == null) canEdit = false;
     if (showInactive == null) showInactive = false;
@@ -300,7 +298,6 @@
                                         entityLabel="<%=r.getReceiptCode()%>"
                                         isActive="<%=r.isActive()%>"
                                         canSoftDelete="<%=canSoftDelete%>"
-                                        canHardDelete="<%=canHardDelete%>"
                                         pendingRequest="<%=pendingIds.contains(r.getReceiptId())%>" />
 
                                 </td>

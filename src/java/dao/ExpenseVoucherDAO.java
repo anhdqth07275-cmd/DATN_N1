@@ -240,10 +240,10 @@ public class ExpenseVoucherDAO {
 
     }
         // ==========================
-    // Giữ tương thích ngược - trước đây delete() = xóa cứng
+    // Giữ tương thích ngược - delete() thực chất luôn là xóa mềm
     // ==========================
     public boolean delete(int id) {
-        return hardDelete(id);
+        return softDelete(id);
     }
 
     // ==========================
@@ -260,42 +260,6 @@ public class ExpenseVoucherDAO {
     public boolean restore(int id) {
         return util.SoftDeleteHelper.setActive(
                 "Expense_Voucher", "expense_id", "is_active", id, true);
-    }
-
-    // ==========================
-    // Xóa vĩnh viễn phiếu chi
-    // ==========================
-    public boolean hardDelete(int id) {
-
-        String sql =
-                "DELETE FROM Expense_Voucher "
-                + "WHERE expense_id=?";
-
-        try {
-
-            Connection con =
-                    DBConnect.getConnection();
-
-            PreparedStatement ps =
-                    con.prepareStatement(sql);
-
-            ps.setInt(1, id);
-
-            int row =
-                    ps.executeUpdate();
-
-            con.close();
-
-            return row > 0;
-
-        } catch (Exception ex) {
-
-            ex.printStackTrace();
-
-        }
-
-        return false;
-
     }
 
     // ==========================

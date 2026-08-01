@@ -16,6 +16,7 @@ public class HoaDon {
     private String userName;
 
     private Date invoiceDate;
+    private Date dueDate;
 
     private double totalAmount;
 
@@ -114,6 +115,25 @@ public class HoaDon {
 
     public void setInvoiceDate(Date invoiceDate) {
         this.invoiceDate = invoiceDate;
+    }
+
+    public Date getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Date dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public String getDueDateVN() {
+
+        if (dueDate == null) {
+            return "";
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(dueDate);
+
     }
 
     public double getTotalAmount() {

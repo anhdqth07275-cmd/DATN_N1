@@ -5,6 +5,22 @@
 <%
 ArrayList<Customer> list =
 (ArrayList<Customer>)request.getAttribute("listCustomer");
+
+String error = (String) request.getAttribute("error");
+String selectedCustomerId = (String) request.getAttribute("selectedCustomerId");
+String dueDateInput = (String) request.getAttribute("dueDateInput");
+
+if (selectedCustomerId == null) {
+    selectedCustomerId = "";
+}
+if (dueDateInput == null) {
+    dueDateInput = "";
+}
+
+java.time.LocalDate todayLd = java.time.LocalDate.now();
+String todayStr = todayLd.toString();
+String todayVN = todayLd.format(
+        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 %>
 
 <!DOCTYPE html>
@@ -122,6 +138,7 @@ ArrayList<Customer> list =
 
                             <option
                                 value="<%=c.getCustomerId()%>"
+                                <%=String.valueOf(c.getCustomerId()).equals(selectedCustomerId) ? "selected" : ""%>
                                 data-search="<%=c.getPhone()!=null?c.getPhone():""%>"
                                 data-sub="<%=c.getPhone()!=null?c.getPhone():"Không có SĐT"%><%=c.getAddress()!=null && !c.getAddress().isEmpty() ? " • " + c.getAddress() : ""%>">
 
@@ -141,7 +158,61 @@ ArrayList<Customer> list =
 
                     </div>
 
-                            
+                    <% if (error != null && !error.isEmpty()) { %>
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <%=error%>
+                    </div>
+                    <% } %>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Ngày lập hóa đơn
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="<%=todayVN%>"
+                            disabled>
+
+                        <div class="form-text">
+
+                            Hóa đơn được lập vào thời điểm hiện tại,
+                            không thể chỉnh sửa.
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Hạn thanh toán <span class="text-danger">*</span>
+
+                        </label>
+
+                        <input
+                            type="date"
+                            id="dueDate"
+                            name="dueDate"
+                            class="form-control"
+                            min="<%=todayStr%>"
+                            value="<%=dueDateInput%>"
+                            required>
+
+                        <div class="form-text">
+
+                            Hạn thanh toán phải lớn hơn hoặc bằng ngày
+                            lập hóa đơn (<%=todayVN%>).
+
+                        </div>
+
+                    </div>
 
                     <div class="mb-3">
 

@@ -16,7 +16,7 @@ public class CustomerDAO {
 
     // includeInactive = true -> lấy cả khách hàng đã bị vô hiệu hóa (status=0)
     // Dùng khi Admin/Giám đốc bật "Hiển thị cả đã vô hiệu hóa" để có thể
-    // khôi phục hoặc xóa cứng những bản ghi đó.
+    // khôi phục lại những bản ghi đó.
     public ArrayList<Customer> getAll(boolean includeInactive) {
 
         ArrayList<Customer> list = new ArrayList<>();
@@ -186,14 +186,6 @@ public class CustomerDAO {
     public boolean restore(int id) {
         return util.SoftDeleteHelper.setActive(
                 "Customer", "customer_id", "status", id, true);
-    }
-
-    // ==========================
-    // Xóa vĩnh viễn khỏi cơ sở dữ liệu - chỉ Admin mới được gọi
-    // ==========================
-    public boolean hardDelete(int id) {
-        return util.SoftDeleteHelper.hardDelete(
-                "Customer", "customer_id", id);
     }
 
     public ArrayList<Customer> search(String keyword) {

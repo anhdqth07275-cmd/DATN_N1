@@ -44,20 +44,12 @@ public class ExpenseVoucherServlet extends HttpServlet {
                 showEditForm(request, response);
                 break;
 
-            case "delete":
-                deleteExpense(request, response);
-                break;
-
             case "softdelete":
                 softDeleteExpense(request, response);
                 break;
 
             case "restore":
                 restoreExpense(request, response);
-                break;
-
-            case "harddelete":
-                deleteExpense(request, response);
                 break;
 
             case "requestdisable":
@@ -107,10 +99,6 @@ public class ExpenseVoucherServlet extends HttpServlet {
                 searchExpense(request, response);
                 break;
 
-            case "delete":
-                deleteExpense(request, response);
-                break;
-
         }
 
     }
@@ -123,7 +111,6 @@ public class ExpenseVoucherServlet extends HttpServlet {
             throws ServletException, IOException {
 
         boolean canSoftDelete = hasAction(request, "XOAMEM");
-        boolean canHardDelete = hasAction(request, "XOACUNG");
         boolean canAdd = hasAction(request, "THEM");
         boolean canEdit = hasAction(request, "SUA");
 
@@ -137,7 +124,6 @@ public class ExpenseVoucherServlet extends HttpServlet {
 
         request.setAttribute("listExpense", list);
         request.setAttribute("canSoftDelete", canSoftDelete);
-        request.setAttribute("canHardDelete", canHardDelete);
         request.setAttribute("canAdd", canAdd);
         request.setAttribute("canEdit", canEdit);
         request.setAttribute("pendingIds", pendingIds);
@@ -149,7 +135,7 @@ public class ExpenseVoucherServlet extends HttpServlet {
     }
 
     // ==========================
-    // Kiểm tra quyền hành động chi tiết (THEM/SUA/XOAMEM/XOACUNG)
+    // Kiểm tra quyền hành động chi tiết (THEM/SUA/XOAMEM)
     // ==========================
     private boolean hasAction(HttpServletRequest request, String actionCode) {
 
@@ -306,32 +292,6 @@ public class ExpenseVoucherServlet extends HttpServlet {
 
     }
         // ==========================
-    // Xóa phiếu chi
-    // ==========================
-    private void deleteExpense(HttpServletRequest request,
-            HttpServletResponse response)
-            throws IOException {
-
-        if (!hasAction(request, "XOACUNG")) {
-            response.sendRedirect(request.getContextPath() + "/phieuchi");
-            return;
-        }
-
-        int id = Integer.parseInt(
-                request.getParameter("id"));
-
-        dao.hardDelete(id);
-
-        util.ActivityLogger.log(request, "XOA", "Phiếu chi",
-                "Xóa vĩnh viễn phiếu chi #" + id);
-
-        response.sendRedirect(
-                request.getContextPath()
-                + "/phieuchi");
-
-    }
-
-    // ==========================
     // Xóa mềm (vô hiệu hóa) - Admin/Giám đốc
     // ==========================
     private void softDeleteExpense(HttpServletRequest request,
@@ -440,7 +400,6 @@ public class ExpenseVoucherServlet extends HttpServlet {
                 "listExpense",
                 list);
         request.setAttribute("canSoftDelete", hasAction(request, "XOAMEM"));
-        request.setAttribute("canHardDelete", hasAction(request, "XOACUNG"));
         request.setAttribute("pendingIds", pendingIds);
         request.setAttribute("showInactive", false);
 
