@@ -50,7 +50,22 @@ rel="stylesheet">
 
     <div class="mb-3">
         <label>Số điện thoại</label>
-        <input class="form-control" name="phone">
+        <div class="input-group">
+            <span class="input-group-text">+84</span>
+            <input
+                class="form-control"
+                type="tel"
+                name="phone"
+                inputmode="numeric"
+                pattern="[0-9]{9,10}"
+                maxlength="10"
+                placeholder="912345678"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                title="Nhập 9 hoặc 10 chữ số">
+        </div>
+        <div class="form-text">
+            Không bắt buộc. Nếu nhập, cần đúng 9 hoặc 10 chữ số sau mã vùng +84 (VD: 912345678).
+        </div>
     </div>
 
     <div class="mb-3">

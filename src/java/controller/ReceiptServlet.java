@@ -226,6 +226,26 @@ public class ReceiptServlet extends HttpServlet {
                 "listHoaDon",
                 listHoaDon);
 
+        // Nếu được điều hướng từ nút "Thu tiền" ở màn hình Công nợ
+        // thì hóa đơn tương ứng sẽ được chọn sẵn trong form.
+        String invoiceIdParam = request.getParameter("invoiceId");
+
+        if (invoiceIdParam != null && !invoiceIdParam.isEmpty()) {
+
+            try {
+
+                request.setAttribute(
+                        "selectedInvoiceId",
+                        Integer.parseInt(invoiceIdParam));
+
+            } catch (NumberFormatException ex) {
+
+                // bỏ qua nếu tham số không hợp lệ
+
+            }
+
+        }
+
         request.getRequestDispatcher(
                 "/view/addReceipt.jsp")
                 .forward(request, response);

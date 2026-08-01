@@ -6,6 +6,13 @@
 <%
     DangKy user = (DangKy) request.getAttribute("user");
     ArrayList<Role> listRole = (ArrayList<Role>) request.getAttribute("listRole");
+    String error = (String) request.getAttribute("error");
+
+    // Ô nhập chỉ hiển thị phần số sau mã vùng +84 (bỏ "+84" hoặc số 0
+    // ở đầu nếu dữ liệu cũ được lưu theo kiểu khác).
+    String phoneRaw = user.getPhone() == null ? "" : user.getPhone().trim();
+    String phoneDigits = phoneRaw.replaceFirst("^\\+84", "")
+            .replaceFirst("^0", "");
 %>
 
 <!DOCTYPE html>
@@ -25,6 +32,10 @@ rel="stylesheet">
 <body class="container mt-5">
 
 <h2>Sửa người dùng</h2>
+
+<% if (error != null) { %>
+<div class="alert alert-danger"><%=error%></div>
+<% } %>
 
 <form action="<%=request.getContextPath()%>/nguoidung" method="post">
 
@@ -53,7 +64,23 @@ rel="stylesheet">
 
     <div class="mb-3">
         <label>Số điện thoại</label>
-        <input class="form-control" name="phone" value="<%=user.getPhone()%>">
+        <div class="input-group">
+            <span class="input-group-text">+84</span>
+            <input
+                class="form-control"
+                type="tel"
+                name="phone"
+                inputmode="numeric"
+                pattern="[0-9]{9,10}"
+                maxlength="10"
+                value="<%=phoneDigits%>"
+                placeholder="912345678"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                title="Nhập 9 hoặc 10 chữ số">
+        </div>
+        <div class="form-text">
+            Không bắt buộc. Nếu nhập, cần đúng 9 hoặc 10 chữ số sau mã vùng +84 (VD: 912345678).
+        </div>
     </div>
 
     <div class="mb-3">

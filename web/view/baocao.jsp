@@ -192,7 +192,7 @@ body{
 
                 <div class="col-md-3">
                     <div class="card-box border-start border-4 border-primary">
-                        <h6>💰 Báo cáo doanh thu</h6>
+                        <h6>💰 Báo cáo doanh thu chưa thực hiện</h6>
                         <h4 class="text-primary"><%= report.getRevenueMoney() %> VNĐ</h4>
                     </div>
                 </div>
@@ -206,7 +206,7 @@ body{
 
                 <div class="col-md-3">
                     <div class="card-box border-start border-4 border-danger">
-                        <h6>💸 Báo cáo chi thu</h6>
+                        <h6>💸 Báo cáo Thu - Chi</h6>
                         <h4 class="text-success">+<%= report.getReceiptMoney() %></h4>
                         <h4 class="text-danger">-<%= report.getExpenseMoney() %></h4>
                     </div>
@@ -214,7 +214,7 @@ body{
 
                 <div class="col-md-3">
                     <div class="card-box border-start border-4 border-success">
-                        <h6>✅ Báo cáo thanh toán</h6>
+                        <h6>✅ Báo cáo doanh thu</h6>
                         <h4 class="text-success"><%= report.getReceiptMoney() %> VNĐ</h4>
                     </div>
                 </div>

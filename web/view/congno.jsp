@@ -199,13 +199,15 @@
 
     <th width="120">Mã HĐ</th>
 
+    <th width="150">Đã thu</th>
+
     <th width="180">Còn nợ</th>
 
     <th width="150">Hạn thanh toán</th>
 
     <th width="150">Trạng thái</th>
 
-    <th width="150">Thao tác</th>
+    <th width="180">Thao tác</th>
 
 </tr>
 
@@ -238,6 +240,16 @@ if(list != null && !list.isEmpty()){
     <td align="center">
 
         <%=d.getInvoiceCode()%>
+
+    </td>
+
+    <td align="right">
+
+        <strong class="text-success">
+
+            <%=d.getPaidMoney()%> VNĐ
+
+        </strong>
 
     </td>
 
@@ -314,11 +326,20 @@ if(status.equalsIgnoreCase("Đã thanh toán")){
     <td align="center">
 
         <a href="<%=request.getContextPath()%>/congno?action=extend&id=<%=d.getDebtId()%>"
-           class="btn btn-warning btn-sm">
+           class="btn btn-warning btn-sm mb-1">
 
             <i class="bi bi-calendar-event"></i>
 
             Gia hạn
+
+        </a>
+
+        <a href="<%=request.getContextPath()%>/phieuthu?action=add&invoiceId=<%=d.getInvoiceId()%>"
+           class="btn btn-success btn-sm mb-1">
+
+            <i class="bi bi-cash-coin"></i>
+
+            Thu tiền
 
         </a>
 
@@ -336,7 +357,7 @@ if(status.equalsIgnoreCase("Đã thanh toán")){
 
 <tr>
 
-    <td colspan="7" class="empty-row">
+    <td colspan="8" class="empty-row">
 
         <i class="bi bi-database-exclamation"></i>
 

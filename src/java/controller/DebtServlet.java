@@ -1,22 +1,29 @@
 package controller;
 
 import dao.DebtDAO;
+import dao.PermissionDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
 
+import model.DangKy;
 import model.Debt;
 
 @WebServlet("/congno")
 public class DebtServlet extends HttpServlet {
 
     DebtDAO dao = new DebtDAO();
+
+    PermissionDAO permissionDAO = new PermissionDAO();
+
+    private static final String MODULE = "CONGNO";
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -83,13 +90,41 @@ public class DebtServlet extends HttpServlet {
     }
 
     // ==========================
+    // Quyền "xem toàn bộ" (CONGNO_XEMTATCA) - nếu không có quyền
+    // này thì chỉ được xem công nợ của hóa đơn do CHÍNH mình lập,
+    // để cảnh báo/nhắc nợ luôn đúng người phụ trách.
+    // Trả về null nếu được xem toàn bộ, ngược lại trả về userId
+    // để DAO lọc.
+    // ==========================
+    private Integer scopeUserId(HttpServletRequest request) {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            return -1; // chưa đăng nhập -> không thấy gì
+        }
+
+        DangKy user = (DangKy) session.getAttribute("user");
+
+        if (user == null) {
+            return -1;
+        }
+
+        boolean seeAll = permissionDAO.hasPermission(
+                user.getRoleId(), MODULE + "_XEMTATCA");
+
+        return seeAll ? null : user.getUserId();
+
+    }
+
+    // ==========================
     // Danh sách công nợ
     // ==========================
     private void listDebt(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        ArrayList<Debt> list = dao.getAll();
+        ArrayList<Debt> list = dao.getAll(scopeUserId(request));
 
         request.setAttribute("listDebt", list);
 
@@ -107,7 +142,7 @@ public class DebtServlet extends HttpServlet {
 
         String keyword = request.getParameter("keyword");
 
-        ArrayList<Debt> list = dao.search(keyword);
+        ArrayList<Debt> list = dao.search(keyword, scopeUserId(request));
 
         request.setAttribute("listDebt", list);
 

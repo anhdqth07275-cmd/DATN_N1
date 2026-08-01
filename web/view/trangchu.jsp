@@ -14,8 +14,11 @@ Dashboard dashboard =
 ArrayList<HoaDon> listInvoice =
         (ArrayList<HoaDon>) request.getAttribute("listInvoice");
 
-ArrayList<Debt> listDebt =
-        (ArrayList<Debt>) request.getAttribute("listDebt");
+ArrayList<Debt> listDueSoon =
+        (ArrayList<Debt>) request.getAttribute("listDueSoon");
+
+ArrayList<Debt> listOverdue =
+        (ArrayList<Debt>) request.getAttribute("listOverdue");
 if(user == null){
     response.sendRedirect(request.getContextPath() + "/dangnhap");
     return;
@@ -162,9 +165,7 @@ if(user == null){
 
                 <div class="topbar">
 
-                    <div>
-                        🔔
-                    </div>
+                    
 
                     <div class="user-box">
 
@@ -190,7 +191,7 @@ if(user == null){
 
                                 <div class="icon-badge">💰</div>
 
-                                <h6>Tổng doanh thu</h6>
+                                <h6>Doanh thu chưa thực hiện</h6>
 
                                 <h3 class="text-primary">
 
@@ -211,7 +212,7 @@ if(user == null){
 
                                 <div class="icon-badge">💵</div>
 
-                                <h6>Tổng thu</h6>
+                                <h6>Tổng doanh thu</h6>
 
                                 <h3 class="text-success">
 
@@ -400,9 +401,14 @@ if(user == null){
 
                         <div class="col-md-6">
 
-                            <div class="box">
+                            <div class="box mb-3">
 
-                                <h5>📋 CÔNG NỢ GẦN NHẤT</h5>
+                                <h5>
+                                    ⏰ SẮP ĐẾN HẠN (trong 3 ngày)
+                                    <% if (listDueSoon != null && !listDueSoon.isEmpty()) { %>
+                                    <span class="badge bg-warning text-dark"><%=listDueSoon.size()%></span>
+                                    <% } %>
+                                </h5>
 
                                 <table class="table table-hover">
 
@@ -426,9 +432,92 @@ if(user == null){
 
                                         <%
 
-                                        if(listDebt!=null){
+                                        if(listDueSoon!=null && !listDueSoon.isEmpty()){
 
-                                            for(Debt d:listDebt){
+                                            for(Debt d:listDueSoon){
+
+                                        %>
+
+                                        <tr>
+
+                                            <td><%=d.getDebtCode()%></td>
+
+                                            <td><%=d.getCustomerName()%></td>
+
+                                            <td class="text-warning">
+
+                                                <%=d.getMoney()%> VNĐ
+
+                                            </td>
+
+                                            <td>
+
+                                                <%=d.getDateVN()%>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <%
+
+                                            }
+
+                                        } else {
+
+                                        %>
+
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted p-3">
+                                                Không có công nợ sắp đến hạn.
+                                            </td>
+                                        </tr>
+
+                                        <%
+
+                                        }
+
+                                        %>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                            <div class="box">
+
+                                <h5>
+                                    🚨 ĐÃ QUÁ HẠN
+                                    <% if (listOverdue != null && !listOverdue.isEmpty()) { %>
+                                    <span class="badge bg-danger"><%=listOverdue.size()%></span>
+                                    <% } %>
+                                </h5>
+
+                                <table class="table table-hover">
+
+                                    <thead>
+
+                                        <tr>
+
+                                            <th>Mã CN</th>
+
+                                            <th>Khách hàng</th>
+
+                                            <th>Số tiền</th>
+
+                                            <th>Hạn TT</th>
+
+                                        </tr>
+
+                                    </thead>
+
+                                    <tbody>
+
+                                        <%
+
+                                        if(listOverdue!=null && !listOverdue.isEmpty()){
+
+                                            for(Debt d:listOverdue){
 
                                         %>
 
@@ -455,6 +544,18 @@ if(user == null){
                                         <%
 
                                             }
+
+                                        } else {
+
+                                        %>
+
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted p-3">
+                                                Không có công nợ quá hạn.
+                                            </td>
+                                        </tr>
+
+                                        <%
 
                                         }
 

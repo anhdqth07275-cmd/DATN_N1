@@ -109,6 +109,37 @@ public class UserServlet extends HttpServlet {
     }
 
     // ==========================
+    // Chuẩn hóa & validate số điện thoại (phần nhập sau mã vùng +84).
+    // - Cho phép để trống (không bắt buộc ở form quản lý người dùng).
+    // - Nếu có nhập, bắt buộc đúng 9 hoặc 10 chữ số.
+    // - Trả về số điện thoại đầy đủ kèm mã vùng để lưu CSDL, vd:
+    //   "912345678" -> "+84912345678". Trả về null nếu để trống.
+    // ==========================
+    private String normalizePhone(String rawInput) {
+
+        if (rawInput == null) {
+            return null;
+        }
+
+        String digits = rawInput.trim();
+
+        if (digits.isEmpty()) {
+            return null;
+        }
+
+        if (!digits.matches("[0-9]{9,10}")) {
+
+            throw new IllegalArgumentException(
+                    "Số điện thoại không hợp lệ! Vui lòng nhập 9 hoặc "
+                    + "10 chữ số sau mã vùng +84, hoặc để trống.");
+
+        }
+
+        return "+84" + digits;
+
+    }
+
+    // ==========================
     // Chỉ Quản trị viên mới được vào phần quản lý người dùng
     // ==========================
     private boolean checkAdmin(HttpServletRequest request,
@@ -219,13 +250,29 @@ public class UserServlet extends HttpServlet {
 
         }
 
+        String phone;
+
+        try {
+
+            phone = normalizePhone(request.getParameter("phone"));
+
+        } catch (IllegalArgumentException ex) {
+
+            request.setAttribute("error", ex.getMessage());
+
+            showAddForm(request, response);
+
+            return;
+
+        }
+
         DangKy u = new DangKy();
 
         u.setUsername(username);
         u.setPassword(request.getParameter("password"));
         u.setFullName(request.getParameter("fullName"));
         u.setEmail(request.getParameter("email"));
-        u.setPhone(request.getParameter("phone"));
+        u.setPhone(phone);
         u.setRoleId(Integer.parseInt(request.getParameter("roleId")));
         u.setStatus(true);
 
@@ -248,14 +295,42 @@ public class UserServlet extends HttpServlet {
 
     private void updateUser(HttpServletRequest request,
             HttpServletResponse response)
-            throws IOException {
+            throws ServletException, IOException {
+
+        int userId = Integer.parseInt(request.getParameter("userId"));
+
+        String phone;
+
+        try {
+
+            phone = normalizePhone(request.getParameter("phone"));
+
+        } catch (IllegalArgumentException ex) {
+
+            request.setAttribute("error", ex.getMessage());
+
+            // Nạp lại đúng người dùng + danh sách vai trò để hiển thị lại
+            // form sửa kèm thông báo lỗi, thay vì mất hết dữ liệu đang sửa.
+            DangKy userToEdit = dao.getById(userId);
+
+            ArrayList<Role> listRole = roleDAO.getAllRoles();
+
+            request.setAttribute("user", userToEdit);
+            request.setAttribute("listRole", listRole);
+
+            request.getRequestDispatcher("/view/editUser.jsp")
+                    .forward(request, response);
+
+            return;
+
+        }
 
         DangKy u = new DangKy();
 
-        u.setUserId(Integer.parseInt(request.getParameter("userId")));
+        u.setUserId(userId);
         u.setFullName(request.getParameter("fullName"));
         u.setEmail(request.getParameter("email"));
-        u.setPhone(request.getParameter("phone"));
+        u.setPhone(phone);
         u.setRoleId(Integer.parseInt(request.getParameter("roleId")));
         u.setStatus("1".equals(request.getParameter("status")));
 

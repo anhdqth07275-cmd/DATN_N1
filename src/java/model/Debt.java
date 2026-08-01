@@ -14,6 +14,11 @@ public class Debt {
 
     private double remainingAmount;
 
+    // Tổng số tiền đã có phiếu thu (is_active=1) cho hóa đơn của
+    // công nợ này - để đối chiếu nhanh mà không cần sang màn hình
+    // Phiếu thu.
+    private double paidAmount;
+
     private Date dueDate;
 
     private String status;
@@ -83,6 +88,14 @@ public class Debt {
         this.remainingAmount = remainingAmount;
     }
 
+    public double getPaidAmount() {
+        return paidAmount;
+    }
+
+    public void setPaidAmount(double paidAmount) {
+        this.paidAmount = paidAmount;
+    }
+
     public Date getDueDate() {
         return dueDate;
     }
@@ -120,6 +133,14 @@ public class Debt {
         DecimalFormat df = new DecimalFormat("#,###");
 
         return df.format(remainingAmount);
+
+    }
+
+    public String getPaidMoney() {
+
+        DecimalFormat df = new DecimalFormat("#,###");
+
+        return df.format(paidAmount);
 
     }
 

@@ -90,6 +90,28 @@ public class DangKyServlet extends HttpServlet {
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
 
+        if (phone != null) {
+            phone = phone.trim();
+        }
+
+        // Số điện thoại (phần nhập sau mã vùng +84) bắt buộc gồm 9 hoặc
+        // 10 chữ số - không tin tưởng hoàn toàn vào validate phía client
+        // (HTML pattern có thể bị bỏ qua/tắt JS).
+        if (phone == null || !phone.matches("[0-9]{9,10}")) {
+
+            request.setAttribute("error",
+                    "Số điện thoại không hợp lệ! Vui lòng nhập 9 hoặc "
+                    + "10 chữ số sau mã vùng +84.");
+
+            request.getRequestDispatcher("/view/dangky.jsp")
+                    .forward(request, response);
+
+            return;
+        }
+
+        // Lưu số điện thoại đầy đủ kèm mã vùng, vd: +84912345678
+        String fullPhone = "+84" + phone;
+
         // Không tin dữ liệu roleId từ client (form/POST param) nữa - mọi tài
         // khoản tự đăng ký đều mặc định là Khách hàng (quyền thấp nhất).
         int roleId = DEFAULT_ROLE_ID_CUSTOMER;
@@ -114,7 +136,7 @@ public class DangKyServlet extends HttpServlet {
         dk.setPassword(password);
         dk.setFullName(fullName);
         dk.setEmail(email);
-        dk.setPhone(phone);
+        dk.setPhone(fullPhone);
         dk.setRoleId(roleId);
 
         boolean result = dao.register(dk);

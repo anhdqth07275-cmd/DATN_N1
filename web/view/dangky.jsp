@@ -149,6 +149,62 @@
 
             }
 
+            .phone-group{
+
+                display:flex;
+
+            }
+
+            .phone-prefix{
+
+                display:flex;
+
+                align-items:center;
+
+                justify-content:center;
+
+                padding:0 14px;
+
+                height:42px;
+
+                background:#eef3f8;
+
+                border:1px solid #ccc;
+
+                border-right:none;
+
+                border-radius:6px 0 0 6px;
+
+                font-weight:bold;
+
+                color:#0b4f86;
+
+                white-space:nowrap;
+
+            }
+
+            .phone-group input{
+
+                flex:1;
+
+                width:auto;
+
+                border-radius:0 6px 6px 0 !important;
+
+            }
+
+            .phone-hint{
+
+                display:block;
+
+                margin-top:6px;
+
+                font-size:13px;
+
+                color:#666;
+
+            }
+
             .btn{
 
                 width:100%;
@@ -326,10 +382,30 @@
 
                         <label>Số điện thoại</label>
 
-                        <input
-                            type="text"
-                            name="phone"
-                            required>
+                        <div class="phone-group">
+
+                            <span class="phone-prefix">+84</span>
+
+                            <input
+                                type="tel"
+                                name="phone"
+                                id="phone"
+                                inputmode="numeric"
+                                pattern="[0-9]{9,10}"
+                                minlength="9"
+                                maxlength="10"
+                                placeholder="912345678"
+                                oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                                title="Nhập 9 hoặc 10 chữ số"
+                                required>
+
+                        </div>
+
+                        <small class="phone-hint">
+
+                            Nhập 9 hoặc 10 chữ số, không nhập số 0 ở đầu (VD: 912345678)
+
+                        </small>
 
                     </div>
                     <button class="btn" type="submit">

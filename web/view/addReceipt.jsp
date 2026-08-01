@@ -5,6 +5,9 @@
 <%
     ArrayList<HoaDon> listHoaDon =
             (ArrayList<HoaDon>) request.getAttribute("listHoaDon");
+
+    Integer selectedInvoiceId =
+            (Integer) request.getAttribute("selectedInvoiceId");
 %>
 
 <!DOCTYPE html>
@@ -139,7 +142,10 @@
                             data-customer="<%=hd.getCustomerName()%>"
                             data-invoice="<%=hd.getInvoiceCode()%>"
                             data-search="<%=hd.getCustomerName()%>"
-                            data-sub="Còn nợ: <%=hd.getRemainingMoney()%> VNĐ">
+                            data-sub="Còn nợ: <%=hd.getRemainingMoney()%> VNĐ"
+                            <%=(selectedInvoiceId != null
+                                    && selectedInvoiceId == hd.getInvoiceId())
+                                    ? "selected" : ""%>>
 
                             <%=hd.getInvoiceCode()%> —
 
