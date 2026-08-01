@@ -187,8 +187,8 @@ public boolean insert(InvoiceDetail d) {
 
         ps.setDouble(5, d.getUnitPrice());
 
-        double subtotal =
-                d.getQuantity() * d.getUnitPrice();
+        // Không còn quản lý số lượng, tiền = đơn giá đã nhập
+        double subtotal = d.getUnitPrice();
 
         ps.setDouble(6, subtotal);
 
@@ -242,8 +242,8 @@ public boolean update(InvoiceDetail d) {
 
         ps.setDouble(4, d.getUnitPrice());
 
-        double subtotal =
-                d.getQuantity() * d.getUnitPrice();
+        // Không còn quản lý số lượng, tiền = đơn giá đã nhập
+        double subtotal = d.getUnitPrice();
 
         ps.setDouble(5, subtotal);
 

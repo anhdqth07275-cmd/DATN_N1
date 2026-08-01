@@ -99,7 +99,7 @@
 
                     <label>
 
-                        Tên hàng
+                        Tên hóa đơn
 
                     </label>
 
@@ -110,50 +110,6 @@
                         name="itemName"
 
                         value="<%=d.getItemName()%>"
-
-                        required>
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label>
-
-                        Đơn vị tính
-
-                    </label>
-
-                    <input
-
-                        class="form-control"
-
-                        name="unit"
-
-                        value="<%=d.getUnit()%>"
-
-                        required>
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label>
-
-                        Số lượng
-
-                    </label>
-
-                    <input
-
-                        type="number"
-
-                        min="1"
-
-                        class="form-control"
-
-                        name="quantity"
-
-                        value="<%=d.getQuantity()%>"
 
                         required>
 

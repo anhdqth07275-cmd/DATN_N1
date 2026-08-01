@@ -135,12 +135,9 @@ public class InvoiceDetailServlet extends HttpServlet {
         d.setItemName(
                 request.getParameter("itemName"));
 
-        d.setUnit(
-                request.getParameter("unit"));
-
-        d.setQuantity(
-                Integer.parseInt(
-                        request.getParameter("quantity")));
+        // Không còn quản lý đơn vị tính / số lượng
+        d.setUnit("");
+        d.setQuantity(1);
 
         d.setUnitPrice(
                 Double.parseDouble(
@@ -179,12 +176,9 @@ public class InvoiceDetailServlet extends HttpServlet {
         d.setItemName(
                 request.getParameter("itemName"));
 
-        d.setUnit(
-                request.getParameter("unit"));
-
-        d.setQuantity(
-                Integer.parseInt(
-                        request.getParameter("quantity")));
+        // Không còn quản lý đơn vị tính / số lượng
+        d.setUnit("");
+        d.setQuantity(1);
 
         d.setUnitPrice(
                 Double.parseDouble(

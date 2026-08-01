@@ -154,7 +154,7 @@
 
                     <i class="bi bi-plus-circle-fill"></i>
 
-                    Thêm mặt hàng
+                    Thêm hóa đơn
 
                 </div>
 
@@ -173,11 +173,11 @@
 
                     <div class="row">
 
-                        <div class="col-md-4">
+                        <div class="col-md-6">
 
                             <label class="form-label">
 
-                                Tên hàng
+                                Tên hóa đơn
 
                             </label>
 
@@ -188,39 +188,7 @@
 
                         </div>
 
-                        <div class="col-md-2">
-
-                            <label class="form-label">
-
-                                Đơn vị tính
-
-                            </label>
-
-                            <input
-                                class="form-control"
-                                name="unit"
-                                required>
-
-                        </div>
-
-                        <div class="col-md-2">
-
-                            <label class="form-label">
-
-                                Số lượng
-
-                            </label>
-
-                            <input
-                                type="number"
-                                min="1"
-                                class="form-control"
-                                name="quantity"
-                                required>
-
-                        </div>
-
-                        <div class="col-md-2">
+                        <div class="col-md-4">
 
                             <label class="form-label">
 
@@ -274,11 +242,7 @@
 
                         <th width="70">STT</th>
 
-                        <th>Tên hàng</th>
-
-                        <th width="130">ĐVT</th>
-
-                        <th width="100">SL</th>
+                        <th>Tên hóa đơn</th>
 
                         <th width="170">Đơn giá</th>
 
@@ -317,18 +281,6 @@
                         <td>
 
                             <%=d.getItemName()%>
-
-                        </td>
-
-                        <td align="center">
-
-                            <%=d.getUnit()%>
-
-                        </td>
-
-                        <td align="center">
-
-                            <%=d.getQuantity()%>
 
                         </td>
 
@@ -386,7 +338,7 @@
 
                     <tr>
 
-                        <td colspan="7"
+                        <td colspan="5"
 
                             class="text-center text-secondary"
 
@@ -394,7 +346,7 @@
 
                             <i class="bi bi-database-exclamation"></i>
 
-                            Chưa có mặt hàng nào.
+                            Chưa có hóa đơn nào.
 
                         </td>
 

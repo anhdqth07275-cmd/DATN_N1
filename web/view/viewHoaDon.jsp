@@ -278,19 +278,7 @@
 
                             <th>
 
-                                Tên hàng
-
-                            </th>
-
-                            <th width="120">
-
-                                ĐVT
-
-                            </th>
-
-                            <th width="100">
-
-                                SL
+                                Tên hóa đơn
 
                             </th>
 
@@ -336,18 +324,6 @@
 
                             </td>
 
-                            <td align="center">
-
-                                <%=d.getUnit()%>
-
-                            </td>
-
-                            <td align="center">
-
-                                <%=d.getQuantity()%>
-
-                            </td>
-
                             <td align="right">
 
                                 <%=String.format("%,.0f", d.getUnitPrice())%>
@@ -376,7 +352,7 @@
 
                         <tr>
 
-                            <td colspan="6"
+                            <td colspan="4"
 
                                 class="text-center text-secondary"
 

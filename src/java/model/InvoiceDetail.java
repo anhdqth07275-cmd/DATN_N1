@@ -92,7 +92,8 @@ public class InvoiceDetail {
     }
 
     private void tinhThanhTien() {
-        this.subtotal = quantity * unitPrice;
+        // Không còn quản lý số lượng, tiền của 1 hóa đơn = đơn giá đã nhập
+        this.subtotal = unitPrice;
     }
 
     public String getMoney() {
