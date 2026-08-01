@@ -19,6 +19,9 @@ public class Receipt {
 
     private String note;
 
+    // Đường dẫn tương đối tới ảnh minh chứng (hóa đơn/biên lai...)
+    private String evidenceImage;
+
     // Hiển thị
     private String customerName;
     private String userName;
@@ -89,6 +92,18 @@ public class Receipt {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getEvidenceImage() {
+        return evidenceImage;
+    }
+
+    public void setEvidenceImage(String evidenceImage) {
+        this.evidenceImage = evidenceImage;
+    }
+
+    public boolean hasEvidenceImage() {
+        return evidenceImage != null && !evidenceImage.isEmpty();
     }
 
     public String getCustomerName() {

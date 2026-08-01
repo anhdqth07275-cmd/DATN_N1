@@ -6,19 +6,26 @@ import dao.PermissionDAO;
 import dao.ReceiptDAO;
 import dao.RequestDisableDAO;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import model.DangKy;
 import model.HoaDon;
 import model.Receipt;
+import util.FileUploadHelper;
 
 @WebServlet(name = "ReceiptServlet", urlPatterns = {"/phieuthu"})
+@MultipartConfig(
+        maxFileSize = 5 * 1024 * 1024,      // 5MB / file
+        maxRequestSize = 10 * 1024 * 1024   // 10MB / request
+)
 public class ReceiptServlet extends HttpServlet {
 
     ReceiptDAO dao = new ReceiptDAO();
@@ -284,7 +291,7 @@ public class ReceiptServlet extends HttpServlet {
 
     private void insertReceipt(HttpServletRequest request,
             HttpServletResponse response)
-            throws IOException {
+            throws IOException, ServletException {
 
         if (!hasAction(request, "THEM")) {
             response.sendRedirect(request.getContextPath() + "/phieuthu");
@@ -324,6 +331,29 @@ public class ReceiptServlet extends HttpServlet {
 
         }
 
+        // Ảnh minh chứng (không bắt buộc) - tăng tính minh bạch khi
+        // ghi nhận phiếu thu.
+        String evidenceImage;
+
+        try {
+
+            Part filePart = request.getPart("evidenceImage");
+
+            evidenceImage = FileUploadHelper.saveEvidenceImage(
+                    request, filePart, "receipts");
+
+        } catch (IllegalArgumentException ex) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/phieuthu?action=add&error="
+                    + java.net.URLEncoder.encode(
+                            ex.getMessage(), "UTF-8"));
+
+            return;
+
+        }
+
         Receipt r = new Receipt();
 
         r.setInvoiceId(invoiceId);
@@ -338,6 +368,8 @@ public class ReceiptServlet extends HttpServlet {
 
         r.setNote(
                 request.getParameter("note"));
+
+        r.setEvidenceImage(evidenceImage);
 
         dao.insert(r);
 
@@ -360,7 +392,7 @@ public class ReceiptServlet extends HttpServlet {
 
     private void updateReceipt(HttpServletRequest request,
             HttpServletResponse response)
-            throws IOException {
+            throws IOException, ServletException {
 
         if (!hasAction(request, "SUA")) {
             response.sendRedirect(request.getContextPath() + "/phieuthu");
@@ -403,6 +435,42 @@ public class ReceiptServlet extends HttpServlet {
 
         }
 
+        // Nếu người dùng chọn ảnh minh chứng mới thì thay thế và xóa
+        // ảnh cũ; nếu không chọn ảnh mới thì giữ nguyên ảnh cũ.
+        Receipt currentReceipt = dao.getById(receiptId);
+
+        String evidenceImage = currentReceipt != null
+                ? currentReceipt.getEvidenceImage() : null;
+
+        try {
+
+            Part filePart = request.getPart("evidenceImage");
+
+            String newImage = FileUploadHelper.saveEvidenceImage(
+                    request, filePart, "receipts");
+
+            if (newImage != null) {
+
+                FileUploadHelper.deleteEvidenceImage(
+                        request, evidenceImage);
+
+                evidenceImage = newImage;
+
+            }
+
+        } catch (IllegalArgumentException ex) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/phieuthu?action=edit&id=" + receiptId
+                    + "&error="
+                    + java.net.URLEncoder.encode(
+                            ex.getMessage(), "UTF-8"));
+
+            return;
+
+        }
+
         Receipt r = new Receipt();
 
         r.setReceiptId(receiptId);
@@ -416,6 +484,8 @@ public class ReceiptServlet extends HttpServlet {
 
         r.setNote(
                 request.getParameter("note"));
+
+        r.setEvidenceImage(evidenceImage);
 
         dao.update(r);
 

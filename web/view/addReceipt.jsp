@@ -91,7 +91,9 @@
 
             <form action="<%=request.getContextPath()%>/phieuthu"
 
-                  method="post">
+                  method="post"
+
+                  enctype="multipart/form-data">
 
                 <input
 
@@ -232,6 +234,30 @@
                         name="note"
                         rows="4"
                         class="form-control"></textarea>
+
+                </div>
+
+                <!-- Ảnh minh chứng -->
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        Ảnh minh chứng (hóa đơn, biên lai, chuyển khoản...)
+
+                    </label>
+
+                    <input
+                        type="file"
+                        name="evidenceImage"
+                        class="form-control"
+                        accept="image/*">
+
+                    <div class="form-text">
+
+                        Không bắt buộc. Hỗ trợ JPG, PNG, GIF, WEBP, tối đa 5MB.
+
+                    </div>
 
                 </div>
                 <div class="d-flex justify-content-between">

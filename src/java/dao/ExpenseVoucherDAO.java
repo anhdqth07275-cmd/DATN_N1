@@ -64,6 +64,9 @@ public class ExpenseVoucherDAO {
                 e.setDescription(
                         rs.getString("description"));
 
+                e.setEvidenceImage(
+                        rs.getString("evidence_image"));
+
                 e.setActive(
                         rs.getBoolean("is_active"));
 
@@ -134,6 +137,9 @@ public class ExpenseVoucherDAO {
                 e.setDescription(
                         rs.getString("description"));
 
+                e.setEvidenceImage(
+                        rs.getString("evidence_image"));
+
                 con.close();
 
                 return e;
@@ -158,8 +164,8 @@ public class ExpenseVoucherDAO {
 
         String sql =
                 "INSERT INTO Expense_Voucher"
-                + "(user_id,expense_name,amount,description) "
-                + "VALUES(?,?,?,?)";
+                + "(user_id,expense_name,amount,description,evidence_image) "
+                + "VALUES(?,?,?,?,?)";
 
         try {
 
@@ -176,6 +182,8 @@ public class ExpenseVoucherDAO {
             ps.setDouble(3, e.getAmount());
 
             ps.setString(4, e.getDescription());
+
+            ps.setString(5, e.getEvidenceImage());
 
             int row =
                     ps.executeUpdate();
@@ -204,7 +212,8 @@ public class ExpenseVoucherDAO {
                 + "SET "
                 + "expense_name=?, "
                 + "amount=?, "
-                + "description=? "
+                + "description=?, "
+                + "evidence_image=? "
                 + "WHERE expense_id=?";
 
         try {
@@ -221,7 +230,9 @@ public class ExpenseVoucherDAO {
 
             ps.setString(3, e.getDescription());
 
-            ps.setInt(4, e.getExpenseId());
+            ps.setString(4, e.getEvidenceImage());
+
+            ps.setInt(5, e.getExpenseId());
 
             int row =
                     ps.executeUpdate();
@@ -320,6 +331,9 @@ public class ExpenseVoucherDAO {
 
                 e.setDescription(
                         rs.getString("description"));
+
+                e.setEvidenceImage(
+                        rs.getString("evidence_image"));
 
                 list.add(e);
 

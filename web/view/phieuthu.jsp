@@ -185,6 +185,8 @@
 
                                 <th>Ghi chú</th>
 
+                                <th width="100">Minh chứng</th>
+
                                 <th width="170">Người lập</th>
 
                                 <th width="170">Thao tác</th>
@@ -274,6 +276,29 @@
 
                                 </td>
 
+                                <td align="center">
+
+                                    <%
+                                        if (r.hasEvidenceImage()) {
+                                    %>
+                                    <a href="<%=request.getContextPath()%>/<%=r.getEvidenceImage()%>"
+                                       target="_blank">
+
+                                        <img src="<%=request.getContextPath()%>/<%=r.getEvidenceImage()%>"
+                                             alt="Minh chứng"
+                                             style="width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid #dee2e6;">
+
+                                    </a>
+                                    <%
+                                        } else {
+                                    %>
+                                    -
+                                    <%
+                                        }
+                                    %>
+
+                                </td>
+
                                 <td>
 
                                     <%=r.getUserName()%>
@@ -314,7 +339,7 @@
 
                             <tr>
 
-                                <td colspan="9"
+                                <td colspan="10"
                                     class="text-center p-4">
 
                                     <i class="bi bi-database-exclamation"></i>

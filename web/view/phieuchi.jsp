@@ -284,6 +284,8 @@
 
         <th>Mô tả</th>
 
+        <th width="100">Minh chứng</th>
+
         <th width="150">Thao tác</th>
 
     </tr>
@@ -348,6 +350,29 @@
 
         <td align="center">
 
+            <%
+                if (e.hasEvidenceImage()) {
+            %>
+            <a href="<%=request.getContextPath()%>/<%=e.getEvidenceImage()%>"
+               target="_blank">
+
+                <img src="<%=request.getContextPath()%>/<%=e.getEvidenceImage()%>"
+                     alt="Minh chứng"
+                     style="width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid #dee2e6;">
+
+            </a>
+            <%
+                } else {
+            %>
+            -
+            <%
+                }
+            %>
+
+        </td>
+
+        <td align="center">
+
             <% if (canEdit) { %>
             <a
                 href="<%=request.getContextPath()%>/phieuchi?action=edit&id=<%=e.getExpenseId()%>"
@@ -381,7 +406,7 @@
 
     <tr>
 
-        <td colspan="7" class="empty-row">
+        <td colspan="8" class="empty-row">
 
             <i class="bi bi-database-exclamation"></i>
 

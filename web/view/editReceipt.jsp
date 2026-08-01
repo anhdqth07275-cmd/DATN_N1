@@ -101,7 +101,9 @@ Cập nhật phiếu thu
 
 <form action="<%=request.getContextPath()%>/phieuthu"
 
-      method="post">
+      method="post"
+
+      enctype="multipart/form-data">
 
 <input
         type="hidden"
@@ -253,6 +255,53 @@ Cập nhật phiếu thu
             rows="4"
 
             class="form-control"><%=receipt.getNote()==null?"":receipt.getNote()%></textarea>
+
+</div>
+
+<!-- Ảnh minh chứng -->
+
+<div class="mb-3">
+
+    <label class="form-label">
+
+        Ảnh minh chứng (hóa đơn, biên lai, chuyển khoản...)
+
+    </label>
+
+    <%
+        if (receipt.hasEvidenceImage()) {
+    %>
+    <div class="mb-2">
+
+        <a href="<%=request.getContextPath()%>/<%=receipt.getEvidenceImage()%>"
+           target="_blank">
+
+            <img src="<%=request.getContextPath()%>/<%=receipt.getEvidenceImage()%>"
+                 alt="Ảnh minh chứng"
+                 style="max-height:130px;border:1px solid #dee2e6;border-radius:8px;">
+
+        </a>
+
+    </div>
+    <%
+        }
+    %>
+
+    <input
+            type="file"
+            name="evidenceImage"
+            class="form-control"
+            accept="image/*">
+
+    <div class="form-text">
+
+        <% if (receipt.hasEvidenceImage()) { %>
+        Để trống nếu muốn giữ nguyên ảnh hiện tại. Chọn ảnh mới để thay thế.
+        <% } else { %>
+        Không bắt buộc. Hỗ trợ JPG, PNG, GIF, WEBP, tối đa 5MB.
+        <% } %>
+
+    </div>
 
 </div>
    <div class="d-flex justify-content-between">

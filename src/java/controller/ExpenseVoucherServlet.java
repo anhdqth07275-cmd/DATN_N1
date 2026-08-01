@@ -4,18 +4,25 @@ import dao.ExpenseVoucherDAO;
 import dao.PermissionDAO;
 import dao.RequestDisableDAO;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import model.DangKy;
 import model.ExpenseVoucher;
+import util.FileUploadHelper;
 
 @WebServlet(name = "ExpenseVoucherServlet", urlPatterns = {"/phieuchi"})
+@MultipartConfig(
+        maxFileSize = 5 * 1024 * 1024,      // 5MB / file
+        maxRequestSize = 10 * 1024 * 1024   // 10MB / request
+)
 public class ExpenseVoucherServlet extends HttpServlet {
 
     ExpenseVoucherDAO dao = new ExpenseVoucherDAO();
@@ -212,7 +219,7 @@ public class ExpenseVoucherServlet extends HttpServlet {
     // ==========================
     private void insertExpense(HttpServletRequest request,
             HttpServletResponse response)
-            throws IOException {
+            throws IOException, ServletException {
 
         if (!hasAction(request, "THEM")) {
             response.sendRedirect(request.getContextPath() + "/phieuchi");
@@ -223,6 +230,29 @@ public class ExpenseVoucherServlet extends HttpServlet {
 
         DangKy user =
                 (DangKy) session.getAttribute("user");
+
+        // Ảnh minh chứng (không bắt buộc) - tăng tính minh bạch khi
+        // ghi nhận phiếu chi.
+        String evidenceImage;
+
+        try {
+
+            Part filePart = request.getPart("evidenceImage");
+
+            evidenceImage = FileUploadHelper.saveEvidenceImage(
+                    request, filePart, "expenses");
+
+        } catch (IllegalArgumentException ex) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/phieuchi?action=add&error="
+                    + java.net.URLEncoder.encode(
+                            ex.getMessage(), "UTF-8"));
+
+            return;
+
+        }
 
         ExpenseVoucher expense =
                 new ExpenseVoucher();
@@ -238,6 +268,8 @@ public class ExpenseVoucherServlet extends HttpServlet {
 
         expense.setDescription(
                 request.getParameter("description"));
+
+        expense.setEvidenceImage(evidenceImage);
 
         dao.insert(expense);
 
@@ -256,19 +288,57 @@ public class ExpenseVoucherServlet extends HttpServlet {
     // ==========================
     private void updateExpense(HttpServletRequest request,
             HttpServletResponse response)
-            throws IOException {
+            throws IOException, ServletException {
 
         if (!hasAction(request, "SUA")) {
             response.sendRedirect(request.getContextPath() + "/phieuchi");
             return;
         }
 
+        int expenseId =
+                Integer.parseInt(
+                        request.getParameter("expenseId"));
+
+        // Nếu người dùng chọn ảnh minh chứng mới thì thay thế và xóa
+        // ảnh cũ; nếu không chọn ảnh mới thì giữ nguyên ảnh cũ.
+        ExpenseVoucher currentExpense = dao.getById(expenseId);
+
+        String evidenceImage = currentExpense != null
+                ? currentExpense.getEvidenceImage() : null;
+
+        try {
+
+            Part filePart = request.getPart("evidenceImage");
+
+            String newImage = FileUploadHelper.saveEvidenceImage(
+                    request, filePart, "expenses");
+
+            if (newImage != null) {
+
+                FileUploadHelper.deleteEvidenceImage(
+                        request, evidenceImage);
+
+                evidenceImage = newImage;
+
+            }
+
+        } catch (IllegalArgumentException ex) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/phieuchi?action=edit&id=" + expenseId
+                    + "&error="
+                    + java.net.URLEncoder.encode(
+                            ex.getMessage(), "UTF-8"));
+
+            return;
+
+        }
+
         ExpenseVoucher expense =
                 new ExpenseVoucher();
 
-        expense.setExpenseId(
-                Integer.parseInt(
-                        request.getParameter("expenseId")));
+        expense.setExpenseId(expenseId);
 
         expense.setExpenseName(
                 request.getParameter("expenseName"));
@@ -279,6 +349,8 @@ public class ExpenseVoucherServlet extends HttpServlet {
 
         expense.setDescription(
                 request.getParameter("description"));
+
+        expense.setEvidenceImage(evidenceImage);
 
         dao.update(expense);
 

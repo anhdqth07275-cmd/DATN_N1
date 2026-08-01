@@ -20,6 +20,10 @@ public class ExpenseVoucher {
     private Date expenseDate;
 
     private String description;
+
+    // Đường dẫn tương đối tới ảnh minh chứng (hóa đơn/biên lai...)
+    private String evidenceImage;
+
     private boolean isActive = true;
 
     public boolean isActive() {
@@ -105,6 +109,18 @@ public class ExpenseVoucher {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getEvidenceImage() {
+        return evidenceImage;
+    }
+
+    public void setEvidenceImage(String evidenceImage) {
+        this.evidenceImage = evidenceImage;
+    }
+
+    public boolean hasEvidenceImage() {
+        return evidenceImage != null && !evidenceImage.isEmpty();
     }
 
     // ==========================

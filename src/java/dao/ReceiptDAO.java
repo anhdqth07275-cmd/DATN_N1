@@ -68,6 +68,9 @@ public class ReceiptDAO {
                 r.setNote(
                         rs.getString("note"));
 
+                r.setEvidenceImage(
+                        rs.getString("evidence_image"));
+
                 r.setCustomerName(
                         rs.getString("customer_name"));
 
@@ -147,6 +150,9 @@ public class ReceiptDAO {
                 r.setNote(
                         rs.getString("note"));
 
+                r.setEvidenceImage(
+                        rs.getString("evidence_image"));
+
                 r.setCustomerName(
                         rs.getString("customer_name"));
 
@@ -182,8 +188,9 @@ public class ReceiptDAO {
                 + "user_id,"
                 + "amount,"
                 + "payment_method,"
-                + "note"
-                + ") VALUES(?,?,?,?,?)";
+                + "note,"
+                + "evidence_image"
+                + ") VALUES(?,?,?,?,?,?)";
 
         try {
 
@@ -201,6 +208,8 @@ public class ReceiptDAO {
             ps.setString(4, r.getPaymentMethod());
 
             ps.setString(5, r.getNote());
+
+            ps.setString(6, r.getEvidenceImage());
 
             int row = ps.executeUpdate();
 
@@ -228,7 +237,8 @@ public class ReceiptDAO {
                 + "invoice_id=?,"
                 + "amount=?,"
                 + "payment_method=?,"
-                + "note=? "
+                + "note=?,"
+                + "evidence_image=? "
                 + "WHERE receipt_id=?";
 
         try {
@@ -246,7 +256,9 @@ public class ReceiptDAO {
 
             ps.setString(4, r.getNote());
 
-            ps.setInt(5, r.getReceiptId());
+            ps.setString(5, r.getEvidenceImage());
+
+            ps.setInt(6, r.getReceiptId());
 
             int row = ps.executeUpdate();
 
@@ -353,6 +365,9 @@ public class ReceiptDAO {
 
                 r.setNote(
                         rs.getString("note"));
+
+                r.setEvidenceImage(
+                        rs.getString("evidence_image"));
 
                 r.setCustomerName(
                         rs.getString("customer_name"));

@@ -71,7 +71,9 @@ Thêm phiếu chi
 
 <form action="<%=request.getContextPath()%>/phieuchi"
 
-      method="post">
+      method="post"
+
+      enctype="multipart/form-data">
 
 <input
 
@@ -155,6 +157,30 @@ Thêm phiếu chi
             class="form-control"
 
             placeholder="Nhập mô tả khoản chi (nếu có)..."></textarea>
+
+</div>
+
+<!-- Ảnh minh chứng -->
+
+<div class="mb-3">
+
+    <label class="form-label">
+
+        Ảnh minh chứng (hóa đơn, biên lai, chuyển khoản...)
+
+    </label>
+
+    <input
+            type="file"
+            name="evidenceImage"
+            class="form-control"
+            accept="image/*">
+
+    <div class="form-text">
+
+        Không bắt buộc. Hỗ trợ JPG, PNG, GIF, WEBP, tối đa 5MB.
+
+    </div>
 
 </div>
 <div class="d-flex justify-content-between">
