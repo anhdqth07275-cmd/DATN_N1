@@ -473,12 +473,26 @@ public double getRemainingAmount(int invoiceId) {
     // ==========================
     // Gia hạn nợ
     // ==========================
+    // Sau khi đổi due_date, phải tính lại status ngay:
+    // - Nếu hạn mới đã >= hôm nay -> hết "Quá hạn", chuyển về
+    //   "Chưa thanh toán" (còn nợ, trong hạn).
+    // - Nếu remaining_amount đã về 0 (trường hợp hiếm, phòng hờ)
+    //   thì vẫn giữ "Đã thanh toán", không được ghi đè.
+    // Không cần chờ sự kiện khác (thêm hóa đơn/phiếu thu) mới
+    // được cập nhật lại status.
     public boolean extendDebt(int debtId,
             java.sql.Date dueDate) {
 
         String sql =
                 "UPDATE Debt "
-                + "SET due_date=? "
+                + "SET due_date=?, "
+                + "    status = CASE "
+                + "        WHEN remaining_amount <= 0 "
+                + "             THEN N'Đã thanh toán' "
+                + "        WHEN ? < CAST(GETDATE() AS DATE) "
+                + "             THEN N'Quá hạn' "
+                + "        ELSE N'Chưa thanh toán' "
+                + "     END "
                 + "WHERE debt_id=?";
 
         try {
@@ -489,7 +503,9 @@ public double getRemainingAmount(int invoiceId) {
 
             ps.setDate(1, dueDate);
 
-            ps.setInt(2, debtId);
+            ps.setDate(2, dueDate);
+
+            ps.setInt(3, debtId);
 
             int row = ps.executeUpdate();
 

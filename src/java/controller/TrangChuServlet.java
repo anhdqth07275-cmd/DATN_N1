@@ -43,10 +43,9 @@ public class TrangChuServlet extends HttpServlet {
 
         DangKy user = (DangKy) session.getAttribute("user");
 
-        boolean seeAll = permissionDAO.hasPermission(
-                user.getRoleId(), "CONGNO_XEMTATCA");
-
-        Integer scopeUserId = seeAll ? null : user.getUserId();
+        // Xem toàn bộ công nợ của công ty, không phân biệt ai lập
+        // hóa đơn (đồng bộ với trang Công nợ - xem DebtServlet).
+        Integer scopeUserId = null;
 
         Dashboard dashboard =
                 dashboardDAO.getDashboard();
@@ -59,8 +58,7 @@ public class TrangChuServlet extends HttpServlet {
                 "listInvoice",
                 hoaDonDAO.getTop5Newest());
 
-        // Cảnh báo công nợ - chỉ của hóa đơn do chính nhân viên này
-        // lập, trừ khi có quyền CONGNO_XEMTATCA (Admin/Giám đốc).
+        // Cảnh báo công nợ - của TẤT CẢ hóa đơn trong công ty.
         request.setAttribute(
                 "listDueSoon",
                 debtDAO.getDueSoon(DUE_SOON_DAYS, scopeUserId, 5));

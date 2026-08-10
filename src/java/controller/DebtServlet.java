@@ -90,11 +90,11 @@ public class DebtServlet extends HttpServlet {
     }
 
     // ==========================
-    // Quyền "xem toàn bộ" (CONGNO_XEMTATCA) - nếu không có quyền
-    // này thì chỉ được xem công nợ của hóa đơn do CHÍNH mình lập,
-    // để cảnh báo/nhắc nợ luôn đúng người phụ trách.
-    // Trả về null nếu được xem toàn bộ, ngược lại trả về userId
-    // để DAO lọc.
+    // Phạm vi xem công nợ.
+    // Tất cả người dùng đã đăng nhập đều xem TOÀN BỘ công nợ của
+    // công ty (mọi hóa đơn chưa thanh toán/chưa thanh toán hết),
+    // không phân biệt ai là người lập hóa đơn.
+    // Trả về null = xem toàn bộ; -1 (chưa đăng nhập) = không thấy gì.
     // ==========================
     private Integer scopeUserId(HttpServletRequest request) {
 
@@ -110,10 +110,7 @@ public class DebtServlet extends HttpServlet {
             return -1;
         }
 
-        boolean seeAll = permissionDAO.hasPermission(
-                user.getRoleId(), MODULE + "_XEMTATCA");
-
-        return seeAll ? null : user.getUserId();
+        return null;
 
     }
 
