@@ -2,6 +2,7 @@
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.HashSet"%>
 <%@page import="model.HoaDon"%>
+<%@page import="util.Paginator"%>
 <%@taglib prefix="my" tagdir="/WEB-INF/tags" %>
 
 <%
@@ -18,6 +19,11 @@ if (pendingIds == null) pendingIds = new HashSet<>();
 
 ArrayList<HoaDon> list =
 (ArrayList<HoaDon>)request.getAttribute("listHoaDon");
+
+int currentPage = Paginator.currentPage(request);
+int totalPages = Paginator.totalPages(list == null ? 0 : list.size());
+ArrayList<HoaDon> pageList = new ArrayList<HoaDon>(Paginator.slice(list, currentPage));
+String pageUrl = Paginator.buildPageUrl(request, request.getContextPath() + "/hoadon");
 %>
 
 <!DOCTYPE html>
@@ -375,9 +381,9 @@ ArrayList<HoaDon> list =
                         <tbody>
                             <%
 
-                        if(list!=null && !list.isEmpty()){
+                        if(pageList!=null && !pageList.isEmpty()){
 
-                            for(HoaDon hd:list){
+                            for(HoaDon hd:pageList){
 
                             %>
 
@@ -536,23 +542,10 @@ ArrayList<HoaDon> list =
 
                     <!-- Pagination -->
 
-                    <nav>
-
-                        <ul class="pagination">
-
-                            <li class="page-item active">
-
-                                <a class="page-link">
-
-                                    1
-
-                                </a>
-
-                            </li>
-
-                        </ul>
-
-                    </nav>
+                    <my:pagination
+                        currentPage="<%=currentPage%>"
+                        totalPages="<%=totalPages%>"
+                        pageUrl="<%=pageUrl%>" />
 
                 </div>
 

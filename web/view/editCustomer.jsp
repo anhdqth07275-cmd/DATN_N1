@@ -3,6 +3,7 @@
 
 <%
     Customer c = (Customer) request.getAttribute("customer");
+    String error = (String) request.getAttribute("error");
 %>
 
 <!DOCTYPE html>
@@ -24,7 +25,13 @@
 
     <h2 class="mb-4">Sửa khách hàng</h2>
 
-    <form action="<%=request.getContextPath()%>/khachhang" method="post">
+    <% if (error != null && !error.isEmpty()) { %>
+    <div class="alert alert-danger">
+        <%=error%>
+    </div>
+    <% } %>
+
+    <form action="<%=request.getContextPath()%>/khachhang" method="post" id="customerForm">
 
         <input type="hidden"
                name="action"
@@ -53,7 +60,15 @@
             <input
                     class="form-control"
                     name="phone"
-                    value="<%=c.getPhone()%>">
+                    value="<%=c.getPhone() != null ? c.getPhone() : ""%>"
+                    type="text"
+                    inputmode="numeric"
+                    pattern="\d{9,10}"
+                    minlength="9"
+                    maxlength="10"
+                    title="Số điện thoại phải là số và có độ dài từ 9 đến 10 kí tự"
+                    required>
+            <div class="form-text">Chỉ nhập số, độ dài từ 9 đến 10 kí tự.</div>
 
         </div>
 
@@ -115,6 +130,26 @@
         </a>
 
     </form>
+
+    <script>
+        (function () {
+            var phoneInput = document.querySelector('input[name="phone"]');
+            var form = document.getElementById('customerForm');
+
+            phoneInput.addEventListener('input', function () {
+                this.value = this.value.replace(/\D/g, '').slice(0, 10);
+            });
+
+            form.addEventListener('submit', function (e) {
+                var val = phoneInput.value.trim();
+                if (!/^\d{9,10}$/.test(val)) {
+                    e.preventDefault();
+                    alert('Số điện thoại không hợp lệ! Vui lòng nhập số, độ dài từ 9 đến 10 kí tự.');
+                    phoneInput.focus();
+                }
+            });
+        })();
+    </script>
 
 </body>
 

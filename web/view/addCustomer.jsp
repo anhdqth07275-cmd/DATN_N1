@@ -1,4 +1,10 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="model.Customer"%>
+
+<%
+    String error = (String) request.getAttribute("error");
+    Customer old = (Customer) request.getAttribute("customer");
+%>
 
 <!DOCTYPE html>
 
@@ -20,7 +26,13 @@ rel="stylesheet">
 
 <h2>Thêm khách hàng</h2>
 
-<form action="<%=request.getContextPath()%>/khachhang" method="post">
+<% if (error != null && !error.isEmpty()) { %>
+<div class="alert alert-danger">
+    <%=error%>
+</div>
+<% } %>
+
+<form action="<%=request.getContextPath()%>/khachhang" method="post" id="customerForm">
 
     <input type="hidden" name="action" value="insert">
 
@@ -31,6 +43,7 @@ rel="stylesheet">
         <input
             class="form-control"
             name="customerName"
+            value="<%=old != null ? old.getCustomerName() : ""%>"
             required>
 
     </div>
@@ -41,7 +54,16 @@ rel="stylesheet">
 
         <input
             class="form-control"
-            name="phone">
+            name="phone"
+            value="<%=old != null && old.getPhone() != null ? old.getPhone() : ""%>"
+            type="text"
+            inputmode="numeric"
+            pattern="\d{9,10}"
+            minlength="9"
+            maxlength="10"
+            title="Số điện thoại phải là số và có độ dài từ 9 đến 10 kí tự"
+            required>
+        <div class="form-text">Chỉ nhập số, độ dài từ 9 đến 10 kí tự.</div>
 
     </div>
 
@@ -51,7 +73,8 @@ rel="stylesheet">
 
         <input
             class="form-control"
-            name="address">
+            name="address"
+            value="<%=old != null && old.getAddress() != null ? old.getAddress() : ""%>">
 
     </div>
 
@@ -62,7 +85,8 @@ rel="stylesheet">
         <input
             class="form-control"
             type="email"
-            name="email">
+            name="email"
+            value="<%=old != null && old.getEmail() != null ? old.getEmail() : ""%>">
 
     </div>
 
@@ -80,6 +104,26 @@ rel="stylesheet">
     </a>
 
 </form>
+
+<script>
+    (function () {
+        var phoneInput = document.querySelector('input[name="phone"]');
+        var form = document.getElementById('customerForm');
+
+        phoneInput.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+
+        form.addEventListener('submit', function (e) {
+            var val = phoneInput.value.trim();
+            if (!/^\d{9,10}$/.test(val)) {
+                e.preventDefault();
+                alert('Số điện thoại không hợp lệ! Vui lòng nhập số, độ dài từ 9 đến 10 kí tự.');
+                phoneInput.focus();
+            }
+        });
+    })();
+</script>
 
 </body>
 

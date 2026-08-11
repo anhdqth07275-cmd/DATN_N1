@@ -1,10 +1,17 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="model.Debt"%>
+<%@page import="util.Paginator"%>
+<%@taglib prefix="my" tagdir="/WEB-INF/tags" %>
 
 <%
     ArrayList<Debt> list =
             (ArrayList<Debt>) request.getAttribute("listDebt");
+
+    int currentPage = Paginator.currentPage(request);
+    int totalPages = Paginator.totalPages(list == null ? 0 : list.size());
+    ArrayList<Debt> pageList = new ArrayList<Debt>(Paginator.slice(list, currentPage));
+    String pageUrl = Paginator.buildPageUrl(request, request.getContextPath() + "/congno");
 %>
 
 <!DOCTYPE html>
@@ -217,9 +224,9 @@
 
 <%
 
-if(list != null && !list.isEmpty()){
+if(pageList != null && !pageList.isEmpty()){
 
-    for(Debt d : list){
+    for(Debt d : pageList){
 
 %>
 
@@ -379,23 +386,10 @@ if(status.equalsIgnoreCase("Đã thanh toán")){
 
             <!-- Pagination -->
 
-            <nav>
-
-                <ul class="pagination">
-
-                    <li class="page-item active">
-
-                        <a class="page-link">
-
-                            1
-
-                        </a>
-
-                    </li>
-
-                </ul>
-
-            </nav>
+            <my:pagination
+                currentPage="<%=currentPage%>"
+                totalPages="<%=totalPages%>"
+                pageUrl="<%=pageUrl%>" />
 
         </div>
 

@@ -190,6 +190,21 @@ public class CustomerServlet extends HttpServlet {
 
     }
 
+    // ==========================
+    // Kiểm tra hợp lệ số điện thoại: chỉ chứa chữ số, độ dài từ 9 đến 10 kí tự
+    // ==========================
+    private boolean isValidPhone(String phone) {
+
+        if (phone == null) {
+            return false;
+        }
+
+        String trimmed = phone.trim();
+
+        return trimmed.matches("\\d{9,10}");
+
+    }
+
     private int currentUserId(HttpServletRequest request) {
 
         HttpSession session = request.getSession(false);
@@ -301,7 +316,7 @@ public class CustomerServlet extends HttpServlet {
 
     private void updateCustomer(HttpServletRequest request,
             HttpServletResponse response)
-            throws IOException {
+            throws ServletException, IOException {
 
         if (!hasAction(request, "SUA")) {
             response.sendRedirect(request.getContextPath() + "/khachhang");
@@ -322,6 +337,20 @@ public class CustomerServlet extends HttpServlet {
         c.setStatus(
                 Boolean.parseBoolean(request.getParameter("status"))
         );
+
+        if (!isValidPhone(c.getPhone())) {
+
+            request.setAttribute("error",
+                    "Số điện thoại không hợp lệ! "
+                    + "Vui lòng nhập số, độ dài từ 9 đến 10 kí tự.");
+            request.setAttribute("customer", c);
+
+            request.getRequestDispatcher("/view/editCustomer.jsp")
+                    .forward(request, response);
+
+            return;
+
+        }
 
         dao.update(c);
 
@@ -382,6 +411,20 @@ public class CustomerServlet extends HttpServlet {
         c.setAddress(request.getParameter("address"));
         c.setEmail(request.getParameter("email"));
         c.setStatus(true);
+
+        if (!isValidPhone(c.getPhone())) {
+
+            request.setAttribute("error",
+                    "Số điện thoại không hợp lệ! "
+                    + "Vui lòng nhập số, độ dài từ 9 đến 10 kí tự.");
+            request.setAttribute("customer", c);
+
+            request.getRequestDispatcher("/view/addCustomer.jsp")
+                    .forward(request, response);
+
+            return;
+
+        }
 
         if (dao.insert(c)) {
 

@@ -2,6 +2,7 @@
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.HashSet"%>
 <%@page import="model.ExpenseVoucher"%>
+<%@page import="util.Paginator"%>
 <%@taglib prefix="my" tagdir="/WEB-INF/tags" %>
 
 <%
@@ -18,6 +19,11 @@
     if (canEdit == null) canEdit = false;
     if (showInactive == null) showInactive = false;
     if (pendingIds == null) pendingIds = new HashSet<>();
+
+    int currentPage = Paginator.currentPage(request);
+    int totalPages = Paginator.totalPages(list == null ? 0 : list.size());
+    ArrayList<ExpenseVoucher> pageList = new ArrayList<ExpenseVoucher>(Paginator.slice(list, currentPage));
+    String pageUrl = Paginator.buildPageUrl(request, request.getContextPath() + "/phieuchi");
 %>
 
 <!DOCTYPE html>
@@ -296,9 +302,9 @@
 
     <%
 
-        if(list!=null && !list.isEmpty()){
+        if(pageList!=null && !pageList.isEmpty()){
 
-            for(ExpenseVoucher e : list){
+            for(ExpenseVoucher e : pageList){
 
     %>
 
@@ -427,23 +433,10 @@
 </table>
     <!-- Pagination -->
 
-<nav>
-
-    <ul class="pagination">
-
-        <li class="page-item active">
-
-            <a class="page-link">
-
-                1
-
-            </a>
-
-        </li>
-
-    </ul>
-
-</nav>
+<my:pagination
+    currentPage="<%=currentPage%>"
+    totalPages="<%=totalPages%>"
+    pageUrl="<%=pageUrl%>" />
 
         </div>
 
